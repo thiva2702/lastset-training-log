@@ -8,8 +8,6 @@ on:
 permissions:
   contents: read
 
-djobs: {}
-
 jobs:
   package:
     runs-on: ubuntu-latest
