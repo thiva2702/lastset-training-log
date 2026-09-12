@@ -1,12 +1,15 @@
-const CACHE = 'lastset-v012-amirtha-theme';
+const CACHE = 'lastset-v0121-premium';
 const ASSETS = [
   './',
+  './app-v12.html',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
   './lastset-theme.css',
-  './lastset-enhancements.js'
+  './lastset-premium.css',
+  './lastset-enhancements.js',
+  './lastset-premium.js'
 ];
 
 self.addEventListener('install', event => {
@@ -24,10 +27,10 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=12">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0121">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0121">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=12"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0121"></script>\n  <script src="./lastset-premium.js?v=0121"></script>\n</body>');
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
   return html;
@@ -41,7 +44,7 @@ self.addEventListener('fetch', event => {
 
   if (wantsHtml) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-store' })
         .then(async response => {
           const text = await response.clone().text();
           const enhanced = enhanceHtml(text);
@@ -50,7 +53,7 @@ self.addEventListener('fetch', event => {
             statusText: response.statusText,
             headers: new Headers({
               'content-type': 'text/html; charset=utf-8',
-              'cache-control': 'no-cache'
+              'cache-control': 'no-store, max-age=0'
             })
           });
         })
