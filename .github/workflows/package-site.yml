@@ -1,0 +1,33 @@
+name: Package LastSet site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+djobs: {}
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Upload complete site
+        uses: actions/upload-artifact@v4
+        with:
+          name: lastset-site
+          path: |
+            README.txt
+            index.html
+            manifest.webmanifest
+            netlify.toml
+            service-worker.js
+            lastset-theme.css
+            lastset-enhancements.js
+            icon-192.png
+            icon-512.png
+          if-no-files-found: error
