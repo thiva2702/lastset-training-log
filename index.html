@@ -893,6 +893,7 @@ function parseAIFromField(){
   state.aiLoading=true;
   state.aiError='';
   state.aiParsed=null;
+  state.smartConversation=[];
 
   // Schedule the actual parse before rerendering so a UI error cannot
   // prevent the parser from running.
@@ -2518,7 +2519,7 @@ function handleSmartConversationReply(){
   if(missing.type==='environment'){
     const l=reply.toLowerCase(); let env=null;
     if(/outdoor|outside|road|trail/.test(l))env='Outdoor';
-    else if(/treadmill/.test(l))env='Treadmill';
+    else if(/treadmill/.test(l)||l.split(/\s+/).some(tok=>tok.length>=6&&fuzzyTokenMatchV11(tok,'treadmill')))env='Treadmill';
     else if(/stationary|exercise bike|spin bike|bike machine|indoor bike/.test(l))env='Stationary Bike';
     else if(/stairmaster|stair machine/.test(l))env='Stair Machine';
     else if(/actual stairs|real stairs|staircase/.test(l))env='Actual Stairs';
@@ -2726,7 +2727,7 @@ function levenshteinV11(a,b){
 }
 function normalizeKnownTyposV11(s){
   return normalizeText(s)
-    .replace(/\bthreadmill\b|\btredmill\b|\btreadmil\b|\btredmil\b/g,'treadmill')
+    .replace(/\bthreadmill\b|\bthreadmil\b|\bthreadmilll\b|\btredmill\b|\btreadmil\b|\btredmil\b/g,'treadmill')
     .replace(/\bdumbell\b|\bdumbells\b/g,'dumbbell')
     .replace(/\bbarbel\b|\bbarbels\b/g,'barbell')
     .replace(/\boutdor\b|\boutdoorss?\b/g,'outdoor')
