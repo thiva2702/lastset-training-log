@@ -1,0 +1,74 @@
+name: LastSet Playwright Production QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'lastset-*.js'
+      - 'lastset-*.css'
+      - 'service-worker.js'
+      - 'worker.js'
+      - 'tests/e2e/**'
+      - 'playwright.config.js'
+      - 'package.json'
+      - '.github/workflows/playwright-production.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lastset-production-playwright
+  cancel-in-progress: false
+
+env:
+  LASTSET_BASE_URL: https://lastset-training-log.thivagar2719.workers.dev/
+  CI: 'true'
+
+jobs:
+  production-e2e:
+    name: Mobile browser regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install test dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Verify production is reachable
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl --fail --silent --show-error --location --max-time 20 "$LASTSET_BASE_URL" > /tmp/lastset.html; then
+              grep -q 'LastSet' /tmp/lastset.html && exit 0
+            fi
+            echo "Production not ready yet. Attempt $attempt/6"
+            sleep 10
+          done
+          echo "LastSet production could not be reached"
+          exit 1
+
+      - name: Run production browser tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lastset-playwright-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
