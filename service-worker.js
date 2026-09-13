@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v0128-workouts';
+const CACHE = 'lastset-v0129-integrity';
 const ASSETS = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS = [
   './lastset-hotfix.js',
   './lastset-calendar.js',
   './lastset-workouts.js',
+  './lastset-integrity.js',
   './assets/hero.webp',
   './assets/equipment.webp',
   './assets/home-hero-thiva.webp'
@@ -26,36 +27,25 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-  );
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0128">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0128">\n  <link rel="stylesheet" href="./lastset-images.css?v=0128">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0128">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0128">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0129">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0129">\n  <link rel="stylesheet" href="./lastset-images.css?v=0129">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0129">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0129">\n</head>');
   } else {
-    if (!html.includes('lastset-hotfix.css')) {
-      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0128">\n</head>');
-    }
-    if (!html.includes('lastset-calendar.css')) {
-      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0128">\n</head>');
-    }
+    if (!html.includes('lastset-hotfix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0129">\n</head>');
+    if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0129">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0128"></script>\n  <script src="./lastset-premium.js?v=0128"></script>\n  <script src="./lastset-hotfix.js?v=0128"></script>\n  <script src="./lastset-calendar.js?v=0128"></script>\n  <script src="./lastset-workouts.js?v=0128"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0129"></script>\n  <script src="./lastset-premium.js?v=0129"></script>\n  <script src="./lastset-hotfix.js?v=0129"></script>\n  <script src="./lastset-calendar.js?v=0129"></script>\n  <script src="./lastset-workouts.js?v=0129"></script>\n  <script src="./lastset-integrity.js?v=0129"></script>\n</body>');
   } else {
-    if (!html.includes('lastset-hotfix.js')) {
-      html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0128"></script>\n</body>');
-    }
-    if (!html.includes('lastset-calendar.js')) {
-      html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0128"></script>\n</body>');
-    }
-    if (!html.includes('lastset-workouts.js')) {
-      html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0128"></script>\n</body>');
-    }
+    if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0129"></script>\n</body>');
+    if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0129"></script>\n</body>');
+    if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0129"></script>\n</body>');
+    if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0129"></script>\n</body>');
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
   return html;
@@ -86,9 +76,7 @@ self.addEventListener('fetch', event => {
           const cached = await caches.match('./index.html');
           if (!cached) return Response.error();
           const text = await cached.text();
-          return new Response(enhanceHtml(text), {
-            headers: { 'content-type': 'text/html; charset=utf-8' }
-          });
+          return new Response(enhanceHtml(text), { headers: { 'content-type': 'text/html; charset=utf-8' } });
         })
     );
     return;
