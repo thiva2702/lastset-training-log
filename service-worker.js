@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v0125-calendar';
+const CACHE = 'lastset-v0126-calendar';
 const ASSETS = [
   './',
   './index.html',
@@ -16,8 +16,7 @@ const ASSETS = [
   './lastset-calendar.js',
   './assets/hero.webp',
   './assets/equipment.webp',
-  './assets/home-hero-thiva.webp',
-  './assets/calendar-hero-thiva.webp'
+  './assets/home-hero-thiva.webp'
 ];
 
 self.addEventListener('install', event => {
@@ -35,23 +34,23 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0125">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0125">\n  <link rel="stylesheet" href="./lastset-images.css?v=0125">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0125">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0125">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0126">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0126">\n  <link rel="stylesheet" href="./lastset-images.css?v=0126">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0126">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0126">\n</head>');
   } else {
     if (!html.includes('lastset-hotfix.css')) {
-      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0125">\n</head>');
+      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0126">\n</head>');
     }
     if (!html.includes('lastset-calendar.css')) {
-      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0125">\n</head>');
+      html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0126">\n</head>');
     }
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0125"></script>\n  <script src="./lastset-premium.js?v=0125"></script>\n  <script src="./lastset-hotfix.js?v=0125"></script>\n  <script src="./lastset-calendar.js?v=0125"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0126"></script>\n  <script src="./lastset-premium.js?v=0126"></script>\n  <script src="./lastset-hotfix.js?v=0126"></script>\n  <script src="./lastset-calendar.js?v=0126"></script>\n</body>');
   } else {
     if (!html.includes('lastset-hotfix.js')) {
-      html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0125"></script>\n</body>');
+      html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0126"></script>\n</body>');
     }
     if (!html.includes('lastset-calendar.js')) {
-      html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0125"></script>\n</body>');
+      html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0126"></script>\n</body>');
     }
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
