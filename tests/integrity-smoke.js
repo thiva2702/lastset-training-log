@@ -18,7 +18,13 @@ assert.equal(legit.sessions['2026-09-08'].length,1);
 
 const fresh=T.emptyUserData('Alice',{weightUnit:'lb',heightCm:170,bodyWeightKg:70});
 assert.equal(fresh.profile.name,'Alice');
-assert.equal(fresh.profile.weightUnit,'lb');
+assert.equal(fresh.profile.weightUnit,'kg');
+assert.equal(fresh.profile.heightCm,0);
+assert.equal(fresh.profile.bodyWeightKg,0);
+const reset=T.emptyUserData('Alice',{weightUnit:'lb',heightCm:170,bodyWeightKg:70},true);
+assert.equal(reset.profile.weightUnit,'lb');
+assert.equal(reset.profile.heightCm,170);
+assert.equal(reset.profile.bodyWeightKg,70);
 assert.deepEqual(fresh.sessions,{});
 assert.deepEqual(fresh.templates,[]);
 

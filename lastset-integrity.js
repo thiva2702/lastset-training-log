@@ -43,15 +43,15 @@
     return changed;
   }
 
-  function emptyUserData(name='', previousProfile={}){
+  function emptyUserData(name='', previousProfile={}, preserveProfile=false){
     return {
       sessions:{}, aliases:{}, machines:{},
       profile:{
         name:String(name||'').trim(),
-        weightUnit:previousProfile.weightUnit||'kg',
-        heightCm:Number(previousProfile.heightCm)||0,
-        bodyWeightKg:Number(previousProfile.bodyWeightKg)||0,
-        progressionPreference:previousProfile.progressionPreference||'reps_first'
+        weightUnit:preserveProfile?(previousProfile.weightUnit||'kg'):'kg',
+        heightCm:preserveProfile?(Number(previousProfile.heightCm)||0):0,
+        bodyWeightKg:preserveProfile?(Number(previousProfile.bodyWeightKg)||0):0,
+        progressionPreference:preserveProfile?(previousProfile.progressionPreference||'reps_first'):'reps_first'
       },
       templates:[], favorites:[], exerciseSettings:{}, plans:{}, dayMeta:{}, schemaVersion:11
     };
@@ -233,10 +233,10 @@
   }
 
   function switchToUser(id){
+    syncActiveSnapshot(data);
     const reg=readRegistry();
     const target=reg.users.find(u=>u.id===id);
     if(!target || !validateBackup(target.data)) return;
-    syncActiveSnapshot(data);
     reg.activeId=id;
     writeRegistry(reg);
     data=clone(target.data);
@@ -248,12 +248,12 @@
   }
 
   function createNewUser(name,deleteCurrent){
+    if(!deleteCurrent) syncActiveSnapshot(data);
     const reg=readRegistry();
     const currentId=reg.activeId;
-    if(!deleteCurrent) syncActiveSnapshot(data);
-    else reg.users=reg.users.filter(u=>u.id!==currentId);
+    if(deleteCurrent) reg.users=reg.users.filter(u=>u.id!==currentId);
     const id=userId();
-    const fresh=emptyUserData(name,data.profile||{});
+    const fresh=emptyUserData(name);
     fresh.profile.userId=id;
     reg.activeId=id;
     reg.users.push({id,name:name||'New user',data:clone(fresh),updatedAt:Date.now()});
@@ -519,7 +519,7 @@
     const name=data.profile?.name||'current user';
     if(!confirm(`Reset training data for ${name}? Sessions, Saved Workouts and plans for this user will be cleared. Other users are kept.`))return;
     const profile=clone(data.profile||{});
-    data=emptyUserData(profile.name||'',profile); data.profile.userId=readRegistry().activeId;
+    data=emptyUserData(profile.name||'',profile,true); data.profile.userId=readRegistry().activeId;
     saveData(data); resetViewTo(isoDate(new Date())); render(); showToast('Current user training data reset');
   },true);
 
