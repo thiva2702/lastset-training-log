@@ -21,6 +21,7 @@ jobs:
           path: |
             README.txt
             V1_RELEASE_CHECKLIST.md
+            V1_BETA_RELEASE.md
             V2_BACKLOG.md
             index.html
             app-v12.html
@@ -45,6 +46,7 @@ jobs:
             lastset-integrity.js
             lastset-profile-equipment.js
             lastset-navigation.js
+            lastset-beta.js
             icon-192.png
             icon-512.png
             assets/*.webp

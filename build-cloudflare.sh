@@ -22,6 +22,7 @@ cp lastset-workouts.js dist/
 cp lastset-integrity.js dist/
 cp lastset-profile-equipment.js dist/
 cp lastset-navigation.js dist/
+cp lastset-beta.js dist/
 cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
