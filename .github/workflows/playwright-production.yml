@@ -10,6 +10,7 @@ on:
       - 'lastset-*.css'
       - 'service-worker.js'
       - 'worker.js'
+      - 'build-cloudflare.sh'
       - 'tests/e2e/**'
       - 'playwright.config.js'
       - 'package.json'
@@ -47,16 +48,25 @@ jobs:
       - name: Install Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Verify production is reachable
+      - name: Wait for v0.13.2 production deployment
         run: |
-          for attempt in 1 2 3 4 5 6; do
+          for attempt in $(seq 1 24); do
+            html_ok=0
+            asset_ok=0
             if curl --fail --silent --show-error --location --max-time 20 "$LASTSET_BASE_URL" > /tmp/lastset.html; then
-              grep -q 'LastSet' /tmp/lastset.html && exit 0
+              grep -q 'lastset-smartlog-shorthand.js?v=0132' /tmp/lastset.html && html_ok=1 || true
             fi
-            echo "Production not ready yet. Attempt $attempt/6"
+            if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-smartlog-shorthand.js?v=0132" > /tmp/lastset-smartlog.js; then
+              grep -q "const VERSION='0.13.2'" /tmp/lastset-smartlog.js && asset_ok=1 || true
+            fi
+            if [ "$html_ok" -eq 1 ] && [ "$asset_ok" -eq 1 ]; then
+              echo "LastSet v0.13.2 production deployment is ready"
+              exit 0
+            fi
+            echo "Waiting for v0.13.2 production deployment. Attempt $attempt/24"
             sleep 10
           done
-          echo "LastSet production could not be reached"
+          echo "LastSet v0.13.2 production deployment did not become ready in time"
           exit 1
 
       - name: Run production browser tests

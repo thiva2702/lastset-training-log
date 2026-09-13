@@ -21,6 +21,7 @@ jobs:
           node --check lastset-integrity.js
           node --check lastset-profile-equipment.js
           node --check lastset-navigation.js
+          node --check lastset-smartlog-shorthand.js
           node --check service-worker.js
           node --check worker.js
           bash -n build-cloudflare.sh
@@ -30,11 +31,14 @@ jobs:
         run: node tests/profile-equipment-smoke.js
       - name: Navigation smoke tests
         run: node tests/navigation-smoke.js
+      - name: Smart Log shorthand smoke tests
+        run: node tests/smartlog-shorthand-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
           test -s lastset-profile-equipment.js
           test -s lastset-navigation.js
+          test -s lastset-smartlog-shorthand.js
           test -s lastset-workouts.js
           test -s lastset-calendar.js
           test -s assets/home-hero-thiva.webp
@@ -43,5 +47,8 @@ jobs:
           grep -q 'lastset-integrity.js' worker.js
           grep -q 'lastset-profile-equipment.js' worker.js
           grep -q 'lastset-navigation.js' worker.js
-          grep -q 'lastset-navigation.js' service-worker.js
-          grep -q 'lastset-navigation.js' build-cloudflare.sh
+          grep -q 'lastset-smartlog-shorthand.js' worker.js
+          grep -q 'lastset-smartlog-shorthand.js' service-worker.js
+          grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
+          bash build-cloudflare.sh
+          test -s dist/lastset-smartlog-shorthand.js

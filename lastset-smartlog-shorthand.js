@@ -22,8 +22,32 @@
     return Array.from({length:count},()=>({weightKg,reps,setType:'working'}));
   }
 
+  function parseInlineCardioMetrics(text){
+    const source=String(text||'');
+    let avgSpeed=null;
+    let incline=null;
+
+    const speedMatch=/\b(\d+(?:\.\d+)?)\s*(km\s*\/\s*h|kmh|kph|mph)\b/i.exec(source);
+    if(speedMatch){
+      const rawSpeed=Number(speedMatch[1]);
+      if(Number.isFinite(rawSpeed)&&rawSpeed>0&&rawSpeed<=120){
+        avgSpeed=/mph/i.test(speedMatch[2])
+          ? Math.round(rawSpeed*1.60934*10)/10
+          : rawSpeed;
+      }
+    }
+
+    const inclineMatch=/(?:\b(\d+(?:\.\d+)?)\s*%\s*(?:incline|grade)\b|\b(?:incline|grade)\s*(?:of|at|was|is)?\s*(\d+(?:\.\d+)?)\s*%?)/i.exec(source);
+    if(inclineMatch){
+      const rawIncline=Number(inclineMatch[1]||inclineMatch[2]);
+      if(Number.isFinite(rawIncline)&&rawIncline>=0&&rawIncline<=50) incline=rawIncline;
+    }
+
+    return {avgSpeed,incline};
+  }
+
   if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-    globalThis.LastSetSmartLogShorthandTest={parseWeightSetCountShorthand};
+    globalThis.LastSetSmartLogShorthandTest={parseWeightSetCountShorthand,parseInlineCardioMetrics};
     return;
   }
 
@@ -48,6 +72,25 @@
     };
     fixed.__lastsetWeightSetCountV0132=true;
     try{ parseSetsEnhanced=fixed; }catch(_){ }
+  }
+
+  const baseCardioParser=typeof parseCardioActivities==='function'?parseCardioActivities:null;
+  if(baseCardioParser&&!baseCardioParser.__lastsetInlineCardioMetricsV0132){
+    const fixed=function(text){
+      const parsed=baseCardioParser(text);
+      if(!Array.isArray(parsed)||!parsed.length) return parsed;
+      const metrics=parseInlineCardioMetrics(text);
+      if(metrics.avgSpeed==null&&metrics.incline==null) return parsed;
+      return parsed.map(item=>{
+        if(!item||item.kind!=='cardio') return item;
+        const next={...item};
+        if((next.avgSpeed==null||Number(next.avgSpeed)===0)&&metrics.avgSpeed!=null) next.avgSpeed=metrics.avgSpeed;
+        if(next.incline==null&&metrics.incline!=null) next.incline=metrics.incline;
+        return next;
+      });
+    };
+    fixed.__lastsetInlineCardioMetricsV0132=true;
+    try{ parseCardioActivities=fixed; }catch(_){ }
   }
 
   document.documentElement.dataset.lastsetSmartlogShorthand=VERSION;
