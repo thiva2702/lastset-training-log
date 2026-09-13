@@ -2,38 +2,40 @@ const APP_PATHS = new Set(["/", "/index.html", "/app-v12", "/app-v12.html"]);
 
 function injectPremiumLayer(html) {
   const headInject = `
-<link rel="stylesheet" href="/lastset-theme.css?v=0129">
-<link rel="stylesheet" href="/lastset-premium.css?v=0129">
-<link rel="stylesheet" href="/lastset-images.css?v=0129">
-<link rel="stylesheet" href="/lastset-hotfix.css?v=0129">
-<link rel="stylesheet" href="/lastset-calendar.css?v=0129">
+<link rel="stylesheet" href="/lastset-theme.css?v=0130">
+<link rel="stylesheet" href="/lastset-premium.css?v=0130">
+<link rel="stylesheet" href="/lastset-images.css?v=0130">
+<link rel="stylesheet" href="/lastset-hotfix.css?v=0130">
+<link rel="stylesheet" href="/lastset-calendar.css?v=0130">
 <meta name="theme-color" content="#090713">
 `;
 
   const bodyInject = `
-<script src="/lastset-enhancements.js?v=0129"></script>
-<script src="/lastset-premium.js?v=0129"></script>
-<script src="/lastset-hotfix.js?v=0129"></script>
-<script src="/lastset-calendar.js?v=0129"></script>
-<script src="/lastset-workouts.js?v=0129"></script>
-<script src="/lastset-integrity.js?v=0129"></script>
+<script src="/lastset-enhancements.js?v=0130"></script>
+<script src="/lastset-premium.js?v=0130"></script>
+<script src="/lastset-hotfix.js?v=0130"></script>
+<script src="/lastset-calendar.js?v=0130"></script>
+<script src="/lastset-workouts.js?v=0130"></script>
+<script src="/lastset-integrity.js?v=0130"></script>
+<script src="/lastset-profile-equipment.js?v=0130"></script>
 `;
 
   let output = html;
   if (!output.includes("lastset-theme.css")) {
     output = output.replace("</head>", headInject + "</head>");
   } else {
-    if (!output.includes("lastset-hotfix.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-hotfix.css?v=0129">\n</head>`);
-    if (!output.includes("lastset-calendar.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-calendar.css?v=0129">\n</head>`);
+    if (!output.includes("lastset-hotfix.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-hotfix.css?v=0130">\n</head>`);
+    if (!output.includes("lastset-calendar.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-calendar.css?v=0130">\n</head>`);
   }
 
   if (!output.includes("lastset-enhancements.js")) {
     output = output.replace("</body>", bodyInject + "</body>");
   } else {
-    if (!output.includes("lastset-hotfix.js")) output = output.replace("</body>", `<script src="/lastset-hotfix.js?v=0129"></script>\n</body>`);
-    if (!output.includes("lastset-calendar.js")) output = output.replace("</body>", `<script src="/lastset-calendar.js?v=0129"></script>\n</body>`);
-    if (!output.includes("lastset-workouts.js")) output = output.replace("</body>", `<script src="/lastset-workouts.js?v=0129"></script>\n</body>`);
-    if (!output.includes("lastset-integrity.js")) output = output.replace("</body>", `<script src="/lastset-integrity.js?v=0129"></script>\n</body>`);
+    if (!output.includes("lastset-hotfix.js")) output = output.replace("</body>", `<script src="/lastset-hotfix.js?v=0130"></script>\n</body>`);
+    if (!output.includes("lastset-calendar.js")) output = output.replace("</body>", `<script src="/lastset-calendar.js?v=0130"></script>\n</body>`);
+    if (!output.includes("lastset-workouts.js")) output = output.replace("</body>", `<script src="/lastset-workouts.js?v=0130"></script>\n</body>`);
+    if (!output.includes("lastset-integrity.js")) output = output.replace("</body>", `<script src="/lastset-integrity.js?v=0130"></script>\n</body>`);
+    if (!output.includes("lastset-profile-equipment.js")) output = output.replace("</body>", `<script src="/lastset-profile-equipment.js?v=0130"></script>\n</body>`);
   }
 
   output = output.replace(
