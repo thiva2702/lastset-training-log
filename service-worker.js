@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v0121-premium';
+const CACHE = 'lastset-v0122-artwork';
 const ASSETS = [
   './',
   './app-v12.html',
@@ -8,8 +8,11 @@ const ASSETS = [
   './icon-512.png',
   './lastset-theme.css',
   './lastset-premium.css',
+  './lastset-images.css',
   './lastset-enhancements.js',
-  './lastset-premium.js'
+  './lastset-premium.js',
+  './assets/hero.webp',
+  './assets/equipment.webp'
 ];
 
 self.addEventListener('install', event => {
@@ -27,10 +30,10 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0121">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0121">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0122">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0122">\n  <link rel="stylesheet" href="./lastset-images.css?v=0122">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0121"></script>\n  <script src="./lastset-premium.js?v=0121"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0122"></script>\n  <script src="./lastset-premium.js?v=0122"></script>\n</body>');
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
   return html;
