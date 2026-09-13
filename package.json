@@ -1,8 +1,8 @@
 {
   "name": "lastset-training-log",
   "private": true,
-  "version": "0.13.2",
-  "description": "LastSet mobile training log production browser regression tests",
+  "version": "1.0.0-beta.1",
+  "description": "LastSet V1 Beta mobile training log production browser regression tests",
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:chromium": "playwright test --project=mobile-chromium",
