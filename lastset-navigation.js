@@ -65,15 +65,10 @@
 
   function goBack(){
     const snap=navStack.pop();
-    if(!snap){
-      if(state.view==='day' && state.tab==='calendar'){
-        state.view='calendar';
-        render();
-      }
-      return;
-    }
+    if(!snap) return false;
     restoreState(snap);
     render();
+    return true;
   }
 
   function topbarHtml(){
@@ -88,22 +83,23 @@
 
   const OPENERS=[
     '[data-date]',
-    '[data-day-action]',
     '[data-exercise]',
+    '[data-plan-exercise]',
     '[data-add-exercise]',
     '[data-edit-exercise]',
     '[data-cardio]',
     '[data-edit-cardio]',
+    '[data-open-saved-workouts]',
     '[data-action="open-templates"]',
     '[data-action="finish-workout"]'
   ];
 
   const COLLAPSE_ACTIONS=new Set([
-    'save-exercise','save-next','save-cardio','confirm-ai-workout','assessment-done','assessment-done','save-template-today'
+    'save-exercise','save-next','save-cardio','confirm-ai-workout','assessment-done'
   ]);
 
   document.addEventListener('click',event=>{
-    const target=event.target instanceof Element?event.target.closest('button,[data-date],[data-exercise],[data-cardio],[data-day-action],[data-add-exercise],[data-edit-exercise],[data-edit-cardio]'):null;
+    const target=event.target instanceof Element?event.target.closest('button,[data-date],[data-exercise],[data-plan-exercise],[data-cardio],[data-day-action],[data-add-exercise],[data-edit-exercise],[data-edit-cardio],[data-open-saved-workouts],[data-template-start]'):null;
     if(!target) return;
 
     if(target.matches('[data-action="back"]')){
@@ -118,15 +114,25 @@
       return;
     }
 
+    if(target.matches('[data-template-start]')){
+      setTimeout(()=>{ collapseToCurrent(); render(); },0);
+      return;
+    }
+
     const action=target.getAttribute('data-action')||'';
     if(COLLAPSE_ACTIONS.has(action)){
       setTimeout(()=>{ collapseToCurrent(); render(); },0);
       return;
     }
 
-    if(OPENERS.some(selector=>target.matches(selector))){
+    const dayAction=target.getAttribute('data-day-action')||'';
+    if(dayAction && dayAction!=='rest'){
       pushCurrent();
       return;
+    }
+
+    if(OPENERS.some(selector=>target.matches(selector))){
+      pushCurrent();
     }
   },true);
 
@@ -150,6 +156,6 @@
     pushCurrent,
     goBack,
     hasBack,
-    _test:{cloneState,restoreState,collapseToCurrent,isTopLevel}
+    _test:{cloneState,restoreState,collapseToCurrent,isTopLevel,stack:navStack}
   };
 })();
