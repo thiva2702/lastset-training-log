@@ -25,7 +25,7 @@ jobs:
             index.html
             app-v12.html
             manifest.webmanifest
-            wrangler.toml
+            wrangler.jsonc
             worker.js
             build-cloudflare.sh
             _headers
@@ -39,6 +39,7 @@ jobs:
             lastset-enhancements.js
             lastset-premium.js
             lastset-hotfix.js
+            lastset-smartlog-shorthand.js
             lastset-calendar.js
             lastset-workouts.js
             lastset-integrity.js
