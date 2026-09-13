@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: lastset-production-playwright
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   LASTSET_BASE_URL: https://lastset-training-log.thivagar2719.workers.dev/
