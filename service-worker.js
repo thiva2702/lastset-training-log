@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v0130-profile-equipment';
+const CACHE = 'lastset-v0131-navigation';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   './lastset-workouts.js',
   './lastset-integrity.js',
   './lastset-profile-equipment.js',
+  './lastset-navigation.js',
   './assets/hero.webp',
   './assets/equipment.webp',
   './assets/home-hero-thiva.webp'
@@ -35,19 +36,20 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0130">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0130">\n  <link rel="stylesheet" href="./lastset-images.css?v=0130">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0130">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0130">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0131">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0131">\n  <link rel="stylesheet" href="./lastset-images.css?v=0131">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0131">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0131">\n</head>');
   } else {
-    if (!html.includes('lastset-hotfix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0130">\n</head>');
-    if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0130">\n</head>');
+    if (!html.includes('lastset-hotfix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0131">\n</head>');
+    if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0131">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0130"></script>\n  <script src="./lastset-premium.js?v=0130"></script>\n  <script src="./lastset-hotfix.js?v=0130"></script>\n  <script src="./lastset-calendar.js?v=0130"></script>\n  <script src="./lastset-workouts.js?v=0130"></script>\n  <script src="./lastset-integrity.js?v=0130"></script>\n  <script src="./lastset-profile-equipment.js?v=0130"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0131"></script>\n  <script src="./lastset-premium.js?v=0131"></script>\n  <script src="./lastset-hotfix.js?v=0131"></script>\n  <script src="./lastset-calendar.js?v=0131"></script>\n  <script src="./lastset-workouts.js?v=0131"></script>\n  <script src="./lastset-integrity.js?v=0131"></script>\n  <script src="./lastset-profile-equipment.js?v=0131"></script>\n  <script src="./lastset-navigation.js?v=0131"></script>\n</body>');
   } else {
-    if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0130"></script>\n</body>');
-    if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0130"></script>\n</body>');
-    if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0130"></script>\n</body>');
-    if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0130"></script>\n</body>');
-    if (!html.includes('lastset-profile-equipment.js')) html = html.replace('</body>', '  <script src="./lastset-profile-equipment.js?v=0130"></script>\n</body>');
+    if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0131"></script>\n</body>');
+    if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0131"></script>\n</body>');
+    if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0131"></script>\n</body>');
+    if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0131"></script>\n</body>');
+    if (!html.includes('lastset-profile-equipment.js')) html = html.replace('</body>', '  <script src="./lastset-profile-equipment.js?v=0131"></script>\n</body>');
+    if (!html.includes('lastset-navigation.js')) html = html.replace('</body>', '  <script src="./lastset-navigation.js?v=0131"></script>\n</body>');
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
   return html;
