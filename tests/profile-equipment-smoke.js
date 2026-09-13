@@ -56,6 +56,7 @@ assert.ok(sandbox.EXERCISES.filter(e=>e.equipment==='Kettlebell').length>=10,'Ke
 assert.ok(sandbox.EXERCISES.filter(e=>e.equipment==='Resistance Band').length>=10,'Resistance Band library missing');
 assert.ok(sandbox.EXERCISES.filter(e=>e.equipment==='Smith Machine').length>=7,'Smith Machine library missing');
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='band-assisted-pull-up'),'Band Assisted Pull Up missing');
+assert.equal(sandbox.EXERCISES.find(e=>e.id==='band-assisted-pull-up').loadType,'assisted','Band assisted pull up must progress by reducing assistance');
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='band-push-up'),'Resistance Band Push Up missing');
 
 sandbox.data.profile.name='Display B';
