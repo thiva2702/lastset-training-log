@@ -26,10 +26,10 @@
         }
       }catch(_){ }
       try{
-        const res=await fetch('/index.html?legacy=0121',{cache:'no-store'});
+        const res=await fetch('/index.html?legacy=0122',{cache:'no-store'});
         let html=await res.text();
-        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0121">\n<link rel="stylesheet" href="/lastset-premium.css?v=0121">\n<meta name="theme-color" content="#090713">\n`;
-        const bodyInject=`\n<script src="/lastset-enhancements.js?v=0121"><\/script>\n<script src="/lastset-premium.js?v=0121"><\/script>\n`;
+        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0122">\n<link rel="stylesheet" href="/lastset-premium.css?v=0122">\n<link rel="stylesheet" href="/lastset-images.css?v=0122">\n<meta name="theme-color" content="#090713">\n`;
+        const bodyInject=`\n<script src="/lastset-enhancements.js?v=0122"><\/script>\n<script src="/lastset-premium.js?v=0122"><\/script>\n`;
         html=html.replace('</head>',headInject+'</head>').replace('</body>',bodyInject+'</body>');
         document.open();
         document.write(html);
