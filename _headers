@@ -18,5 +18,14 @@
 /lastset-hotfix.js
   Cache-Control: no-store, max-age=0
 
+/lastset-calendar.css
+  Cache-Control: no-store, max-age=0
+
+/lastset-calendar.js
+  Cache-Control: no-store, max-age=0
+
 /assets/home-hero-thiva.webp
+  Cache-Control: no-store, max-age=0
+
+/assets/calendar-hero-thiva.webp
   Cache-Control: no-store, max-age=0
