@@ -17,6 +17,7 @@ cp lastset-enhancements.js dist/
 cp lastset-premium.js dist/
 cp lastset-hotfix.js dist/
 cp lastset-calendar.js dist/
+cp lastset-workouts.js dist/
 cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
