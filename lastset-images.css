@@ -1,1 +1,69 @@
-PLACEHOLDER
+/* LastSet v0.12.2 generated visual assets */
+
+/* Replace the temporary stick figure hero with the generated athletic model. */
+.ls-hero:before{
+  content:""!important;
+  position:absolute!important;
+  right:-8px!important;
+  bottom:-10px!important;
+  width:56%!important;
+  height:105%!important;
+  opacity:.93!important;
+  background-image:url('/assets/hero.webp')!important;
+  background-repeat:no-repeat!important;
+  background-position:right bottom!important;
+  background-size:contain!important;
+  filter:drop-shadow(0 0 24px rgba(156,82,224,.26))!important;
+}
+.ls-hero:after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:linear-gradient(90deg,rgba(10,7,17,.98) 0%,rgba(10,7,17,.90) 37%,rgba(10,7,17,.38) 63%,rgba(8,6,14,.10) 100%)!important;
+}
+.ls-hero-art{display:none!important;}
+.ls-motto{max-width:68%!important;}
+.ls-motto-sub{max-width:60%!important;}
+.ls-scribble{right:10px!important;top:auto!important;bottom:18px!important;max-width:108px!important;}
+
+/* Replace the two circle placeholder on the exercise hero with actual rendered weights. */
+.ls-exercise-hero:after{
+  content:""!important;
+  position:absolute!important;
+  right:-14px!important;
+  bottom:-25px!important;
+  width:205px!important;
+  height:150px!important;
+  opacity:.82!important;
+  background-image:url('/assets/equipment.webp')!important;
+  background-repeat:no-repeat!important;
+  background-position:right bottom!important;
+  background-size:contain!important;
+  filter:drop-shadow(0 0 20px rgba(159,82,229,.24))!important;
+}
+.ls-exercise-hero:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  background:linear-gradient(90deg,rgba(15,10,25,.97) 0%,rgba(15,10,25,.88) 52%,rgba(15,10,25,.18) 80%,rgba(15,10,25,.05) 100%);
+}
+.ls-exercise-hero>*{position:relative!important;z-index:2!important;}
+.ls-exercise-hero h2,.ls-exercise-hero p,.ls-eyebrow{max-width:66%!important;}
+
+/* Keep the small exercise row icons clean and secondary so the photography leads the page. */
+.ls-ex-thumb{
+  background:linear-gradient(145deg,#241933,#14101d)!important;
+  border-color:rgba(170,104,238,.30)!important;
+  box-shadow:inset 0 0 18px rgba(142,76,201,.08)!important;
+}
+
+@media (max-width:390px){
+  .ls-hero:before{width:60%!important;right:-20px!important;}
+  .ls-motto{max-width:70%!important;font-size:28px!important;}
+  .ls-motto-sub{max-width:62%!important;}
+  .ls-exercise-hero:after{width:178px!important;right:-25px!important;}
+  .ls-exercise-hero h2,.ls-exercise-hero p,.ls-eyebrow{max-width:70%!important;}
+}
