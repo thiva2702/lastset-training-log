@@ -1,0 +1,35 @@
+name: LastSet integrity tests
+
+on:
+  push:
+    branches: [main, v0129-trust-data-integrity]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Syntax checks
+        run: |
+          node --check lastset-integrity.js
+          node --check service-worker.js
+          node --check worker.js
+          bash -n build-cloudflare.sh
+      - name: Integrity smoke tests
+        run: node tests/integrity-smoke.js
+      - name: Verify production bundle inputs
+        run: |
+          test -s lastset-integrity.js
+          test -s lastset-workouts.js
+          test -s lastset-calendar.js
+          test -s assets/home-hero-thiva.webp
+          grep -q 'lastset-integrity.js' worker.js
+          grep -q 'lastset-integrity.js' service-worker.js
+          grep -q 'lastset-integrity.js' build-cloudflare.sh
