@@ -1,0 +1,192 @@
+/* LastSet v0.12.5 calendar experience */
+.ls-calendar-screen{
+  padding-top:14px!important;
+}
+
+.ls-calendar-hero{
+  position:relative;
+  min-height:132px;
+  margin:0 0 14px;
+  border:1px solid rgba(157,91,226,.34);
+  border-radius:22px;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(8,6,14,.98) 0%,rgba(10,7,17,.92) 34%,rgba(10,7,17,.52) 58%,rgba(8,6,14,.08) 86%),
+    url('/assets/calendar-hero-thiva.webp?v=0125') center center/cover no-repeat;
+  box-shadow:0 18px 42px rgba(0,0,0,.30), inset 0 0 0 1px rgba(255,255,255,.025);
+}
+.ls-calendar-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 82% 28%,rgba(166,255,77,.10),transparent 22%),
+    linear-gradient(180deg,rgba(168,108,255,.05),transparent 50%);
+}
+.ls-calendar-hero-copy{
+  position:relative;
+  z-index:1;
+  width:58%;
+  padding:18px 18px 17px;
+}
+.ls-calendar-kicker{
+  color:#a6ff4d;
+  font-size:10px;
+  line-height:1;
+  font-weight:850;
+  letter-spacing:1.9px;
+  text-transform:uppercase;
+}
+.ls-calendar-hero h2{
+  margin:7px 0 6px;
+  color:#fff;
+  font-size:25px;
+  line-height:1.02;
+  letter-spacing:-.8px;
+  text-shadow:0 2px 18px rgba(0,0,0,.55);
+}
+.ls-calendar-hero p{
+  margin:0;
+  color:#c0b9cf;
+  font-size:11px;
+  line-height:1.45;
+  text-shadow:0 2px 14px rgba(0,0,0,.62);
+}
+
+.ls-calendar-screen > .card.pad,
+.ls-calendar-screen .ls-calendar-card{
+  background:
+    radial-gradient(circle at 88% 7%,rgba(129,67,189,.12),transparent 27%),
+    linear-gradient(160deg,rgba(22,19,34,.98),rgba(12,11,21,.99))!important;
+  border-color:rgba(121,92,159,.30)!important;
+}
+.ls-calendar-screen .month-head{
+  padding-bottom:12px!important;
+}
+.ls-calendar-screen .month-head h2{
+  font-size:24px!important;
+  letter-spacing:-.7px;
+}
+.ls-calendar-screen .month-btn{
+  color:#c79cff!important;
+  border:1px solid rgba(168,108,255,.18)!important;
+  background:rgba(168,108,255,.05)!important;
+}
+.ls-calendar-screen .month-btn:active{
+  color:#a6ff4d!important;
+  border-color:rgba(166,255,77,.38)!important;
+}
+
+.ls-calendar-screen .stats.ls-calendar-stats{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-top:16px!important;
+}
+.ls-calendar-screen .stats.ls-calendar-stats .stat{
+  position:relative;
+  min-height:78px;
+  padding:12px 10px 10px!important;
+  overflow:hidden;
+  background:linear-gradient(155deg,rgba(28,23,43,.96),rgba(18,15,29,.98))!important;
+  border:1px solid rgba(102,86,135,.34)!important;
+  border-radius:16px!important;
+}
+.ls-calendar-screen .stats.ls-calendar-stats .stat::before{
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  margin-bottom:8px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:900;
+  color:#d7c7f4;
+  background:rgba(168,108,255,.13);
+  border:1px solid rgba(168,108,255,.18);
+}
+.ls-calendar-screen .stats.ls-calendar-stats .stat[data-kind="training"]::before{content:"✓";color:#caff8f;background:rgba(166,255,77,.10);border-color:rgba(166,255,77,.20);}
+.ls-calendar-screen .stats.ls-calendar-stats .stat[data-kind="resistance"]::before{content:"R";}
+.ls-calendar-screen .stats.ls-calendar-stats .stat[data-kind="cardio"]::before{content:"↗";color:#caff8f;background:rgba(62,120,53,.16);border-color:rgba(166,255,77,.18);}
+.ls-calendar-screen .stats.ls-calendar-stats .stat[data-kind="weeks"]::before{content:"W";color:#ffd58a;background:rgba(255,177,74,.10);border-color:rgba(255,177,74,.18);}
+.ls-calendar-screen .stats.ls-calendar-stats .stat strong{
+  font-size:19px!important;
+  line-height:1;
+}
+.ls-calendar-screen .stats.ls-calendar-stats .stat span{
+  display:block;
+  margin-top:5px;
+  color:#aaa2bb!important;
+  font-size:10px!important;
+  line-height:1.2;
+}
+
+.ls-calendar-insight{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:12px;
+  padding:13px 14px;
+  border:1px solid rgba(107,91,139,.32);
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(19,16,30,.96),rgba(13,12,22,.98));
+}
+.ls-calendar-insight-mark{
+  width:34px;
+  height:34px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  color:#a6ff4d;
+  background:rgba(166,255,77,.09);
+  border:1px solid rgba(166,255,77,.18);
+  font-size:16px;
+  font-weight:900;
+}
+.ls-calendar-insight-copy{
+  min-width:0;
+  flex:1;
+}
+.ls-calendar-insight-label{
+  color:#9c93ae;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:1.3px;
+  text-transform:uppercase;
+}
+.ls-calendar-insight strong{
+  display:block;
+  margin-top:3px;
+  color:#f2eff8;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.ls-calendar-insight span{
+  display:block;
+  margin-top:2px;
+  color:#9f97b0;
+  font-size:10px;
+  line-height:1.35;
+}
+.ls-calendar-insight button{
+  flex:0 0 auto;
+  border:1px solid rgba(168,108,255,.26);
+  border-radius:10px;
+  padding:8px 10px;
+  background:rgba(168,108,255,.08);
+  color:#d9c8f5;
+  font-size:10px;
+  font-weight:800;
+}
+
+@media (max-width:430px){
+  .ls-calendar-hero{min-height:118px;border-radius:20px;background-position:57% center;}
+  .ls-calendar-hero-copy{width:58%;padding:15px 14px;}
+  .ls-calendar-hero h2{font-size:22px;}
+  .ls-calendar-hero p{font-size:10px;}
+  .ls-calendar-screen .stats.ls-calendar-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .ls-calendar-screen .stats.ls-calendar-stats .stat{min-height:76px;}
+}
