@@ -1,0 +1,11 @@
+{
+  "name": "lastset-training-log",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-13",
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/"]
+  }
+}
