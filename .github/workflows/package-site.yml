@@ -21,11 +21,26 @@ jobs:
           path: |
             README.txt
             index.html
+            app-v12.html
             manifest.webmanifest
-            netlify.toml
+            wrangler.toml
+            worker.js
+            build-cloudflare.sh
+            _headers
+            _redirects
             service-worker.js
             lastset-theme.css
+            lastset-premium.css
+            lastset-images.css
+            lastset-hotfix.css
+            lastset-calendar.css
             lastset-enhancements.js
+            lastset-premium.js
+            lastset-hotfix.js
+            lastset-calendar.js
+            lastset-workouts.js
+            lastset-integrity.js
             icon-192.png
             icon-512.png
+            assets/*.webp
           if-no-files-found: error
