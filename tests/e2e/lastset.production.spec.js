@@ -35,6 +35,18 @@ async function registryData(page) {
   }, USERS_KEY);
 }
 
+async function waitForSessionType(page, type) {
+  await page.waitForFunction(({ key, type }) => {
+    try {
+      const raw = localStorage.getItem(key);
+      const data = raw ? JSON.parse(raw) : null;
+      return Object.values(data?.sessions || {}).flat().some((session) => session?.type === type);
+    } catch (_) {
+      return false;
+    }
+  }, { key: DATA_KEY, type });
+}
+
 async function todayIso(page) {
   return page.evaluate(() => {
     const d = new Date();
@@ -44,7 +56,7 @@ async function todayIso(page) {
 
 async function goToday(page) {
   await page.locator('[data-nav="day"]').click();
-  await expect(page.locator('[data-day-action="resistance"]')).toBeVisible();
+  await expect(page.locator('[data-day-action="resistance"]').first()).toBeVisible();
 }
 
 async function goProfile(page) {
@@ -54,7 +66,7 @@ async function goProfile(page) {
 
 async function openExercise(page, exerciseId) {
   await goToday(page);
-  await page.locator('[data-day-action="resistance"]').click();
+  await page.locator('[data-day-action="resistance"]').first().click();
   await expect(page.locator('#exercise-search')).toBeVisible();
   await page.locator(`[data-exercise="${exerciseId}"]`).click();
   await expect(page.locator('[data-action="save-exercise"]')).toBeVisible();
@@ -65,7 +77,8 @@ async function logExternalExercise(page, exerciseId, weight, reps) {
   await page.locator('[data-set-weight="0"]').fill(String(weight));
   await page.locator('[data-set-reps="0"]').fill(String(reps));
   await page.locator('[data-action="save-exercise"]').click();
-  await expect(page.getByText('Sessions', { exact: true })).toBeVisible();
+  await waitForSessionType(page, 'resistance');
+  await expect(page.locator('[data-day-action="describe"]')).toBeVisible();
 }
 
 async function createUserKeepingCurrent(page, name) {
@@ -98,7 +111,7 @@ async function saveProfileValues(page, { displayName, bodyWeight, height, gender
   await expect(page.locator('.toast')).toContainText('Profile saved');
 }
 
-async function runSmartLog(page, text) {
+async function runSmartLog(page, text, expectedType) {
   await goToday(page);
   await page.locator('[data-day-action="describe"]').click();
   await expect(page.locator('#ai-text')).toBeVisible();
@@ -106,7 +119,8 @@ async function runSmartLog(page, text) {
   await page.locator('[data-action="parse-ai"]').click();
   await expect(page.locator('[data-action="confirm-ai-workout"]')).toBeVisible({ timeout: 8_000 });
   await page.locator('[data-action="confirm-ai-workout"]').click();
-  await expect(page.getByText('Sessions', { exact: true })).toBeVisible();
+  await waitForSessionType(page, expectedType);
+  await expect(page.locator('[data-day-action="describe"]')).toBeVisible();
 }
 
 test.describe('LastSet production v0.13.1', () => {
@@ -114,12 +128,16 @@ test.describe('LastSet production v0.13.1', () => {
     await cleanStart(page);
   });
 
-  test('fresh browser starts clean on Today without a meaningless Back button', async ({ page }) => {
+  test('fresh browser data is clean and Today is a top level destination without Back', async ({ page }) => {
+    let data = await storedData(page);
+    expect(data).toBeTruthy();
+    expect(Object.keys(data.sessions || {})).toHaveLength(0);
+
+    await goToday(page);
     await expect(page.locator('[data-nav="day"]')).toHaveClass(/active/);
     await expect(page.locator('[data-action="back"]')).toHaveCount(0);
 
-    const data = await storedData(page);
-    expect(data).toBeTruthy();
+    data = await storedData(page);
     expect(Object.keys(data.sessions || {})).toHaveLength(0);
   });
 
@@ -141,7 +159,7 @@ test.describe('LastSet production v0.13.1', () => {
     const iso = await todayIso(page);
     await page.locator(`[data-date="${iso}"]`).click();
 
-    await page.locator('[data-day-action="resistance"]').click();
+    await page.locator('[data-day-action="resistance"]').first().click();
     await expect(page.locator('#exercise-search')).toBeVisible();
     await page.locator('[data-exercise="chest-press"]').click();
     await expect(page.locator('[data-action="save-exercise"]')).toBeVisible();
@@ -150,7 +168,7 @@ test.describe('LastSet production v0.13.1', () => {
     await expect(page.locator('#exercise-search')).toBeVisible();
 
     await page.locator('[data-action="back"]').click();
-    await expect(page.locator('[data-day-action="resistance"]')).toBeVisible();
+    await expect(page.locator('[data-day-action="resistance"]').first()).toBeVisible();
 
     await page.locator('[data-action="back"]').click();
     await expect(page.locator('.calendar-grid')).toBeVisible();
@@ -165,7 +183,7 @@ test.describe('LastSet production v0.13.1', () => {
 
   test('equipment filters and aliases find the new v0.13.0 exercise variants', async ({ page }) => {
     await goToday(page);
-    await page.locator('[data-day-action="resistance"]').click();
+    await page.locator('[data-day-action="resistance"]').first().click();
 
     await page.locator('#equipment-filter').selectOption({ label: 'EZ Bar' });
     await page.locator('#exercise-search').fill('easy curl bar');
@@ -192,7 +210,7 @@ test.describe('LastSet production v0.13.1', () => {
   });
 
   test('Smart Log ignores rest 120 sec as a load and records bench 80 kg 3x5', async ({ page }) => {
-    await runSmartLog(page, 'Bench press 80kg 3x5 rest 120 sec');
+    await runSmartLog(page, 'Bench press 80kg 3x5 rest 120 sec', 'resistance');
 
     const data = await storedData(page);
     const sessions = Object.values(data.sessions || {}).flat();
@@ -208,7 +226,7 @@ test.describe('LastSet production v0.13.1', () => {
   });
 
   test('Smart Log keeps treadmill speed and incline separate from distance', async ({ page }) => {
-    await runSmartLog(page, 'treadmill 20 min 8 km/h 3% incline');
+    await runSmartLog(page, 'treadmill 20 min 8 km/h 3% incline', 'cardio');
 
     const data = await storedData(page);
     const sessions = Object.values(data.sessions || {}).flat();
@@ -234,7 +252,7 @@ test.describe('LastSet production v0.13.1', () => {
     const card = page.locator('.ls-workout-card').filter({ hasText: 'QA Push' });
     await expect(card).toBeVisible();
     await card.locator('[data-template-start]').click();
-    await expect(page.locator('[data-day-action="resistance"]')).toBeVisible();
+    await expect(page.locator('[data-day-action="resistance"]').first()).toBeVisible();
 
     const iso = await todayIso(page);
     const data = await storedData(page);
