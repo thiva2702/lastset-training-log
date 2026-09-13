@@ -35,13 +35,24 @@
       brand.appendChild(badge);
     });
 
+    const desiredVersion = `LastSet ${RELEASE.label} · build ${RELEASE.build}`;
     const version = [...document.querySelectorAll('.muted')].find(el => /LastSet\s+(?:v|V)/i.test(el.textContent || ''));
-    if (version) version.textContent = `LastSet ${RELEASE.label} · build ${RELEASE.build}`;
+    if (version && version.textContent !== desiredVersion) version.textContent = desiredVersion;
 
-    document.documentElement.dataset.lastsetRelease = RELEASE.semver;
+    if (document.documentElement.dataset.lastsetRelease !== RELEASE.semver) {
+      document.documentElement.dataset.lastsetRelease = RELEASE.semver;
+    }
   }
 
-  const observer = new MutationObserver(decorateBeta);
+  let scheduled = false;
+  const observer = new MutationObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      decorateBeta();
+    });
+  });
   observer.observe(document.documentElement, { childList: true, subtree: true });
   decorateBeta();
 })();
