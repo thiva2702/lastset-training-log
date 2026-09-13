@@ -22,6 +22,7 @@ jobs:
           node --check lastset-profile-equipment.js
           node --check lastset-navigation.js
           node --check lastset-smartlog-shorthand.js
+          node --check lastset-beta.js
           node --check service-worker.js
           node --check worker.js
           bash -n build-cloudflare.sh
@@ -39,16 +40,22 @@ jobs:
           test -s lastset-profile-equipment.js
           test -s lastset-navigation.js
           test -s lastset-smartlog-shorthand.js
+          test -s lastset-beta.js
           test -s lastset-workouts.js
           test -s lastset-calendar.js
           test -s assets/home-hero-thiva.webp
           test -s V1_RELEASE_CHECKLIST.md
+          test -s V1_BETA_RELEASE.md
           test -s V2_BACKLOG.md
           grep -q 'lastset-integrity.js' worker.js
           grep -q 'lastset-profile-equipment.js' worker.js
           grep -q 'lastset-navigation.js' worker.js
           grep -q 'lastset-smartlog-shorthand.js' worker.js
+          grep -q 'lastset-beta.js' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
+          grep -q 'lastset-beta.js' service-worker.js
           grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
+          grep -q 'lastset-beta.js' build-cloudflare.sh
           bash build-cloudflare.sh
           test -s dist/lastset-smartlog-shorthand.js
+          test -s dist/lastset-beta.js
