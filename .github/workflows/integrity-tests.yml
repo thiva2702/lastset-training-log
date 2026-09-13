@@ -20,6 +20,7 @@ jobs:
         run: |
           node --check lastset-integrity.js
           node --check lastset-profile-equipment.js
+          node --check lastset-navigation.js
           node --check service-worker.js
           node --check worker.js
           bash -n build-cloudflare.sh
@@ -27,14 +28,20 @@ jobs:
         run: node tests/integrity-smoke.js
       - name: Profile and equipment smoke tests
         run: node tests/profile-equipment-smoke.js
+      - name: Navigation smoke tests
+        run: node tests/navigation-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
           test -s lastset-profile-equipment.js
+          test -s lastset-navigation.js
           test -s lastset-workouts.js
           test -s lastset-calendar.js
           test -s assets/home-hero-thiva.webp
+          test -s V1_RELEASE_CHECKLIST.md
+          test -s V2_BACKLOG.md
           grep -q 'lastset-integrity.js' worker.js
           grep -q 'lastset-profile-equipment.js' worker.js
-          grep -q 'lastset-profile-equipment.js' service-worker.js
-          grep -q 'lastset-profile-equipment.js' build-cloudflare.sh
+          grep -q 'lastset-navigation.js' worker.js
+          grep -q 'lastset-navigation.js' service-worker.js
+          grep -q 'lastset-navigation.js' build-cloudflare.sh
