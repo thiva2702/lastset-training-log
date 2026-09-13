@@ -1,76 +1,94 @@
-LASTSET PWA v0.12.2 — PURPLE + GREEN PERFORMANCE UI
+LASTSET PWA v0.12.9 — TRUST + DATA INTEGRITY
 
-This release keeps the free on device Smart Log approach and combines the latest functional fixes with the new LastSet visual direction.
+This release protects the accuracy of training history before further feature expansion. The Purple + Green interface, on device Smart Log, assisted and bodyweight handling, Calendar artwork and Saved Workouts remain in place.
 
-KEY CHANGES
+TRUST AND DATA CHANGES
 
-1. New visual identity.
-   Purple is the main atmospheric and structural colour.
-   Lime green is the primary action and progress colour.
-   Dark charcoal surfaces improve contrast and reduce the flat prototype feel.
-   Home, exercise selection, cards, navigation and workout actions share the same visual system.
+1. Fresh start integrity.
+   The old seeded Chest Press demo session is removed from fresh and reset data.
+   Existing stored data is only cleaned when it exactly matches the legacy demo signature and creation date pattern.
 
-2. Rotating motivational headline.
-   The Home screen rotates through ten short mottos when the app is opened so the first screen feels fresh and motivating.
+2. Previous workout behaviour.
+   Using a previous workout creates a plan containing the exercise structure.
+   Previous weights, reps and sets are not recorded as completed work for today.
 
-3. Exercise discovery improvements.
-   Equipment filters include All, Barbell, Dumbbell, Machine, Bodyweight and Cable.
-   Recent and logged today states remain visible.
-   Exercise search keeps the existing typo tolerance and muscle filtering logic.
+3. Separate users.
+   Profile includes user data management.
+   Existing users can be stored and switched without mixing workout history.
+   Starting a new user starts with a clean profile and clean training history.
+   The current user can be kept for later or permanently deleted after a separate confirmation.
+   Resetting the current user's training data preserves that user's profile values while clearing sessions, plans and Saved Workouts.
 
-4. Bodyweight and assisted exercise handling.
-   Pull Up and Dip can be logged as Bodyweight, Assisted or Weighted.
-   Assisted Pull Up stays recognised as assisted and does not silently become normal bodyweight Pull Up.
-   Assisted Dip is included and uses assistance weight correctly.
-   Lower assistance represents progression for assisted movements.
+4. Saved Workout date safety.
+   Starting a Saved Workout from Profile targets the real current day.
+   Starting one while working from a Calendar day targets that selected date and the button states the date clearly.
 
-5. Smart Log parsing updates.
-   Percent incline such as 3% remains recognised as treadmill incline.
-   Cardio units remain protected from phantom distance or resistance interpretation.
-   Resistance Training wording is used consistently.
+5. Progress accuracy.
+   External load exercises use highest load and reps.
+   Assisted exercises treat less assistance as progression.
+   Bodyweight exercises show reps or added external load.
+   Timed exercises show duration in seconds.
+   Session counts are based on distinct training dates.
 
-6. Profile additions.
-   Height and body weight can be stored in Profile.
-   Body weight becomes available for bodyweight exercise context while keeping exercise specific override behaviour.
+6. Smart Log duplicate protection.
+   If Smart Log identifies an exercise already logged in the current resistance session, the new sets are merged into that exercise instead of creating a duplicate exercise row.
 
-7. Premium generated artwork.
-   The Home hero uses generated athletic artwork instead of the temporary stick figure.
-   The exercise hero uses rendered gym equipment instead of the temporary circle graphic.
-   Artwork is compressed to WebP for mobile performance.
+7. Backup and storage controls.
+   Profile includes Import Backup for LastSet JSON exports.
+   Import replaces only the active user's data after confirmation.
+   Profile shows a device storage health indicator.
 
-8. Existing v0.11 behaviour retained.
-   Cardio parsing uses unit precedence.
-   Running and walking can distinguish treadmill from outdoors.
-   Push ups save reps without requiring weight.
-   Plank uses timed holds.
-   Incline, flat and decline chest press remain distinct.
-   Workout assessment understands external weight, bodyweight, assisted and timed movements.
+8. Input validation.
+   Resistance and cardio values receive sanity checks before saving so impossible or accidental values are less likely to pollute progress history.
 
-REGRESSION CASES
+9. Clearer feature language.
+   Saved Training Day language is normalized to Saved Workouts.
+   Machine Scan is explicitly labelled Machine Scan Beta because reliable general machine recognition is not yet enabled.
 
+10. Regression testing.
+    Automated GitHub Actions checks now run syntax tests, build input checks and integrity smoke tests.
+    Tests cover legacy demo removal, user data initialization, Saved Workout date targeting, load type specific Progress, backup validation and numeric range validation.
+
+VISUAL AND TRAINING FEATURES RETAINED
+
+Purple is the main atmospheric and structural colour.
+Lime green is the primary action and progress colour.
+The Home hero uses the approved user portrait artwork.
+The Calendar uses its compact workout hero and improved date contrast.
+The Home screen rotates through ten short motivational mottos.
+Pull Up and Dip support Bodyweight, Assisted and Weighted modes.
+Assisted Pull Up and Assisted Dip remain distinct assisted movements.
+Plank uses timed holds.
+Treadmill incline percentages are retained by Smart Log.
+Cardio unit precedence prevents speed values from becoming phantom distance values.
+
+CORE REGRESSION CASES
+
+A fresh user must have zero workout sessions.
+A new user must not inherit another user's height, body weight, Saved Workouts or history.
+Switching back to a stored user must restore that user's own data.
+Using a previous workout must not create completed sets.
+Starting a Saved Workout from Profile must target today.
+Starting a Saved Workout from an old Calendar date must target that selected date.
+Assisted progress must prefer lower assistance.
+Bodyweight progress must show reps or added load rather than 0 kg.
+Timed progress must show seconds.
+Smart Log must merge repeated exercise sets into the same exercise for the day.
 10 km/h must never become 10 km.
 2 km remains distance.
-threadmill resolves to Treadmill.
-Treadmill recognises incline stated as a percentage.
-Cycling and running do not create phantom resistance sets.
-Push Ups save reps with no weight requirement.
+Push Ups save reps without requiring weight.
 Plank saves seconds.
 Assisted Pull Up remains assisted.
 Assisted Dip remains assisted.
-Pull Up and Dip support Bodyweight, Assisted and Weighted modes.
-Bodyweight versus weighted squat remains clarified when ambiguous.
-Incline, flat and decline chest press remain distinct.
 “struggled after rep 6” remains an effort note and does not reduce completed reps.
 
 DEPLOYMENT
 
 Production repository: thiva2702/lastset-training-log
 Production branch: main
-Primary hosting target: Cloudflare Pages
+Primary hosting target: Cloudflare
 Framework preset: None
 Build command: bash build-cloudflare.sh
 Build output directory: dist
 
-Cloudflare Pages should be connected directly to GitHub so pushes to main deploy automatically. See CLOUDFLARE_SETUP.md for the one time project setup.
-
-The previous Netlify project can remain inactive as a temporary fallback and should not be used for new deploys while its account credits are exhausted.
+Cloudflare is connected directly to GitHub so pushes to main deploy automatically. The service worker cache for this release is v0.12.9.
