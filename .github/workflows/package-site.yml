@@ -20,6 +20,8 @@ jobs:
           name: lastset-site
           path: |
             README.txt
+            V1_RELEASE_CHECKLIST.md
+            V2_BACKLOG.md
             index.html
             app-v12.html
             manifest.webmanifest
@@ -41,6 +43,7 @@ jobs:
             lastset-workouts.js
             lastset-integrity.js
             lastset-profile-equipment.js
+            lastset-navigation.js
             icon-192.png
             icon-512.png
             assets/*.webp
