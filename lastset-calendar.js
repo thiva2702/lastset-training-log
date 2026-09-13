@@ -102,7 +102,33 @@
     card.appendChild(insight);
   }
 
+  function decorateDayContext(){
+    if(typeof state==='undefined' || state.view!=='day') return;
+
+    if(state.tab==='calendar'){
+      const back=document.querySelector('.icon-btn[data-action="back"]');
+      if(back){
+        back.setAttribute('aria-label','Back to calendar');
+        back.onclick=(event)=>{
+          event.preventDefault();
+          event.stopPropagation();
+          state.view='calendar';
+          state.tab='calendar';
+          render();
+        };
+      }
+    }
+
+    document.querySelectorAll('.quick-workout.ls-repeat-card').forEach(card=>{
+      const label=card.querySelector('.ls-repeat-label');
+      if(label) label.textContent='Previous training day';
+      const title=card.querySelector('.quick-head strong') || card.querySelector('strong');
+      if(title) title.textContent='Previous logged workout';
+    });
+  }
+
   function decorateCalendarExperience(){
+    decorateDayContext();
     if(typeof state==='undefined' || state.view!=='calendar') return;
     const main=document.querySelector('main.container');
     if(!main) return;
@@ -123,7 +149,7 @@
 
     decorateStats(card,metrics);
     decorateInsight(card,metrics);
-    document.documentElement.dataset.lastsetCalendar='v0125';
+    document.documentElement.dataset.lastsetCalendar='v0127';
   }
 
   if(typeof render==='function'){
