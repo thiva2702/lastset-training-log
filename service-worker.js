@@ -1,7 +1,6 @@
-const CACHE = 'lastset-v0122-artwork';
+const CACHE = 'lastset-v0124-regression';
 const ASSETS = [
   './',
-  './app-v12.html',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
@@ -9,10 +8,13 @@ const ASSETS = [
   './lastset-theme.css',
   './lastset-premium.css',
   './lastset-images.css',
+  './lastset-hotfix.css',
   './lastset-enhancements.js',
   './lastset-premium.js',
+  './lastset-hotfix.js',
   './assets/hero.webp',
-  './assets/equipment.webp'
+  './assets/equipment.webp',
+  './assets/home-hero-thiva.webp'
 ];
 
 self.addEventListener('install', event => {
@@ -30,10 +32,14 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0122">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0122">\n  <link rel="stylesheet" href="./lastset-images.css?v=0122">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0124">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0124">\n  <link rel="stylesheet" href="./lastset-images.css?v=0124">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0124">\n</head>');
+  } else if (!html.includes('lastset-hotfix.css')) {
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0124">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0122"></script>\n  <script src="./lastset-premium.js?v=0122"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0124"></script>\n  <script src="./lastset-premium.js?v=0124"></script>\n  <script src="./lastset-hotfix.js?v=0124"></script>\n</body>');
+  } else if (!html.includes('lastset-hotfix.js')) {
+    html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0124"></script>\n</body>');
   }
   html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
   return html;

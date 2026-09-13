@@ -20,4 +20,18 @@ cp _headers dist/
 cp _redirects dist/
 cp assets/*.webp dist/assets/
 
-echo "Cloudflare Pages bundle ready in dist"
+# The home hero is stored as base64 text in GitHub so the connector can carry
+# the generated binary safely. Rebuild the actual WebP for Cloudflare output.
+base64 -d assets/home-hero-thiva-valid.webp.b64 > dist/assets/home-hero-thiva.webp
+
+# Fail the build if the decoded hero is not a real WebP file.
+python3 - <<'PY'
+from pathlib import Path
+p=Path('dist/assets/home-hero-thiva.webp')
+b=p.read_bytes()
+if not (len(b)>12 and b[:4]==b'RIFF' and b[8:12]==b'WEBP'):
+    raise SystemExit('home hero asset failed WebP validation')
+print(f'Validated home hero: {len(b)} bytes')
+PY
+
+echo "Cloudflare bundle ready in dist"

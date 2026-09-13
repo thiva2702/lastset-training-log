@@ -136,13 +136,87 @@
     stableApplyExerciseFilters();
   }
 
+  function firstCardioBoundary(source, fromIndex, toIndex){
+    const start=Math.max(0,Number(fromIndex)||0);
+    const end=Math.max(start,Number.isFinite(Number(toIndex))?Number(toIndex):source.length);
+    const tail=source.slice(start,end);
+    const match=/\b(?:then\s+)?(?:treadmill(?:\s+(?:run|walk))?|running|run|jogging|jog|walking|walk|stationary\s+bike|exercise\s+bike|spin\s+bike|cycling|cycle|biking|rowing\s+machine|rower|rowing|swimming|swim|elliptical|cross\s+trainer|stair\s+machine|stairmaster|stair\s+climb|stairs)\b/i.exec(tail);
+    return match ? start + match.index : end;
+  }
+
+  function installSmartLogBoundaryFix(){
+    if(typeof parseSmartWorkout!=='function' || parseSmartWorkout.__lastsetBoundaryFixV0124) return;
+    const baseParseSmartWorkout=parseSmartWorkout;
+
+    const fixed=function(text){
+      const source=String(text||'');
+      const parsed=baseParseSmartWorkout(source);
+      try{
+        if(!parsed || !Array.isArray(parsed.items) || typeof parseExerciseSetsV11!=='function') return parsed;
+
+        const resistance=parsed.items.filter(item=>item?.kind==='resistance');
+        if(!resistance.length) return parsed;
+
+        const mentions=typeof findExerciseMentions==='function'
+          ? (findExerciseMentions(source)||[]).slice().sort((a,b)=>a.start-b.start)
+          : [];
+
+        const used=new Set();
+        if(mentions.length){
+          mentions.forEach((mention,index)=>{
+            const nextStart=index+1<mentions.length?mentions[index+1].start:source.length;
+            const end=firstCardioBoundary(source,mention.end,nextStart);
+            const segment=source.slice(mention.start,end).trim();
+            if(!segment) return;
+
+            let itemIndex=resistance.findIndex((item,i)=>!used.has(i) && item.exerciseId===mention.exercise?.id);
+            if(itemIndex<0) itemIndex=resistance.findIndex((_,i)=>!used.has(i));
+            if(itemIndex<0) return;
+            used.add(itemIndex);
+
+            const item=resistance[itemIndex];
+            const exercise=mention.exercise || (typeof EXERCISES!=='undefined' ? EXERCISES.find(e=>e.id===item.exerciseId) : null);
+            if(!exercise) return;
+
+            const sets=parseExerciseSetsV11(exercise,segment);
+            if(Array.isArray(sets) && sets.length){
+              item.sets=sets;
+              item.loadType=exercise.loadType||item.loadType;
+            }
+          });
+        }else if(resistance.length===1){
+          const item=resistance[0];
+          const exercise=typeof EXERCISES!=='undefined' ? EXERCISES.find(e=>e.id===item.exerciseId) : null;
+          if(exercise){
+            const end=firstCardioBoundary(source,0,source.length);
+            if(end<source.length){
+              const sets=parseExerciseSetsV11(exercise,source.slice(0,end));
+              if(Array.isArray(sets) && sets.length) item.sets=sets;
+            }
+          }
+        }
+
+        return typeof finalizeSmartParsed==='function' ? finalizeSmartParsed(parsed) : parsed;
+      }catch(err){
+        console.warn('LastSet mixed workout boundary fix skipped',err);
+        return parsed;
+      }
+    };
+
+    fixed.__lastsetBoundaryFixV0124=true;
+    try{ parseSmartWorkout=fixed; }catch(_){ }
+  }
+
   try{ applyExerciseFilters=stableApplyExerciseFilters; }catch(_){ }
   try{ filterExercises=stableApplyExerciseFilters; }catch(_){ }
 
   function applyHotfixes(){
     wireStableFilterUI();
-    document.documentElement.dataset.lastsetHotfix='v0123';
+    installSmartLogBoundaryFix();
+    document.documentElement.dataset.lastsetHotfix='v0124';
   }
+
+  installSmartLogBoundaryFix();
 
   if(typeof render==='function'){
     const previousRender=render;
