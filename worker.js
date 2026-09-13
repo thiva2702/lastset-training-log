@@ -5,21 +5,29 @@ function injectPremiumLayer(html) {
 <link rel="stylesheet" href="/lastset-theme.css?v=0122">
 <link rel="stylesheet" href="/lastset-premium.css?v=0122">
 <link rel="stylesheet" href="/lastset-images.css?v=0122">
+<link rel="stylesheet" href="/lastset-hotfix.css?v=0123">
 <meta name="theme-color" content="#090713">
 `;
 
   const bodyInject = `
 <script src="/lastset-enhancements.js?v=0122"></script>
 <script src="/lastset-premium.js?v=0122"></script>
+<script src="/lastset-hotfix.js?v=0123"></script>
 `;
 
   let output = html;
   if (!output.includes("lastset-theme.css")) {
     output = output.replace("</head>", headInject + "</head>");
+  } else if (!output.includes("lastset-hotfix.css")) {
+    output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-hotfix.css?v=0123">\n</head>`);
   }
+
   if (!output.includes("lastset-enhancements.js")) {
     output = output.replace("</body>", bodyInject + "</body>");
+  } else if (!output.includes("lastset-hotfix.js")) {
+    output = output.replace("</body>", `<script src="/lastset-hotfix.js?v=0123"></script>\n</body>`);
   }
+
   output = output.replace(
     '<meta name="theme-color" content="#0b1220" />',
     '<meta name="theme-color" content="#090713" />'
@@ -31,10 +39,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Cloudflare normalizes HTML asset URLs, so the old app-v12 bootstrap could
-    // fetch /index.html, be redirected to /, and load itself forever.
-    // Serve the real application HTML directly from the Worker and inject the
-    // premium LastSet layer server-side instead of using document.write().
     if (request.method === "GET" && APP_PATHS.has(url.pathname)) {
       const assetUrl = new URL(request.url);
       assetUrl.pathname = "/index.html";

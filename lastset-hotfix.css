@@ -1,0 +1,81 @@
+/* LastSet v0.12.3 home hero, calendar contrast and filter stability */
+
+/* Home hero: approved Thiva portrait */
+.ls-hero{
+  min-height:178px!important;
+  background:#100b19!important;
+}
+.ls-hero::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  opacity:1!important;
+  background-image:url('/assets/home-hero-thiva.webp?v=0123')!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:cover!important;
+  filter:none!important;
+  transform:none!important;
+}
+.ls-hero::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(90deg,
+      rgba(7,5,12,.96) 0%,
+      rgba(9,6,15,.90) 31%,
+      rgba(10,7,17,.62) 48%,
+      rgba(9,6,15,.14) 72%,
+      rgba(8,5,13,.05) 100%)!important;
+}
+.ls-hero>*{position:relative!important;z-index:2!important;}
+.ls-motto{max-width:58%!important;}
+.ls-motto-sub{max-width:52%!important;}
+.ls-scribble{display:none!important;}
+.ls-hero-art{display:none!important;}
+
+/* Calendar: readable current month dates against the purple environment */
+.ls-calendar-screen .day,
+.ls-calendar-screen .day .day-number{
+  color:#ded7ee!important;
+  opacity:1!important;
+}
+.ls-calendar-screen .day:not(.outside):not(.selected) .day-number{
+  color:#e2dced!important;
+  text-shadow:0 1px 10px rgba(190,145,255,.08);
+}
+.ls-calendar-screen .day.outside{
+  opacity:1!important;
+}
+.ls-calendar-screen .day.outside .day-number{
+  color:#6f6780!important;
+  opacity:.82!important;
+}
+.ls-calendar-screen .day.selected .day-number{
+  color:#fff!important;
+  font-weight:850!important;
+}
+.ls-calendar-screen .day.today:not(.selected) .day-number{
+  color:#c9ff8c!important;
+}
+.ls-calendar-screen .weekdays div{
+  color:#b7accb!important;
+}
+
+/* Stable filter empty state */
+.ls-filter-empty{
+  display:none;
+  margin:12px 0 0;
+  padding:18px 14px;
+  border:1px solid #392f4d;
+  border-radius:15px;
+  background:rgba(18,14,28,.78);
+  color:#aaa3bc;
+  text-align:center;
+  font-size:12px;
+  line-height:1.45;
+}

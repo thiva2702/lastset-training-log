@@ -11,8 +11,10 @@ cp icon-512.png dist/
 cp lastset-theme.css dist/
 cp lastset-premium.css dist/
 cp lastset-images.css dist/
+cp lastset-hotfix.css dist/
 cp lastset-enhancements.js dist/
 cp lastset-premium.js dist/
+cp lastset-hotfix.js dist/
 cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
