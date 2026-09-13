@@ -1,4 +1,4 @@
-LASTSET PWA v0.12 — PURPLE + GREEN PERFORMANCE UI
+LASTSET PWA v0.12.2 — PURPLE + GREEN PERFORMANCE UI
 
 This release keeps the free on device Smart Log approach and combines the latest functional fixes with the new LastSet visual direction.
 
@@ -33,7 +33,12 @@ KEY CHANGES
    Height and body weight can be stored in Profile.
    Body weight becomes available for bodyweight exercise context while keeping exercise specific override behaviour.
 
-7. Existing v0.11 behaviour retained.
+7. Premium generated artwork.
+   The Home hero uses generated athletic artwork instead of the temporary stick figure.
+   The exercise hero uses rendered gym equipment instead of the temporary circle graphic.
+   Artwork is compressed to WebP for mobile performance.
+
+8. Existing v0.11 behaviour retained.
    Cardio parsing uses unit precedence.
    Running and walking can distinguish treadmill from outdoors.
    Push ups save reps without requiring weight.
@@ -61,7 +66,11 @@ DEPLOYMENT
 
 Production repository: thiva2702/lastset-training-log
 Production branch: main
-Netlify project: lastset-training-log
-Publish directory: .
+Primary hosting target: Cloudflare Pages
+Framework preset: None
+Build command: bash build-cloudflare.sh
+Build output directory: dist
 
-This commit is the v0.12 production release trigger for Netlify continuous deployment.
+Cloudflare Pages should be connected directly to GitHub so pushes to main deploy automatically. See CLOUDFLARE_SETUP.md for the one time project setup.
+
+The previous Netlify project can remain inactive as a temporary fallback and should not be used for new deploys while its account credits are exhausted.
