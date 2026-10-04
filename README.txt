@@ -1,3 +1,31 @@
+LASTSET PWA v0.13.3 — CORE RELIABILITY
+
+This build is the Core Reliability milestone. It keeps the existing Purple + Green experience while hardening Smart Log and reducing unnecessary questions.
+
+CORE RELIABILITY CHANGES
+
+1. Optional cardio details no longer block saving.
+   Duration or distance is enough for a cardio entry.
+   Environment, incline, speed, resistance level and similar context remain useful but optional.
+
+2. Mixed resistance and cardio parsing is isolated by activity boundary.
+   Cardio numbers such as duration and machine level are not allowed to leak into the preceding resistance exercise.
+
+3. Effort notes are separated from completed rep counts.
+   Phrases such as struggled after rep 6 remain notes and must not overwrite the actual completed reps.
+
+4. Partial set plans are preserved.
+   Phrases such as 100 kg for 2 sets keep the known load and set count, then ask only for the missing reps.
+
+5. Correction support is expanded.
+   Users can correct a specific set load, cardio duration, incline and machine level without rebuilding the whole entry.
+
+6. Load type rules are stricter.
+   External and assisted exercises require load when it is essential. Normal bodyweight, band and timed work follow their own data requirements.
+
+7. Regression coverage is expanded.
+   The reliability suite now protects mixed strength plus cardio logging, effort notes, optional cardio context, partial set plans, assisted work, bodyweight work, timed work and correction handling.
+
 LASTSET PWA v0.13.0 — PROFILE CLARITY + EQUIPMENT EXPANSION
 
 This release builds on the v0.12.9 trust and data integrity foundation. The Purple + Green interface, on device Smart Log, Calendar artwork, Saved Workouts and protected workout history remain in place.
