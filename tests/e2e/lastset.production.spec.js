@@ -290,4 +290,54 @@ test.describe('LastSet production v0.13.1', () => {
     const registry = await registryData(page);
     expect(registry.users.filter((u) => /QA User [AB]/.test(u.name || '')).length).toBe(2);
   });
+
+  test('LastSet Memory recalls a previous exercise only when explicitly requested', async ({ page }) => {
+    await page.evaluate((key) => {
+      const raw=localStorage.getItem(key);
+      const current=raw?JSON.parse(raw):{sessions:{},profile:{}};
+      const d=new Date();
+      d.setDate(d.getDate()-7);
+      const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      current.sessions=current.sessions||{};
+      current.sessions[iso]=[{
+        id:'qa-memory-history',
+        type:'resistance',
+        createdAt:Date.now()-7*86400000,
+        exercises:[{
+          exerciseId:'bench-press',
+          name:'Bench Press',
+          sets:[
+            {weight:80,reps:10},
+            {weight:80,reps:10},
+            {weight:80,reps:8}
+          ]
+        }]
+      }];
+      localStorage.setItem(key,JSON.stringify(current));
+    }, DATA_KEY);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(page.locator('.bottom-nav')).toBeVisible();
+
+    await goToday(page);
+    await page.locator('[data-day-action="describe"]').click();
+    await page.locator('#ai-text').fill('bench press same as last time');
+    await page.locator('[data-action="parse-ai"]').click();
+
+    await expect(page.locator('.ls-memory-used')).toBeVisible();
+    await expect(page.locator('.ls-memory-used')).toContainText('Using your previous training');
+    await expect(page.locator('.ai-set')).toHaveCount(3);
+    await expect(page.locator('.ai-set').nth(0)).toContainText('80 kg');
+    await expect(page.locator('.ai-set').nth(2)).toContainText('8');
+
+    await page.locator('[data-action="confirm-ai-workout"]').click();
+    await waitForSessionType(page,'resistance');
+
+    const data=await storedData(page);
+    const today=await todayIso(page);
+    const session=(data.sessions?.[today]||[]).find(x=>x.type==='resistance');
+    const bench=session?.exercises?.find(x=>x.exerciseId==='bench-press');
+    expect(bench).toBeTruthy();
+    expect(bench.sets.map(x=>[Number(x.weight),Number(x.reps)])).toEqual([[80,10],[80,10],[80,8]]);
+  });
+
 });
