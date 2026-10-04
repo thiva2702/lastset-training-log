@@ -18,6 +18,7 @@ cp lastset-premium.js dist/
 cp lastset-hotfix.js dist/
 cp lastset-smartlog-shorthand.js dist/
 cp lastset-core-reliability.js dist/
+cp lastset-memory.js dist/
 cp lastset-calendar.js dist/
 cp lastset-workouts.js dist/
 cp lastset-integrity.js dist/

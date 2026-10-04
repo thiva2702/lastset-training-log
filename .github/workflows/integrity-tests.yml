@@ -2,7 +2,7 @@ name: LastSet integrity tests
 
 on:
   push:
-    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability]
+    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,6 +23,7 @@ jobs:
           node --check lastset-navigation.js
           node --check lastset-smartlog-shorthand.js
           node --check lastset-core-reliability.js
+          node --check lastset-memory.js
           node --check lastset-beta.js
           node --check service-worker.js
           node --check worker.js
@@ -37,6 +38,8 @@ jobs:
         run: node tests/smartlog-shorthand-smoke.js
       - name: Core reliability smoke tests
         run: node tests/core-reliability-smoke.js
+      - name: Memory smoke tests
+        run: node tests/memory-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
@@ -44,6 +47,7 @@ jobs:
           test -s lastset-navigation.js
           test -s lastset-smartlog-shorthand.js
           test -s lastset-core-reliability.js
+          test -s lastset-memory.js
           test -s lastset-beta.js
           test -s lastset-workouts.js
           test -s lastset-calendar.js
@@ -56,14 +60,18 @@ jobs:
           grep -q 'lastset-navigation.js' worker.js
           grep -q 'lastset-smartlog-shorthand.js' worker.js
           grep -q 'lastset-core-reliability.js' worker.js
+          grep -q 'lastset-memory.js' worker.js
           grep -q 'lastset-beta.js' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
           grep -q 'lastset-core-reliability.js' service-worker.js
+          grep -q 'lastset-memory.js' service-worker.js
           grep -q 'lastset-beta.js' service-worker.js
           grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
           grep -q 'lastset-core-reliability.js' build-cloudflare.sh
+          grep -q 'lastset-memory.js' build-cloudflare.sh
           grep -q 'lastset-beta.js' build-cloudflare.sh
           bash build-cloudflare.sh
           test -s dist/lastset-smartlog-shorthand.js
           test -s dist/lastset-core-reliability.js
+          test -s dist/lastset-memory.js
           test -s dist/lastset-beta.js

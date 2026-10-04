@@ -1,3 +1,30 @@
+LASTSET PWA v0.13.4 — MEMORY MVP
+
+This build adds the first real LastSet Memory layer. It uses the user's own workout history to reduce repeated entry while keeping every remembered assumption visible and editable.
+
+MEMORY MVP
+
+1. Exercise specific recall.
+   Phrases such as "bench same as last time" reuse the latest saved Bench Press sets rather than copying an unrelated full workout.
+
+2. Explicit memory only.
+   Previous values are never silently inserted. LastSet shows the source date and requires review before saving.
+
+3. Memory suggestions.
+   When an exercise is identified but set details are missing, LastSet can show the most recent set pattern with a one tap "Use last sets" action.
+
+4. Partial override support.
+   "Bench same as last time but 82.5 kg today" keeps the previous reps while applying the explicitly stated new load.
+
+5. Learned phrases.
+   Users can teach LastSet phrases such as "when I say incline DB, I mean Incline Dumbbell Press." Learned phrases are stored with the current user.
+
+6. User control.
+   Profile shows recent memory patterns and allows learned phrases to be cleared without deleting workout history.
+
+7. Regression protection.
+   Memory recall, history source selection, one tap suggestions, partial overrides and learned aliases are covered by automated smoke tests.
+
 LASTSET PWA v0.13.3 — CORE RELIABILITY
 
 This build is the Core Reliability milestone. It keeps the existing Purple + Green experience while hardening Smart Log and reducing unnecessary questions.
