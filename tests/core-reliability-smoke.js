@@ -70,8 +70,8 @@ assert.equal(T.requiredSmartMissing({
 }, catalogue).type, 'timed');
 
 const mixed = 'Leg press 100 kg 2 sets of 10 then cycling 15 min level 6';
-const cyclingAt = mixed.toLowerCase().indexOf('cycling');
-assert.equal(T.firstCardioBoundary(mixed, 0, mixed.length), cyclingAt);
+const cardioBoundary = mixed.toLowerCase().indexOf('then cycling');
+assert.equal(T.firstCardioBoundary(mixed, 0, mixed.length), cardioBoundary);
 
 let correction = T.applyReliabilityCorrection({
   items:[{kind:'resistance',name:'Bench Press',sets:[{weightKg:80,reps:10},{weightKg:80,reps:8}]}]
