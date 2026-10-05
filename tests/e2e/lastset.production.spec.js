@@ -76,7 +76,7 @@ async function goToday(page) {
 }
 
 async function goProfile(page) {
-  await page.locator('[data-nav="profile"]').click();
+  await page.locator('.bottom-nav [data-nav="profile"]').click();
   await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
 }
 
