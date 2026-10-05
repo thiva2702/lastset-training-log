@@ -1,13 +1,19 @@
 {
   "name": "LastSet Training Log",
   "short_name": "LastSet",
-  "description": "Fast resistance and cardio training log with free on device Smart Log.",
+  "description": "Fast, low-friction training log with Smart Log, memory and progress intelligence.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#090713",
   "theme_color": "#090713",
   "icons": [
+    {
+      "src": "assets/lastset-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "icon-192.png",
       "sizes": "192x192",
