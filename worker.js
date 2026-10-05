@@ -40,7 +40,8 @@ function injectPremiumLayer(html) {
     if (!output.includes("lastset-hotfix.js")) output = output.replace("</body>", `<script src="/lastset-hotfix.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-smartlog-shorthand.js")) output = output.replace("</body>", `<script src="/lastset-smartlog-shorthand.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-core-reliability.js")) output = output.replace("</body>", `<script src="/lastset-core-reliability.js?v=0133"></script>\n</body>`);
-    if (!output.includes("lastset-memory.js")) output = output.replace("</body>", `<script src="/lastset-memory.js?v=0134"></script>\n</body>`);\n    if (!output.includes("lastset-intelligence.js")) output = output.replace("</body>", `<script src="/lastset-intelligence.js?v=0137"></script>\n</body>`);
+    if (!output.includes("lastset-memory.js")) output = output.replace("</body>", `<script src="/lastset-memory.js?v=0134"></script>\n</body>`);
+    if (!output.includes("lastset-intelligence.js")) output = output.replace("</body>", `<script src="/lastset-intelligence.js?v=0137"></script>\n</body>`);
     if (!output.includes("lastset-calendar.js")) output = output.replace("</body>", `<script src="/lastset-calendar.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-workouts.js")) output = output.replace("</body>", `<script src="/lastset-workouts.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-integrity.js")) output = output.replace("</body>", `<script src="/lastset-integrity.js?v=0132"></script>\n</body>`);
