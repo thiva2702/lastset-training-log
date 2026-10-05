@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-0135';
+const CACHE = 'lastset-v1-beta1-0136';
 const ASSETS = [
   './',
   './index.html',
