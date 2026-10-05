@@ -28,7 +28,7 @@
       try{
         const res=await fetch('/index.html?legacy=0138',{cache:'no-store'});
         let html=await res.text();
-        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0132">\n<link rel="stylesheet" href="/lastset-premium.css?v=0132">\n<link rel="stylesheet" href="/lastset-images.css?v=0132">\n<meta name="theme-color" content="#090713">\n`;
+        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0138">\n<link rel="stylesheet" href="/lastset-premium.css?v=0138">\n<link rel="stylesheet" href="/lastset-images.css?v=0132">\n<meta name="theme-color" content="#090713">\n`;
         const bodyInject=`\n<script src="/lastset-enhancements.js?v=0132"><\/script>\n<script src="/lastset-premium.js?v=0132"><\/script>\n<script src="/lastset-hotfix.js?v=0132"><\/script>\n<script src="/lastset-smartlog-shorthand.js?v=0132"><\/script>\n<script src="/lastset-core-reliability.js?v=0133"><\/script>\n<script src="/lastset-memory.js?v=0134"><\/script>\n<script src="/lastset-intelligence.js?v=0137"><\/script>\n<script src="/lastset-calendar.js?v=0132"><\/script>\n<script src="/lastset-workouts.js?v=0132"><\/script>\n<script src="/lastset-integrity.js?v=0132"><\/script>\n<script src="/lastset-profile-equipment.js?v=0135"><\/script>\n<script src="/lastset-navigation.js?v=0132"><\/script>\n<script src="/lastset-beta.js?v=1beta1"><\/script>\n`;
         html=html.replace('</head>',headInject+'</head>').replace('</body>',bodyInject+'</body>');
         document.open();
