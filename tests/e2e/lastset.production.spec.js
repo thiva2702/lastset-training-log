@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const DATA_KEY = 'lastset-data-v1';
 const USERS_KEY = 'lastset-user-spaces-v1';
 
-async function cleanStart(page) {
+async function resetToOnboarding(page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.evaluate(async () => {
     localStorage.clear();
@@ -16,9 +16,25 @@ async function cleanStart(page) {
     }
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.ls-onboard-screen')).toBeVisible();
+  await expect(page.locator('#ls-onboard-name')).toBeVisible();
+  await expect(page.locator('.bottom-nav')).toHaveCount(0);
+}
+
+async function completeOnboarding(page, name = 'QA Primary') {
+  await page.locator('#ls-onboard-name').fill(name);
+  await page.locator('#ls-onboard-unit').selectOption('kg');
+  await page.locator('[data-onboard-save]').click();
+  await expect(page.locator('.ls-onboard-finish')).toBeVisible();
+  await page.locator('[data-start="day"]').click();
   await expect(page.locator('.bottom-nav')).toBeVisible();
   await expect(page.locator('[data-nav="day"]')).toBeVisible();
   await page.waitForFunction(() => document.documentElement.dataset.lastsetNavigation === '0.13.1');
+}
+
+async function cleanStart(page) {
+  await resetToOnboarding(page);
+  await completeOnboarding(page);
 }
 
 async function storedData(page) {
@@ -86,9 +102,11 @@ async function createUserKeepingCurrent(page, name) {
   await page.locator('[data-profile-manage-users]').click();
   await expect(page.locator('[data-user-new]')).toBeVisible();
   await page.locator('[data-user-new]').click();
-  await expect(page.locator('#ls-new-user-name')).toBeVisible();
-  await page.locator('#ls-new-user-name').fill(name);
-  await page.locator('[data-new-keep]').click();
+  await expect(page.locator('#ls-new-profile-name')).toBeVisible();
+  await page.locator('#ls-new-profile-name').fill(name);
+  await page.locator('[data-v14-create-user]').click();
+  await expect(page.locator('.ls-onboard-finish')).toBeVisible();
+  await page.locator('[data-start="day"]').click();
   await expect(page.locator('[data-nav="day"]')).toBeVisible();
 }
 
@@ -123,9 +141,21 @@ async function runSmartLog(page, text, expectedType) {
   await expect(page.locator('[data-day-action="describe"]')).toBeVisible();
 }
 
-test.describe('LastSet production v0.13.1', () => {
+test.describe('LastSet production v0.14.0', () => {
   test.beforeEach(async ({ page }) => {
     await cleanStart(page);
+  });
+
+  test('fresh install is blocked until a profile is saved', async ({ page }) => {
+    await resetToOnboarding(page);
+    await expect(page.getByRole('heading', { name: 'Your training starts with you.' })).toBeVisible();
+    await expect(page.locator('.bottom-nav')).toHaveCount(0);
+
+    await completeOnboarding(page, 'Onboarding QA');
+    const data = await storedData(page);
+    expect(data.profile?.name).toBe('Onboarding QA');
+    expect(data.profile?.onboardingComplete).toBe(true);
+    await expect(page.locator('.bottom-nav')).toBeVisible();
   });
 
   test('fresh browser data is clean and Today is a top level destination without Back', async ({ page }) => {
@@ -175,8 +205,8 @@ test.describe('LastSet production v0.13.1', () => {
   });
 
   test('top right profile shortcut opens Profile directly', async ({ page }) => {
-    await expect(page.locator('[data-action="profile-top"]')).toBeVisible();
-    await page.locator('[data-action="profile-top"]').click();
+    await expect(page.locator('.ls-user-chip')).toBeVisible();
+    await page.locator('.ls-user-chip').click();
     await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
     await expect(page.locator('[data-action="back"]')).toHaveCount(0);
   });
@@ -289,6 +319,54 @@ test.describe('LastSet production v0.13.1', () => {
 
     const registry = await registryData(page);
     expect(registry.users.filter((u) => /QA User [AB]/.test(u.name || '')).length).toBe(2);
+  });
+
+  test('Progress drill-down shows chart, guidance and one-tap last sets', async ({ page }) => {
+    await logExternalExercise(page, 'chest-press', 60, 10);
+
+    await page.locator('[data-nav="progress"]').click();
+    const progress = page.locator('[data-progress-exercise="chest-press"]');
+    await expect(progress).toBeVisible();
+    await progress.click();
+
+    await expect(page.locator('.ls-v14-chart-card')).toBeVisible();
+    await expect(page.locator('.ls-v14-guide')).toBeVisible();
+    await expect(page.locator('[data-use-last-progress="chest-press"]')).toBeVisible();
+  });
+
+  test('CSV import previews, imports and rolls back as one transaction', async ({ page }) => {
+    await goProfile(page);
+    await page.locator('[data-open-import-center]').click();
+    await expect(page.getByRole('heading', { name: 'Import Training History' })).toBeVisible();
+
+    const csv = [
+      'Date,Workout Name,Exercise Name,Set Order,Weight,Weight Unit,Reps',
+      '2026-09-01,QA Push,Chest Press,1,50,kg,10',
+      '2026-09-01,QA Push,Chest Press,2,55,kg,8'
+    ].join('\n');
+
+    await page.locator('[data-import-file]').setInputFiles({
+      name: 'strong-qa.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(csv)
+    });
+    await expect(page.locator('.ls-v14-import-preview')).toBeVisible();
+    await expect(page.locator('.ls-v14-import-preview')).toContainText('Strong preview');
+
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('[data-import-confirm]').click();
+    await expect(page.locator('[data-rollback-import]')).toBeVisible();
+
+    let data = await storedData(page);
+    const imported = Object.values(data.sessions || {}).flat().filter(s => s.importId);
+    expect(imported).toHaveLength(1);
+    expect(data.imports || []).toHaveLength(1);
+
+    page.once('dialog', dialog => dialog.accept());
+    await page.locator('[data-rollback-import]').click();
+    data = await storedData(page);
+    expect(Object.values(data.sessions || {}).flat().filter(s => s.importId)).toHaveLength(0);
+    expect(data.imports || []).toHaveLength(0);
   });
 
   test('LastSet Memory recalls a previous exercise only when explicitly requested', async ({ page }) => {
