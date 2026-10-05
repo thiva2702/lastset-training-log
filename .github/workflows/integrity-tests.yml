@@ -30,6 +30,7 @@ jobs:
           node --check lastset-identity.js
           node --check lastset-v0140.js
           node --check lastset-onboarding.js
+          node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
           node --check worker.js
           bash -n build-cloudflare.sh
