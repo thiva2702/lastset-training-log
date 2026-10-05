@@ -1,4 +1,16 @@
-LASTSET PWA v0.13.4 — MEMORY MVP
+LASTSET PWA v0.13.5 — MACHINE LIBRARY EXPANSION
+
+This build closes a real gym-floor search gap found during field use. Exact selectorized machine names now resolve to movement-specific LastSet exercises instead of forcing the user to guess a generic label.
+
+MACHINE LIBRARY CHANGES
+
+1. Added Converging Chest Press as a distinct machine exercise.
+2. Added Diverging Lat Pulldown as a distinct machine exercise.
+3. Added Diverging Low Row as a distinct machine exercise.
+4. Added separate Rear Delt and Pec Fly movements for dual-function Rear Delt / Pec Fly machines.
+5. Added separate Flat Bench Press, Incline Press and Shoulder Press modes for Multi-Press machines.
+6. Added exact Precor-style labels and common aliases so gym-floor machine names are searchable.
+7. These entries keep progress separate from generic cable or free-weight movements.
 
 This build adds the first real LastSet Memory layer. It uses the user's own workout history to reduce repeated entry while keeping every remembered assumption visible and editable.
 
