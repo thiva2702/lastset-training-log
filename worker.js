@@ -2,8 +2,8 @@ const APP_PATHS = new Set(["/", "/index.html", "/app-v12", "/app-v12.html"]);
 
 function injectPremiumLayer(html) {
   const headInject = `
-<link rel="stylesheet" href="/lastset-theme.css?v=0132">
-<link rel="stylesheet" href="/lastset-premium.css?v=0132">
+<link rel="stylesheet" href="/lastset-theme.css?v=0138">
+<link rel="stylesheet" href="/lastset-premium.css?v=0138">
 <link rel="stylesheet" href="/lastset-images.css?v=0132">
 <link rel="stylesheet" href="/lastset-hotfix.css?v=0132">
 <link rel="stylesheet" href="/lastset-calendar.css?v=0132">
