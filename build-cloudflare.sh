@@ -8,8 +8,10 @@ cp app-v12.html dist/
 cp manifest.webmanifest dist/
 cp icon-192.png dist/
 cp icon-512.png dist/
+cp apple-touch-icon.png dist/
 cp lastset-theme.css dist/
 cp lastset-premium.css dist/
+cp lastset-brand.css dist/
 cp lastset-images.css dist/
 cp lastset-hotfix.css dist/
 cp lastset-calendar.css dist/
@@ -26,9 +28,11 @@ cp lastset-integrity.js dist/
 cp lastset-profile-equipment.js dist/
 cp lastset-navigation.js dist/
 cp lastset-beta.js dist/
+cp lastset-brand.js dist/
 cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
 cp assets/*.webp dist/assets/
+cp assets/*.svg dist/assets/
 
 echo "Cloudflare bundle ready in dist"

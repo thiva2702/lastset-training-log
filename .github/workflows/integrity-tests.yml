@@ -2,7 +2,7 @@ name: LastSet integrity tests
 
 on:
   push:
-    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library, v0136-canonical-machine-library, v0137-smarter-memory-progress, v0138-ios-safe-area]
+    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library, v0136-canonical-machine-library, v0137-smarter-memory-progress, v0138-ios-safe-area, v0139-brand-nav-polish]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -26,6 +26,7 @@ jobs:
           node --check lastset-memory.js
           node --check lastset-intelligence.js
           node --check lastset-beta.js
+          node --check lastset-brand.js
           node --check service-worker.js
           node --check worker.js
           bash -n build-cloudflare.sh
@@ -45,6 +46,8 @@ jobs:
         run: node tests/intelligence-smoke.js
       - name: iOS safe area smoke tests
         run: node tests/ios-safe-area-smoke.js
+      - name: Brand and navigation smoke tests
+        run: node tests/brand-nav-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
@@ -55,6 +58,10 @@ jobs:
           test -s lastset-memory.js
           test -s lastset-intelligence.js
           test -s lastset-beta.js
+          test -s lastset-brand.js
+          test -s lastset-brand.css
+          test -s assets/lastset-mark.svg
+          test -s apple-touch-icon.png
           test -s lastset-workouts.js
           test -s lastset-calendar.js
           test -s assets/home-hero-thiva.webp
@@ -69,19 +76,31 @@ jobs:
           grep -q 'lastset-memory.js' worker.js
           grep -q 'lastset-intelligence.js' worker.js
           grep -q 'lastset-beta.js' worker.js
+          grep -q 'lastset-brand.js' worker.js
+          grep -q 'lastset-brand.css' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
           grep -q 'lastset-core-reliability.js' service-worker.js
           grep -q 'lastset-memory.js' service-worker.js
           grep -q 'lastset-intelligence.js' service-worker.js
           grep -q 'lastset-beta.js' service-worker.js
+          grep -q 'lastset-brand.js' service-worker.js
+          grep -q 'lastset-brand.css' service-worker.js
+          grep -q 'assets/lastset-mark.svg' service-worker.js
           grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
           grep -q 'lastset-core-reliability.js' build-cloudflare.sh
           grep -q 'lastset-memory.js' build-cloudflare.sh
           grep -q 'lastset-intelligence.js' build-cloudflare.sh
           grep -q 'lastset-beta.js' build-cloudflare.sh
+          grep -q 'lastset-brand.js' build-cloudflare.sh
+          grep -q 'lastset-brand.css' build-cloudflare.sh
+          grep -q 'assets/\*.svg' build-cloudflare.sh
           bash build-cloudflare.sh
           test -s dist/lastset-smartlog-shorthand.js
           test -s dist/lastset-core-reliability.js
           test -s dist/lastset-memory.js
           test -s dist/lastset-intelligence.js
           test -s dist/lastset-beta.js
+          test -s dist/lastset-brand.js
+          test -s dist/lastset-brand.css
+          test -s dist/assets/lastset-mark.svg
+          test -s dist/apple-touch-icon.png
