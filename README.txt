@@ -1,3 +1,16 @@
+LASTSET PWA v0.13.6 — CANONICAL MACHINE LIBRARY
+
+This build expands LastSet's machine exercise coverage using commercial selectorized equipment catalogs as reference, while keeping the in-app library brand-neutral.
+
+CANONICAL MACHINE LIBRARY
+
+1. Machine names are stored by movement, not manufacturer.
+2. Added meaningful variants including Diverging Seated Row, Converging Shoulder Press, Dual Axis Chest Press, Dual Axis Pulldown, Arc Leg Press, Standing Lateral Raise and Sit / Stand Hip Abduction.
+3. Added missing selectorized movements including Machine Biceps Curl, Seated Dip / Triceps Press, Assisted Dip, Calf Extension, Prone Leg Curl, Seated Leg Curl, Glute Extension, Glute Bridge, Rotary Torso, Back Extension and abdominal machines.
+4. Combination-machine labels resolve to each actual movement. Examples include Pulldown / Seated Row, Leg Curl / Leg Extension, Inner / Outer Thigh, Assist Dip / Chin and Abdominal / Back Extension.
+5. Removed brand names and manufacturer product codes from the machine-search aliases introduced in 0.13.5.
+6. Generic Leg Curl no longer captures exact Seated Leg Curl or Prone/Lying Leg Curl searches.
+
 LASTSET PWA v0.13.5 — MACHINE LIBRARY EXPANSION
 
 This build closes a real gym-floor search gap found during field use. Exact selectorized machine names now resolve to movement-specific LastSet exercises instead of forcing the user to guess a generic label.
