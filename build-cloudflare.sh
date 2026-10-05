@@ -13,6 +13,8 @@ cp lastset-theme.css dist/
 cp lastset-premium.css dist/
 cp lastset-brand.css dist/
 cp lastset-identity.css dist/
+cp lastset-v0140.css dist/
+cp lastset-onboarding.css dist/
 cp lastset-images.css dist/
 cp lastset-hotfix.css dist/
 cp lastset-calendar.css dist/
@@ -31,6 +33,8 @@ cp lastset-navigation.js dist/
 cp lastset-beta.js dist/
 cp lastset-brand.js dist/
 cp lastset-identity.js dist/
+cp lastset-v0140.js dist/
+cp lastset-onboarding.js dist/
 cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
