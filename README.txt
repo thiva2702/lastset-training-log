@@ -1,3 +1,39 @@
+LASTSET PWA v0.13.7 — SMARTER MEMORY + PROGRESS
+
+This release turns LastSet's workout history into practical training intelligence without adding a backend or an external AI dependency.
+
+SMARTER MEMORY + PROGRESS
+
+1. Workout-level memory.
+   Phrases such as "same chest workout as last week", "same as Monday" and "repeat last back day" can recall a previous resistance session for review before saving.
+
+2. Workout modifiers.
+   Recalled workouts can be adjusted with phrases such as "skip assisted dips", "bench 82.5 kg" or a new set count.
+
+3. Correction learning.
+   Repeated exercise-name corrections are observed. After the same correction pattern is seen repeatedly, LastSet asks before learning that wording as a default alias.
+
+4. Full exercise progress metrics.
+   Progress now shows session count, last working sets, best set, a recent volume/effort trend and a conservative next target.
+
+5. PR detection.
+   Current workout performance is checked against previous exercise history using rules appropriate to normal, assisted, bodyweight and timed work.
+
+6. Next-session targets.
+   Targets use the most recent working sets and the user's progression preference. Reps-first adds a rep to the weakest set; weight-first uses a small load increase only after a completed rep threshold.
+
+7. Rich workout summaries.
+   Completed days show working-set count, detected PRs and exercises whose recorded workload improved versus the previous session.
+
+8. Zero-result search tracking.
+   Search terms that return no exercise matches are stored locally with the current user's data to identify real library gaps during beta testing.
+
+9. Better typo tolerance.
+   Exercise search now accepts near-miss tokens such as common one-character spelling errors in addition to the existing fuzzy matching.
+
+10. Local-first.
+    Workout memory, analytics, correction learning and search telemetry remain in the user's existing LastSet data store.
+
 LASTSET PWA v0.13.6 — CANONICAL MACHINE LIBRARY
 
 This build expands LastSet's machine exercise coverage using commercial selectorized equipment catalogs as reference, while keeping the in-app library brand-neutral.
