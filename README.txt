@@ -1,3 +1,39 @@
+LASTSET PWA v0.13.10 — PERSONAL IDENTITY + UI POLISH
+
+This release makes the active LastSet user visible throughout the app and adds a local, user-specific profile photo without introducing a backend.
+
+PERSONAL IDENTITY
+
+1. Header identity.
+   The top-right header now shows the current LastSet user's name followed by their avatar: "Thiva [photo]".
+
+2. User-specific profile photo.
+   Profile photos are selected from the device, centre-cropped and resized locally to 256 × 256 before storage.
+
+3. Local-first storage.
+   Only the resized avatar is stored with the active LastSet user's profile on the current device. No profile photo upload service was added.
+
+4. Initials fallback.
+   Users without a photo receive a clean initials avatar.
+
+5. Switch-user ready.
+   The identity chip reads the active user's profile on every render, so name and avatar change with the active user.
+
+6. Profile page identity card.
+   Profile now presents a larger avatar, current user name, Upload/Change photo, Remove and Switch user controls together.
+
+7. Header polish.
+   Header height is reduced slightly and the progression-mark glow is softened so the identity feels more integrated with the rest of the interface.
+
+8. Calendar polish.
+   Monthly day rows and weekday spacing are tightened slightly to reveal more content above the fixed navigation without changing the calendar structure.
+
+9. Safe areas preserved.
+   iPhone status-bar / Dynamic Island and Home Indicator spacing remain protected.
+
+10. Regression coverage.
+    Added tests for initials, avatar safety, user-specific registry persistence, header polish and calendar spacing.
+
 LASTSET PWA v0.13.9 — BRAND INTEGRATION + NAVIGATION POLISH
 
 This release turns the approved progression concept into the working LastSet product identity and cleans up the fixed mobile navigation.
