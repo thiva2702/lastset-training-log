@@ -47,4 +47,8 @@ assert.ok(css.includes('.ls-user-name'),'Header username styling missing');
 assert.ok(css.includes('min-height:56px'),'Calendar mobile spacing polish missing');
 assert.ok(brand.includes('LastSetBrand'),'Brand dependency unexpectedly missing');
 
+const identitySource=fs.readFileSync('lastset-identity.js','utf8');
+assert.ok(identitySource.includes("document.querySelector('[data-manage-users]')"),'Switch user identity card handler missing');
+assert.ok(identitySource.includes('manager.click()'),'Switch user must open the existing user manager after identity rerender');
+
 console.log('LastSet personal identity smoke tests passed');

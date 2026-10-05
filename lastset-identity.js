@@ -218,6 +218,13 @@
       if(typeof showToast==='function') showToast('Profile photo removed');
       else if(typeof render==='function') render();
     };
+
+    const switchUser=section.querySelector('[data-profile-manage-users]');
+    if(switchUser) switchUser.onclick=()=>{
+      const manager=document.querySelector('[data-manage-users]');
+      if(manager){ manager.click(); return; }
+      if(typeof showToast==='function') showToast('User manager is not available yet');
+    };
   }
 
   function decorate(){
