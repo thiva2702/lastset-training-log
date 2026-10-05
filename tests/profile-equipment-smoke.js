@@ -58,6 +58,15 @@ assert.ok(sandbox.EXERCISES.filter(e=>e.equipment==='Smith Machine').length>=7,'
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='band-assisted-pull-up'),'Band Assisted Pull Up missing');
 assert.equal(sandbox.EXERCISES.find(e=>e.id==='band-assisted-pull-up').loadType,'assisted','Band assisted pull up must progress by reducing assistance');
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='band-push-up'),'Resistance Band Push Up missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='converging-chest-press-machine'),'Converging Chest Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='diverging-lat-pulldown-machine'),'Diverging Lat Pulldown missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='diverging-low-row-machine'),'Diverging Low Row missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='rear-delt-pec-fly-rear-delt'),'Rear Delt mode missing for dual machine');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='rear-delt-pec-fly-pec-fly'),'Pec Fly mode missing for dual machine');
+assert.equal(sandbox.EXERCISES.filter(e=>e.machineFamily==='Multi-Press').length,3,'Multi-Press must expose flat, incline and shoulder modes separately');
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='converging-chest-press-machine').aliases.includes('precor converging chest press'),'Exact Precor chest press search alias missing');
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='diverging-lat-pulldown-machine').aliases.includes('precor diverging lat pulldown'),'Exact Precor lat pulldown search alias missing');
+
 
 sandbox.data.profile.name='Display B';
 sandbox.saveData(sandbox.data);
@@ -74,4 +83,4 @@ assert.ok(profileHtml.includes('Prefer not to say'),'Gender privacy option missi
 assert.ok(source.includes("btn.dataset.action='profile-top'"),'Top profile icon navigation missing');
 assert.ok(source.includes("'EZ Bar','Dumbbell','Kettlebell'"),'Expanded equipment chips missing');
 
-console.log('PASS v0.13.0 profile and equipment smoke tests');
+console.log('PASS v0.13.5 profile and equipment smoke tests');

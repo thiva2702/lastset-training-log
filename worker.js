@@ -20,7 +20,7 @@ function injectPremiumLayer(html) {
 <script src="/lastset-calendar.js?v=0132"></script>
 <script src="/lastset-workouts.js?v=0132"></script>
 <script src="/lastset-integrity.js?v=0132"></script>
-<script src="/lastset-profile-equipment.js?v=0132"></script>
+<script src="/lastset-profile-equipment.js?v=0135"></script>
 <script src="/lastset-navigation.js?v=0132"></script>
 <script src="/lastset-beta.js?v=1beta1"></script>
 `;
@@ -43,7 +43,7 @@ function injectPremiumLayer(html) {
     if (!output.includes("lastset-calendar.js")) output = output.replace("</body>", `<script src="/lastset-calendar.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-workouts.js")) output = output.replace("</body>", `<script src="/lastset-workouts.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-integrity.js")) output = output.replace("</body>", `<script src="/lastset-integrity.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-profile-equipment.js")) output = output.replace("</body>", `<script src="/lastset-profile-equipment.js?v=0132"></script>\n</body>`);
+    if (!output.includes("lastset-profile-equipment.js")) output = output.replace("</body>", `<script src="/lastset-profile-equipment.js?v=0135"></script>\n</body>`);
     if (!output.includes("lastset-navigation.js")) output = output.replace("</body>", `<script src="/lastset-navigation.js?v=0132"></script>\n</body>`);
     if (!output.includes("lastset-beta.js")) output = output.replace("</body>", `<script src="/lastset-beta.js?v=1beta1"></script>\n</body>`);
   }
