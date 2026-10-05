@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-0134';
+const CACHE = 'lastset-v1-beta1-0135';
 const ASSETS = [
   './',
   './index.html',
@@ -46,7 +46,7 @@ function enhanceHtml(text) {
     if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n</head>');
   }
   if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0132"></script>\n  <script src="./lastset-premium.js?v=0132"></script>\n  <script src="./lastset-hotfix.js?v=0132"></script>\n  <script src="./lastset-smartlog-shorthand.js?v=0132"></script>\n  <script src="./lastset-core-reliability.js?v=0133"></script>\n  <script src="./lastset-memory.js?v=0134"></script>\n  <script src="./lastset-calendar.js?v=0132"></script>\n  <script src="./lastset-workouts.js?v=0132"></script>\n  <script src="./lastset-integrity.js?v=0132"></script>\n  <script src="./lastset-profile-equipment.js?v=0132"></script>\n  <script src="./lastset-navigation.js?v=0132"></script>\n  <script src="./lastset-beta.js?v=1beta1"></script>\n</body>');
+    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0132"></script>\n  <script src="./lastset-premium.js?v=0132"></script>\n  <script src="./lastset-hotfix.js?v=0132"></script>\n  <script src="./lastset-smartlog-shorthand.js?v=0132"></script>\n  <script src="./lastset-core-reliability.js?v=0133"></script>\n  <script src="./lastset-memory.js?v=0134"></script>\n  <script src="./lastset-calendar.js?v=0132"></script>\n  <script src="./lastset-workouts.js?v=0132"></script>\n  <script src="./lastset-integrity.js?v=0132"></script>\n  <script src="./lastset-profile-equipment.js?v=0135"></script>\n  <script src="./lastset-navigation.js?v=0132"></script>\n  <script src="./lastset-beta.js?v=1beta1"></script>\n</body>');
   } else {
     if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-smartlog-shorthand.js')) html = html.replace('</body>', '  <script src="./lastset-smartlog-shorthand.js?v=0132"></script>\n</body>');
@@ -55,7 +55,7 @@ function enhanceHtml(text) {
     if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-profile-equipment.js')) html = html.replace('</body>', '  <script src="./lastset-profile-equipment.js?v=0132"></script>\n</body>');
+    if (!html.includes('lastset-profile-equipment.js')) html = html.replace('</body>', '  <script src="./lastset-profile-equipment.js?v=0135"></script>\n</body>');
     if (!html.includes('lastset-navigation.js')) html = html.replace('</body>', '  <script src="./lastset-navigation.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-beta.js')) html = html.replace('</body>', '  <script src="./lastset-beta.js?v=1beta1"></script>\n</body>');
   }
