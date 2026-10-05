@@ -1,3 +1,45 @@
+LASTSET PWA v0.14.0 — CAPTURE, PROGRESS & MIGRATION
+
+This is the largest PWA feature release so far. It strengthens onboarding, natural capture, progress visibility and migration without adding a backend or external AI dependency.
+
+V0.14.0
+
+1. Mandatory first-time profile onboarding.
+   Brand-new users must save a profile before entering LastSet. Display name and weight unit are required; profile photo, gender, height and body weight are optional.
+
+2. Draft-first new users.
+   Starting a new user from the user manager now opens a profile draft. Nothing is created until Save Profile succeeds.
+
+3. Existing-user migration.
+   Existing valid named profiles are silently marked complete, so current users are not forced through onboarding again.
+
+4. Voice Smart Log.
+   Supported browsers can capture a spoken workout, show the live transcript, run it through the existing on-device Smart Log parser and present the normal review screen.
+
+5. Exercise progress drill-down.
+   Progress cards open a dedicated exercise page with session count, recent trend chart, best set, last session and chronological history.
+
+6. One-tap memory.
+   Exercise logging now uses "Use last sets" wording, and the progress detail page can preload the most recent working sets for today's session.
+
+7. Exercise guidance.
+   Resistance exercises receive lightweight setup, execution and common-mistake guidance derived from movement and equipment type.
+
+8. Reversible CSV import.
+   Hevy, Strong and generic strength CSV files are parsed locally. LastSet previews matched rows, lets the user map unmatched exercise names, tags the import as one transaction and can undo that import without touching pre-existing workouts.
+
+9. Search-gap review.
+   Previously captured zero-result exercise searches are visible in Profile so testers can see which names and machines LastSet failed to match.
+
+10. Header identity polish.
+    The current username is larger and brighter while preserving the name-first / avatar-last layout.
+
+11. Local-first.
+    Onboarding, voice interpretation, progress analytics, CSV parsing, import mapping and search-gap data continue to stay in the current LastSet local data model.
+
+12. Native-only features remain separate.
+    Photo-to-exercise recognition, Apple Health, Live Activities, Home/Lock Screen widgets and Apple Watch are intentionally not bundled into this PWA release.
+
 LASTSET PWA v0.13.10 — PERSONAL IDENTITY + UI POLISH
 
 This release makes the active LastSet user visible throughout the app and adds a local, user-specific profile photo without introducing a backend.
