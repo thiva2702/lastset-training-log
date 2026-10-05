@@ -15,6 +15,33 @@ assert.deepStrictEqual(sets, [
 ]);
 assert.strictEqual(sets.some((set) => set.weightKg === 120 || set.reps === 120), false);
 
+assert.deepStrictEqual(
+  helpers.parseWeightSetCountShorthand('Chest press machine 55 KG 10 reps three sets'),
+  [
+    { weightKg: 55, reps: 10, setType: 'working' },
+    { weightKg: 55, reps: 10, setType: 'working' },
+    { weightKg: 55, reps: 10, setType: 'working' }
+  ]
+);
+
+assert.deepStrictEqual(
+  helpers.parseWeightSetCountShorthand('Dumbbell lateral raise 10 KG both hand 12 reps three sets'),
+  [
+    { weightKg: 10, reps: 12, setType: 'working' },
+    { weightKg: 10, reps: 12, setType: 'working' },
+    { weightKg: 10, reps: 12, setType: 'working' }
+  ]
+);
+
+assert.deepStrictEqual(
+  helpers.parseWeightSetCountShorthand('Chest press 55 kg three sets of 10 reps'),
+  [
+    { weightKg: 55, reps: 10, setType: 'working' },
+    { weightKg: 55, reps: 10, setType: 'working' },
+    { weightKg: 55, reps: 10, setType: 'working' }
+  ]
+);
+
 const lbSets = helpers.parseWeightSetCountShorthand('Bench 176lb 2x8');
 assert.strictEqual(lbSets.length, 2);
 assert.strictEqual(lbSets[0].weightKg, 79.8);
