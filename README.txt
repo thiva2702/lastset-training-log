@@ -1,3 +1,15 @@
+LASTSET PWA v0.13.8 — iOS SAFE AREA FIX
+
+This release fixes the LastSet header being hidden behind the iPhone status bar / Dynamic Island in standalone PWA mode.
+
+IOS SAFE AREA
+
+1. The sticky topbar now reserves env(safe-area-inset-top) when the app uses black-translucent status bar mode.
+2. Header content keeps normal internal spacing after the safe area instead of relying on a fixed top padding.
+3. Existing bottom navigation safe-area handling remains unchanged.
+4. Theme and premium CSS cache versions were refreshed so installed PWAs receive the fix immediately after update.
+5. Added a regression test covering viewport-fit, top safe area, translucent iOS status-bar mode and bottom safe-area handling.
+
 LASTSET PWA v0.13.7 — SMARTER MEMORY + PROGRESS
 
 This release turns LastSet's workout history into practical training intelligence without adding a backend or an external AI dependency.
