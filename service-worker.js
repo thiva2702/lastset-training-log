@@ -41,7 +41,7 @@ self.addEventListener('activate', event => {
 function enhanceHtml(text) {
   let html = text;
   if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0132">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0132">\n  <link rel="stylesheet" href="./lastset-images.css?v=0132">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0132">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n</head>');
+    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0138">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0138">\n  <link rel="stylesheet" href="./lastset-images.css?v=0132">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0132">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n</head>');
   } else {
     if (!html.includes('lastset-hotfix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0132">\n</head>');
     if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n</head>');
