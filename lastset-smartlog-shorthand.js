@@ -1,21 +1,52 @@
 (() => {
   'use strict';
 
-  const VERSION='0.13.2';
+  const VERSION='0.14.0.2';
+
+  const SPOKEN_NUMBERS=Object.freeze({
+    one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
+    eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,
+    seventeen:17,eighteen:18,nineteen:19,twenty:20
+  });
+
+  function spokenNumber(value){
+    const raw=String(value??'').toLowerCase().trim();
+    if(Object.prototype.hasOwnProperty.call(SPOKEN_NUMBERS,raw)) return SPOKEN_NUMBERS[raw];
+    const n=Number(raw);
+    return Number.isFinite(n)?n:null;
+  }
 
   function parseWeightSetCountShorthand(text){
-    const source=String(text||'');
-    const match=/\b(\d+(?:\.\d+)?)\s*(kg|kgs?|kilos?|lb|lbs|pounds?)\s*(\d{1,2})\s*[x×]\s*(\d{1,3})\b/i.exec(source);
-    if(!match) return null;
+    const source=String(text||'').toLowerCase().replace(/,/g,' ').replace(/\s+/g,' ').trim();
+    const N='(?:\\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)';
+    const U='(?:kg|kgs?|kilos?|lb|lbs|pounds?)';
+    const F='(?:\\s+(?:both|each|per|hand|hands|arm|arms|side|sides)){0,5}';
 
-    const rawWeight=Number(match[1]);
-    const count=Number(match[3]);
-    const reps=Number(match[4]);
+    let match=new RegExp('\\b(\\d+(?:\\.\\d+)?)\\s*('+U+')\\s*('+N+')\\s*[x×]\\s*('+N+')\\b','i').exec(source);
+    let rawWeight,unit,count,reps;
+
+    if(match){
+      rawWeight=Number(match[1]);unit=match[2];count=spokenNumber(match[3]);reps=spokenNumber(match[4]);
+    }else{
+      // Natural speech: "55 kg 10 reps three sets"
+      match=new RegExp('\\b(\\d+(?:\\.\\d+)?)\\s*('+U+')'+F+'\\s*('+N+')\\s*reps?\\s*(?:for\\s*)?('+N+')\\s*sets?\\b','i').exec(source);
+      if(match){
+        rawWeight=Number(match[1]);unit=match[2];reps=spokenNumber(match[3]);count=spokenNumber(match[4]);
+      }else{
+        // Also support "55 kg three sets of 10 reps"
+        match=new RegExp('\\b(\\d+(?:\\.\\d+)?)\\s*('+U+')'+F+'\\s*('+N+')\\s*sets?\\s*(?:of|x|×|at)?\\s*('+N+')\\s*(?:reps?)?\\b','i').exec(source);
+        if(match){
+          rawWeight=Number(match[1]);unit=match[2];count=spokenNumber(match[3]);reps=spokenNumber(match[4]);
+        }
+      }
+    }
+
+    if(!match) return null;
     if(!Number.isFinite(rawWeight)||rawWeight<0||rawWeight>2200) return null;
     if(!Number.isInteger(count)||count<1||count>20) return null;
     if(!Number.isInteger(reps)||reps<1||reps>500) return null;
 
-    const weightKg=/lb|pound/i.test(match[2])
+    const weightKg=/lb|pound/i.test(unit)
       ? Math.round(rawWeight*0.453592*10)/10
       : rawWeight;
 
@@ -47,7 +78,7 @@
   }
 
   if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-    globalThis.LastSetSmartLogShorthandTest={parseWeightSetCountShorthand,parseInlineCardioMetrics};
+    globalThis.LastSetSmartLogShorthandTest={spokenNumber,parseWeightSetCountShorthand,parseInlineCardioMetrics};
     return;
   }
 

@@ -1,3 +1,31 @@
+LASTSET PWA v0.14.0.2 — VOICE RELIABILITY HOTFIX
+
+This hotfix addresses two field issues found on iPhone Voice Smart Log.
+
+1. Spoken set counts.
+   Natural phrases such as "55 kg 10 reps three sets" and "55 kg three sets of 10 reps" now expand into the correct repeated working sets. Number words and digits are both supported.
+
+2. Dumbbell speech filler.
+   Phrases such as "10 kg both hand 12 reps three sets" keep the set count rather than collapsing to one set.
+
+3. Common iPhone transcription correction.
+   Known speech-to-text variants such as "literal race" or "lateral rays" are interpreted as "lateral raise" for exercise matching while the original transcript remains visible to the user.
+
+4. Interim transcript recovery.
+   If iOS captures speech as an interim result but never promotes it to final text, LastSet now salvages the captured transcript instead of silently doing nothing.
+
+5. Deterministic finish control.
+   Voice Smart Log now includes a Done button so the user can end recording explicitly.
+
+6. Listening timeout.
+   A 15-second watchdog safely stops a stuck voice session and processes any speech already captured.
+
+7. Better error recovery.
+   No-speech, blocked microphone, unavailable audio capture and generic recognition failures now exit the listening overlay and return a useful message.
+
+8. Regression coverage.
+   Automated tests include the exact natural spoken set-count formats found during field testing.
+
 LASTSET PWA v0.14.0 — CAPTURE, PROGRESS & MIGRATION
 
 This is the largest PWA feature release so far. It strengthens onboarding, natural capture, progress visibility and migration without adding a backend or external AI dependency.

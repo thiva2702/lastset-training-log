@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const VERSION='0.14.0';
+const VERSION='0.14.0.2';
 const clone=v=>JSON.parse(JSON.stringify(v));
 const norm=v=>String(v||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9.+/% -]+/g,' ').replace(/\s+/g,' ').trim();
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0;};
@@ -231,8 +231,21 @@ function formatSetLine(set,type){
   return fmt(num(set.weight))+' kg × '+fmt(num(set.reps));
 }
 
+function resolveVoiceTranscript(finalText,liveText){
+  const finalValue=String(finalText||'').trim().replace(/\s+/g,' ');
+  const liveValue=String(liveText||'').trim().replace(/\s+/g,' ');
+  if(liveValue&&(!finalValue||liveValue.length>finalValue.length))return liveValue;
+  return finalValue;
+}
+function normalizeVoiceTranscript(text){
+  return String(text||'').trim()
+    .replace(/\b(?:literal|littoral)\s+raise\b/gi,'lateral raise')
+    .replace(/\b(?:literal|littoral|lateral)\s+(?:race|rays)\b/gi,'lateral raise')
+    .replace(/\s+/g,' ');
+}
+
 if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-  globalThis.LastSetV14Test={parseCsv,detectCsvFormat,parseDateValue,matchExerciseName,csvPreview,buildImportSessions,applyImport,rollbackImport,historyForExercise,bestSet,chartSeries,guideForExercise,formatSetLine};
+  globalThis.LastSetV14Test={parseCsv,detectCsvFormat,parseDateValue,matchExerciseName,csvPreview,buildImportSessions,applyImport,rollbackImport,historyForExercise,bestSet,chartSeries,guideForExercise,formatSetLine,resolveVoiceTranscript,normalizeVoiceTranscript};
   return;
 }
 if(typeof window==='undefined'||typeof document==='undefined')return;
@@ -364,23 +377,124 @@ function useLastSets(id){
 function startVoice(){
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!Recognition){showToast('Voice input is not supported in this browser');return;}
-  if(voiceSession){try{voiceSession.abort();}catch(_){}voiceSession=null;}
-  const r=new Recognition();voiceSession=r;r.lang=navigator.language||'en-US';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
-  const overlay=document.createElement('div');overlay.className='ls-v14-voice';overlay.innerHTML='<div class="ls-v14-voice-card"><div class="ls-v14-mic">●</div><div class="ls-i-kicker">Voice Smart Log</div><h3>Listening…</h3><p data-voice-text>Say the exercise, weight and reps naturally.</p><button class="secondary" data-voice-cancel>Cancel</button></div>';document.body.appendChild(overlay);
-  overlay.querySelector('[data-voice-cancel]').onclick=()=>{try{r.abort();}catch(_){}overlay.remove();voiceSession=null;};
+
+  if(voiceSession){
+    try{voiceSession.abort();}catch(_){}
+    voiceSession=null;
+  }
+
+  const MAX_LISTEN_MS=15000;
+  const r=new Recognition();
+  voiceSession=r;
+  r.lang=navigator.language||'en-US';
+  r.interimResults=true;
+  r.continuous=false;
+  r.maxAlternatives=1;
+
+  const overlay=document.createElement('div');
+  overlay.className='ls-v14-voice';
+  overlay.innerHTML='<div class="ls-v14-voice-card"><div class="ls-v14-mic">●</div><div class="ls-i-kicker">Voice Smart Log</div><h3 data-voice-heading>Listening…</h3><p data-voice-text>Say the exercise, weight, reps and number of sets naturally.</p><div class="ls-v14-voice-actions"><button class="primary" data-voice-done>Done</button><button class="secondary" data-voice-cancel>Cancel</button></div></div>';
+  document.body.appendChild(overlay);
+
   let finalText='';
-  r.onresult=e=>{
-    let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=(finalText?' ':'')+t;else interim+=t;}
-    const shown=(finalText||interim||'Listening…').trim();const node=overlay.querySelector('[data-voice-text]');if(node)node.textContent=shown;
+  let liveText='';
+  let cancelled=false;
+  let settled=false;
+  let watchdog=null;
+  let stopFallback=null;
+
+  const cleanup=()=>{
+    if(watchdog)clearTimeout(watchdog);
+    if(stopFallback)clearTimeout(stopFallback);
+    if(voiceSession===r)voiceSession=null;
+    overlay.remove();
   };
-  r.onerror=e=>{overlay.remove();voiceSession=null;if(e.error!=='aborted')showToast('Could not capture voice');};
-  r.onend=()=>{
-    voiceSession=null;overlay.remove();const text=finalText.trim();if(!text)return;
-    state.aiDraft=text;state.aiError='';state.aiLoading=false;
-    try{state.aiParsed=parseSmartWorkout(text);state.aiSource='voice';}catch(err){state.aiParsed=null;state.aiError='I could not understand that voice entry yet.';}
+
+  const commitVoice=()=>{
+    if(settled||cancelled)return;
+    settled=true;
+    const text=resolveVoiceTranscript(finalText,liveText);
+    cleanup();
+
+    if(!text){
+      showToast('I did not catch anything. Tap Speak workout and try again.');
+      return;
+    }
+
+    state.aiDraft=text;
+    state.aiError='';
+    state.aiLoading=false;
+    const parserText=normalizeVoiceTranscript(text);
+    try{
+      state.aiParsed=parseSmartWorkout(parserText);
+      state.aiSource='voice';
+    }catch(err){
+      state.aiParsed=null;
+      state.aiError='I captured the voice, but could not understand the workout yet.';
+    }
     render();
   };
-  try{r.start();}catch(_){overlay.remove();voiceSession=null;showToast('Could not start voice input');}
+
+  const stopListening=()=>{
+    if(settled||cancelled)return;
+    const heading=overlay.querySelector('[data-voice-heading]');
+    if(heading)heading.textContent='Finishing…';
+    try{r.stop();}catch(_){commitVoice();return;}
+    stopFallback=setTimeout(commitVoice,900);
+  };
+
+  overlay.querySelector('[data-voice-done]').onclick=stopListening;
+  overlay.querySelector('[data-voice-cancel]').onclick=()=>{
+    if(settled)return;
+    cancelled=true;
+    settled=true;
+    cleanup();
+    try{r.abort();}catch(_){}
+  };
+
+  r.onresult=e=>{
+    const all=[],finalParts=[];
+    for(let i=0;i<e.results.length;i++){
+      const transcript=String(e.results[i]?.[0]?.transcript||'').trim();
+      if(!transcript)continue;
+      all.push(transcript);
+      if(e.results[i].isFinal)finalParts.push(transcript);
+    }
+    if(all.length)liveText=all.join(' ').replace(/\s+/g,' ').trim();
+    if(finalParts.length)finalText=finalParts.join(' ').replace(/\s+/g,' ').trim();
+
+    const shown=resolveVoiceTranscript(finalText,liveText)||'Listening…';
+    const node=overlay.querySelector('[data-voice-text]');
+    if(node)node.textContent=shown;
+  };
+
+  r.onerror=e=>{
+    if(cancelled||settled)return;
+    const error=String(e?.error||'');
+    const captured=resolveVoiceTranscript(finalText,liveText);
+    if(captured){commitVoice();return;}
+
+    settled=true;
+    cleanup();
+    if(error==='not-allowed'||error==='service-not-allowed')showToast('Microphone permission is blocked for LastSet.');
+    else if(error==='audio-capture')showToast('LastSet could not access the microphone.');
+    else if(error==='no-speech')showToast('I did not hear anything. Tap Speak workout and try again.');
+    else if(error!=='aborted')showToast('Voice recognition stopped. Tap Speak workout to try again.');
+  };
+
+  r.onend=()=>{
+    if(cancelled||settled)return;
+    commitVoice();
+  };
+
+  try{
+    r.start();
+    watchdog=setTimeout(stopListening,MAX_LISTEN_MS);
+  }catch(_){
+    settled=true;
+    cleanup();
+    showToast('Could not start voice input. Try again in a moment.');
+  }
 }
 
 if(typeof progressScreen==='function')progressScreen=progressOverview;

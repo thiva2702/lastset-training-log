@@ -3,6 +3,19 @@ global.__LASTSET_TEST_ONLY__=true;
 require('../lastset-v0140.js');
 const T=global.LastSetV14Test;
 assert(T,'v0.14 test API missing');
+
+assert.equal(
+  T.resolveVoiceTranscript('', 'Chest press machine 55 KG 10 reps three sets'),
+  'Chest press machine 55 KG 10 reps three sets'
+);
+assert.equal(
+  T.resolveVoiceTranscript('Chest press machine', 'Chest press machine 55 KG 10 reps three sets'),
+  'Chest press machine 55 KG 10 reps three sets'
+);
+assert.equal(
+  T.normalizeVoiceTranscript('Dumbbell literal race 10 KG both hand 12 reps three sets'),
+  'Dumbbell lateral raise 10 KG both hand 12 reps three sets'
+);
 const cat=[
 {id:'bench',name:'Bench Press',equipment:'Barbell',movement:'Horizontal Press',primaryMuscle:'Chest',muscles:['Chest','Triceps'],loadType:'external',aliases:['bench','barbell bench press']},
 {id:'row',name:'Seated Row',equipment:'Machine',movement:'Horizontal Pull',primaryMuscle:'Back',muscles:['Back','Biceps'],loadType:'external',aliases:['machine row','seated cable row']},
