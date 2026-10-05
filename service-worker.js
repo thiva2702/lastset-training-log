@@ -52,7 +52,8 @@ function enhanceHtml(text) {
     if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-smartlog-shorthand.js')) html = html.replace('</body>', '  <script src="./lastset-smartlog-shorthand.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-core-reliability.js')) html = html.replace('</body>', '  <script src="./lastset-core-reliability.js?v=0133"></script>\n</body>');
-    if (!html.includes('lastset-memory.js')) html = html.replace('</body>', '  <script src="./lastset-memory.js?v=0134"></script>\n</body>');\n    if (!html.includes('lastset-intelligence.js')) html = html.replace('</body>', '  <script src="./lastset-intelligence.js?v=0137"></script>\n</body>');
+    if (!html.includes('lastset-memory.js')) html = html.replace('</body>', '  <script src="./lastset-memory.js?v=0134"></script>\n</body>');
+    if (!html.includes('lastset-intelligence.js')) html = html.replace('</body>', '  <script src="./lastset-intelligence.js?v=0137"></script>\n</body>');
     if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0132"></script>\n</body>');
     if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0132"></script>\n</body>');
