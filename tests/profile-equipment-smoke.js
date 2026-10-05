@@ -64,8 +64,43 @@ assert.ok(sandbox.EXERCISES.some(e=>e.id==='diverging-low-row-machine'),'Divergi
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='rear-delt-pec-fly-rear-delt'),'Rear Delt mode missing for dual machine');
 assert.ok(sandbox.EXERCISES.some(e=>e.id==='rear-delt-pec-fly-pec-fly'),'Pec Fly mode missing for dual machine');
 assert.equal(sandbox.EXERCISES.filter(e=>e.machineFamily==='Multi-Press').length,3,'Multi-Press must expose flat, incline and shoulder modes separately');
-assert.ok(sandbox.EXERCISES.find(e=>e.id==='converging-chest-press-machine').aliases.includes('precor converging chest press'),'Exact Precor chest press search alias missing');
-assert.ok(sandbox.EXERCISES.find(e=>e.id==='diverging-lat-pulldown-machine').aliases.includes('precor diverging lat pulldown'),'Exact Precor lat pulldown search alias missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='diverging-seated-row-machine'),'Diverging Seated Row missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='converging-shoulder-press-machine'),'Converging Shoulder Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='machine-biceps-curl'),'Machine Biceps Curl missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='seated-dip-triceps-press'),'Seated Dip / Triceps Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='assisted-dip'),'Assisted Dip missing');
+assert.equal(sandbox.EXERCISES.find(e=>e.id==='assisted-dip').loadType,'assisted','Assisted Dip must progress by reducing assistance');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='machine-lateral-raise'),'Machine Lateral Raise missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='standing-lateral-raise-machine'),'Standing Lateral Raise missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='converging-shoulder-press-machine'),'Converging Shoulder Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='dual-axis-chest-press'),'Dual Axis Chest Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='dual-axis-pulldown'),'Dual Axis Pulldown missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='calf-extension-machine'),'Calf Extension missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='prone-leg-curl'),'Prone Leg Curl missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='seated-leg-curl'),'Seated Leg Curl missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='arc-leg-press'),'Arc Leg Press missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='glute-extension-machine'),'Glute Extension missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='glute-bridge-machine'),'Glute Bridge Machine missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='sit-stand-hip-abduction'),'Sit / Stand Hip Abduction missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='rotary-torso-machine'),'Rotary Torso missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='back-extension-machine'),'Back Extension Machine missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='abdominal-crunch-machine'),'Abdominal Crunch Machine missing');
+assert.ok(sandbox.EXERCISES.some(e=>e.id==='advanced-abdominal-crunch'),'Advanced Abdominal Crunch missing');
+
+const allAliases=sandbox.EXERCISES.flatMap(e=>e.aliases||[]).map(x=>String(x).toLowerCase());
+assert.ok(!allAliases.some(a=>a.includes('precor')),'Canonical machine library must not require brand names');
+assert.ok(!allAliases.some(a=>/\b(?:rsl|vsl|dsl)\d+/.test(a)),'Canonical machine library must not require manufacturer model codes');
+
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='lat-pulldown').aliases.includes('pulldown seated row'),'Pulldown / Seated Row machine name should resolve to Pulldown');
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='seated-row').aliases.includes('pulldown seated row'),'Pulldown / Seated Row machine name should resolve to Seated Row');
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='hip-abduction').aliases.includes('inner outer thigh'),'Inner / Outer Thigh should resolve to Hip Abduction');
+assert.ok(sandbox.EXERCISES.find(e=>e.id==='hip-adduction').aliases.includes('inner outer thigh'),'Inner / Outer Thigh should resolve to Hip Adduction');
+
+const genericLegCurl=sandbox.EXERCISES.find(e=>e.id==='leg-curl');
+if(genericLegCurl){
+  assert.ok(!genericLegCurl.aliases.includes('seated leg curl'),'Generic Leg Curl must not steal exact Seated Leg Curl searches');
+  assert.ok(!genericLegCurl.aliases.includes('lying leg curl'),'Generic Leg Curl must not steal exact Prone Leg Curl searches');
+}
 
 
 sandbox.data.profile.name='Display B';
@@ -83,4 +118,4 @@ assert.ok(profileHtml.includes('Prefer not to say'),'Gender privacy option missi
 assert.ok(source.includes("btn.dataset.action='profile-top'"),'Top profile icon navigation missing');
 assert.ok(source.includes("'EZ Bar','Dumbbell','Kettlebell'"),'Expanded equipment chips missing');
 
-console.log('PASS v0.13.5 profile and equipment smoke tests');
+console.log('PASS v0.13.6 canonical machine library smoke tests');
