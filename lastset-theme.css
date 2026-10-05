@@ -39,8 +39,9 @@ body::before {
   background: rgba(9,7,19,.82) !important;
   border-bottom: 1px solid rgba(168,108,255,.22) !important;
   box-shadow: 0 10px 35px rgba(0,0,0,.24) !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
 }
-.topbar-inner { max-width:760px !important; padding-top:18px !important; padding-bottom:14px !important; }
+.topbar-inner { max-width:760px !important; padding-top:12px !important; padding-bottom:14px !important; }
 .brand strong { font-size:25px !important; letter-spacing:-.8px !important; color:#fff !important; }
 .brand strong .brand-set { color: var(--accent) !important; }
 .brand span { color:#aaa3c2 !important; }
