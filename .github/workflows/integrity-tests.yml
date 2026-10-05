@@ -2,7 +2,7 @@ name: LastSet integrity tests
 
 on:
   push:
-    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library]
+    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library, v0136-canonical-machine-library]
   pull_request:
     branches: [main]
   workflow_dispatch:
