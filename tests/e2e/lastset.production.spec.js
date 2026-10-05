@@ -255,6 +255,21 @@ test.describe('LastSet production v0.14.0', () => {
     expect(item.sets.some((s) => Number(s.weight) === 120 || Number(s.reps) === 120)).toBeFalsy();
   });
 
+  test('Smart Log expands natural spoken set counts into repeated sets', async ({ page }) => {
+    await runSmartLog(page, 'Chest press machine 55 KG 10 reps three sets', 'resistance');
+
+    const data = await storedData(page);
+    const sessions = Object.values(data.sessions || {}).flat();
+    const resistance = sessions.find((session) => session.type === 'resistance');
+    expect(resistance).toBeTruthy();
+
+    const item = resistance.exercises.find((exercise) => exercise.exerciseId === 'chest-press' || /chest press/i.test(exercise.name || ''));
+    expect(item).toBeTruthy();
+    expect(item.sets).toHaveLength(3);
+    expect(item.sets.map((set) => Number(set.weight))).toEqual([55, 55, 55]);
+    expect(item.sets.map((set) => Number(set.reps))).toEqual([10, 10, 10]);
+  });
+
   test('Smart Log keeps treadmill speed and incline separate from distance', async ({ page }) => {
     await runSmartLog(page, 'treadmill 20 min 8 km/h 3% incline', 'cardio');
 
