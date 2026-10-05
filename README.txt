@@ -1,3 +1,39 @@
+LASTSET PWA v0.13.9 — BRAND INTEGRATION + NAVIGATION POLISH
+
+This release turns the approved progression concept into the working LastSet product identity and cleans up the fixed mobile navigation.
+
+BRAND + NAVIGATION
+
+1. New progression mark.
+   LastSet now uses the three rising bars as its primary visual symbol for progress over time.
+
+2. Compact product header.
+   The everyday header uses a restrained progression icon, white/purple LastSet wordmark, subtle BETA pill and the existing "Remember today. Build tomorrow." tagline.
+
+3. Branded launch experience.
+   New sessions receive a short dark-purple launch treatment using the progression mark instead of the old plain text splash.
+
+4. New app icon system.
+   PWA icons, Apple touch icon and the web manifest now use the progression identity.
+
+5. Consistent navigation icons.
+   Calendar, Today, Progress and Profile now use one SVG icon family rather than mixed emoji symbols.
+
+6. Real Profile shortcut.
+   The top-right profile symbol now opens Profile instead of visually looking like Profile while still behaving as the Today shortcut.
+
+7. Bottom navigation polish.
+   Active navigation uses a restrained purple surface with a lime completion indicator.
+
+8. Scroll clearance.
+   Main content now reserves enough bottom space that cards and controls do not disappear beneath the fixed bottom navigation.
+
+9. Safe areas preserved.
+   The existing iPhone Dynamic Island/status-bar and Home Indicator safe-area handling remains part of the branded layout.
+
+10. Controlled brand hierarchy.
+    Purple represents LastSet identity and progress. Lime remains reserved for completion, success and active feedback instead of competing with the wordmark.
+
 LASTSET PWA v0.13.8 — iOS SAFE AREA FIX
 
 This release fixes the LastSet header being hidden behind the iPhone status bar / Dynamic Island in standalone PWA mode.
