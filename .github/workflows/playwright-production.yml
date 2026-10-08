@@ -62,7 +62,7 @@ jobs:
               grep -q 'lastset-beta.js?v=1beta1' /tmp/lastset.html && html_ok=1 || true
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-beta.js?v=1beta1" > /tmp/lastset-beta.js; then
-              grep -q "semver: '1.0.0-beta.1'" /tmp/lastset-beta.js && grep -q "build: '0.14.1'" /tmp/lastset-beta.js && beta_ok=1 || true
+              grep -q "semver: '1.0.0-beta.1'" /tmp/lastset-beta.js && grep -q "build: '0.14.1.1'" /tmp/lastset-beta.js && beta_ok=1 || true
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-smartlog-shorthand.js?v=01402" > /tmp/lastset-smartlog.js; then
               grep -q "const VERSION='0.14.0.2'" /tmp/lastset-smartlog.js && smartlog_ok=1 || true
