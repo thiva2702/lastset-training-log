@@ -87,7 +87,7 @@
   function addExerciseToPlan(db,date,exerciseId,now=Date.now()){
     if(!db||!date||!exerciseId)return false;
     db.plans=db.plans||{};
-    const plan=db.plans[date]||(db.plans[date]={templateId:null,name:'Planned workout',exerciseIds:[],createdAt:now,source:'explore'});
+    const plan=db.plans[date]||(db.plans[date]={templateId:null,name:'Muscle Explorer plan',exerciseIds:[],createdAt:now,source:'explore'});
     plan.exerciseIds=Array.isArray(plan.exerciseIds)?plan.exerciseIds:[];
     if(plan.exerciseIds.includes(exerciseId))return false;
     plan.exerciseIds.push(exerciseId);
@@ -238,6 +238,18 @@
 
   initState();
 
+  if(typeof planCard==='function'){
+    const previousPlanCard=planCard;
+    planCard=function(plan){
+      let html=previousPlanCard(plan);
+      if(plan?.source==='explore'){
+        html=html.replace("Today\\'s saved Training Day",'Built in Muscle Explorer');
+        html=html.replace('<button class="mini-btn" data-action="open-templates">Change</button>','<span class="session-tag">Explore</span>');
+      }
+      return html;
+    };
+  }
+
   if(typeof screen==='function'){
     const previousScreen=screen;
     screen=function(){
@@ -256,7 +268,6 @@
       state.exploreGroup=name;
       state.exploreRegion='';
       state.exploreExerciseId='';
-      if(GROUPS[name]?.side)state.exploreSide=GROUPS[name].side;
       render();return;
     }
     const side=event.target.closest?.('[data-explore-side]');
