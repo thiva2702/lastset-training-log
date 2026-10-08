@@ -1,0 +1,113 @@
+/* LastSet premium anatomy explorer v0.15.0 */
+.ls-anatomy-card{
+  position:relative;overflow:hidden;
+  border:1px solid rgba(159,106,213,.27)!important;
+  border-radius:23px!important;
+  background:linear-gradient(155deg,rgba(35,24,52,.95),rgba(14,11,24,.98) 42%,rgba(23,14,37,.98))!important;
+  box-shadow:0 18px 48px rgba(5,3,13,.33),inset 0 1px 0 rgba(223,172,255,.055);
+  padding:16px 13px 14px!important;
+}
+.ls-anatomy-card::before{
+  content:"";position:absolute;top:-110px;right:-70px;width:245px;height:245px;
+  border-radius:50%;background:radial-gradient(circle,rgba(125,60,178,.15),transparent 72%);
+  pointer-events:none;
+}
+.ls-anatomy-head{position:relative;z-index:1;align-items:flex-start;gap:8px;}
+.ls-anatomy-head strong{font-size:13px;letter-spacing:-.01em;color:#f4eafc;}
+.ls-anatomy-head span{font-size:9px;line-height:1.5;color:#a79ab8;margin-top:4px;}
+.ls-side-toggle{border-color:#4d375e;border-radius:13px;padding:3px;flex-shrink:0;}
+.ls-side-toggle button{font-size:10px;padding:8px 12px;border-radius:10px;min-width:48px;transition:background .18s ease,color .18s ease;}
+.ls-side-toggle button.active{background:linear-gradient(135deg,#8051af,#64318f);color:#fff;box-shadow:0 3px 9px rgba(78,28,112,.32);}
+.ls-anatomy-stage{
+  position:relative;isolation:isolate;
+  max-width:none!important;min-height:485px!important;
+  margin:12px -6px 2px!important;overflow:hidden;
+  border-radius:18px!important;
+  background:
+    radial-gradient(ellipse 64% 51% at 50% 37%,rgba(127,68,173,.15),transparent 83%),
+    linear-gradient(180deg,rgba(14,9,23,.08),rgba(8,6,14,.35));
+}
+.ls-anatomy-stage::before{
+  content:"";position:absolute;inset:13px;
+  border:1px solid rgba(159,125,181,.10);border-radius:14px;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(153,110,184,.048) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(153,110,184,.048) 1px,transparent 1px);
+  background-size:31px 31px;
+  mask-image:linear-gradient(180deg,transparent,#000 16%,#000 87%,transparent);
+}
+.ls-anatomy-stage::after{
+  content:"MUSCLE ATLAS  /  INTERACTIVE";
+  position:absolute;bottom:12px;left:14px;
+  color:#7c6a8b;font-size:8px;font-weight:800;letter-spacing:.16em;
+  pointer-events:none;
+}
+.ls-anatomy.ls-anatomy-premium{
+  width:min(100%,259px)!important;height:auto!important;
+  max-height:486px;
+  overflow:visible;
+  position:relative;z-index:1;
+  filter:drop-shadow(0 16px 16px rgba(0,0,0,.24));
+}
+.ls-atlas-body path{
+  fill:url(#ls-atlas-body);
+  stroke:#776184;
+  stroke-width:1.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.ls-atlas-group{cursor:pointer;outline:none;}
+.ls-atlas-group .ls-atlas-segment{
+  fill:url(#ls-atlas-muscle);
+  stroke:rgba(208,165,234,.76);
+  stroke-width:1.35;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+  transition:fill .16s ease,stroke .16s ease,filter .16s ease,opacity .16s ease;
+  filter:drop-shadow(0 1px 1px rgba(8,3,15,.35));
+}
+.ls-atlas-group:hover .ls-atlas-segment,
+.ls-atlas-group:focus-visible .ls-atlas-segment,
+.ls-atlas-group.active .ls-atlas-segment{
+  fill:url(#ls-atlas-active);
+  stroke:#e3ffa9;
+  stroke-width:1.6;
+  filter:drop-shadow(0 0 5px rgba(166,255,84,.32));
+}
+.ls-anatomy-premium:has(.ls-atlas-group.active) .ls-atlas-group:not(.active) .ls-atlas-segment{opacity:.72;}
+.ls-atlas-topography,
+.ls-atlas-etch,
+.ls-atlas-guide,
+.ls-atlas-ring,
+.ls-atlas-marker{
+  pointer-events:none;
+}
+.ls-atlas-topography path{fill:none;stroke:#d3b4dc;stroke-width:1;stroke-opacity:.32;stroke-linecap:round;}
+.ls-atlas-etch path{fill:none;stroke:#ecc7f8;stroke-width:.9;stroke-opacity:.38;stroke-linecap:round;}
+.ls-atlas-guide{fill:none;stroke:#a675bd;stroke-opacity:.12;stroke-width:.65;stroke-dasharray:2 7;}
+.ls-atlas-ring{fill:none;stroke:#b179cd;stroke-opacity:.14;stroke-width:.65;}
+.ls-atlas-marker{fill:#b7ff64;opacity:.65;}
+.ls-anatomy-hint{
+  position:relative;z-index:1;
+  margin:8px auto 1px;padding:9px 12px;
+  width:fit-content;max-width:100%;
+  border:1px solid rgba(133,95,163,.2);
+  border-radius:999px;
+  background:rgba(17,11,27,.82);
+  color:#b3a6c0;font-size:10px;
+}
+.ls-anatomy-hint strong{color:#ceffa2;}
+.ls-explore-hero p{font-size:11px;line-height:1.48;}
+.ls-explore-chip{font-size:10px;min-height:38px;padding:9px 12px;}
+.ls-explore-chip:focus-visible,
+.ls-side-toggle button:focus-visible{outline:2px solid #b9ff68;outline-offset:2px;}
+@media(max-width:380px){
+  .ls-anatomy-stage{min-height:442px!important;}
+  .ls-anatomy.ls-anatomy-premium{width:min(100%,237px)!important;max-height:448px;}
+  .ls-anatomy-head strong{font-size:12px;}
+  .ls-side-toggle button{padding:7px 9px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .ls-atlas-group .ls-atlas-segment,.ls-side-toggle button{transition:none!important;}
+}
