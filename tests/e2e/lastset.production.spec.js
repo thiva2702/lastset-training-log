@@ -254,7 +254,7 @@ test.describe('LastSet production v0.14.0', () => {
 
     await page.locator('[data-explore-group="Chest"]').first().click();
     await page.locator('[data-explore-region="Mid Chest"]').click();
-    await expect(page.locator('[data-explore-exercise]')).toHaveCount(await page.locator('[data-explore-exercise]').count());
+    await expect(page.locator('[data-explore-exercise]').first()).toBeVisible();
 
     await context.setOffline(false);
   });
