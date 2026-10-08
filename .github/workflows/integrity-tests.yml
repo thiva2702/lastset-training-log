@@ -2,7 +2,7 @@ name: LastSet integrity tests
 
 on:
   push:
-    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library, v0136-canonical-machine-library, v0137-smarter-memory-progress, v0138-ios-safe-area, v0139-brand-nav-polish, v01310-personal-identity-polish, v0140-capture-progress-migration, v01402-voice-reliability]
+    branches: [main, v0129-trust-data-integrity, v0130-profile-equipment, v0.11-core-reliability, v0134-memory-mvp, v0135-precor-machine-library, v0136-canonical-machine-library, v0137-smarter-memory-progress, v0138-ios-safe-area, v0139-brand-nav-polish, v01310-personal-identity-polish, v0140-capture-progress-migration, v01402-voice-reliability, v0141-offline-muscle-explorer]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -30,6 +30,8 @@ jobs:
           node --check lastset-identity.js
           node --check lastset-v0140.js
           node --check lastset-onboarding.js
+          node --check lastset-offline.js
+          node --check lastset-explore.js
           node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
           node --check worker.js
@@ -58,6 +60,10 @@ jobs:
         run: node tests/v0140-smoke.js
       - name: Onboarding smoke tests
         run: node tests/onboarding-smoke.js
+      - name: Offline smoke tests
+        run: node tests/offline-smoke.js
+      - name: Muscle Explorer smoke tests
+        run: node tests/explore-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
@@ -76,6 +82,10 @@ jobs:
           test -s lastset-v0140.css
           test -s lastset-onboarding.js
           test -s lastset-onboarding.css
+          test -s lastset-offline.js
+          test -s lastset-offline.css
+          test -s lastset-explore.js
+          test -s lastset-explore.css
           test -s assets/lastset-mark.svg
           test -s apple-touch-icon.png
           test -s lastset-workouts.js
@@ -100,6 +110,10 @@ jobs:
           grep -q 'lastset-v0140.css' worker.js
           grep -q 'lastset-onboarding.js' worker.js
           grep -q 'lastset-onboarding.css' worker.js
+          grep -q 'lastset-offline.js' worker.js
+          grep -q 'lastset-offline.css' worker.js
+          grep -q 'lastset-explore.js' worker.js
+          grep -q 'lastset-explore.css' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
           grep -q 'lastset-core-reliability.js' service-worker.js
           grep -q 'lastset-memory.js' service-worker.js
@@ -113,6 +127,10 @@ jobs:
           grep -q 'lastset-v0140.css' service-worker.js
           grep -q 'lastset-onboarding.js' service-worker.js
           grep -q 'lastset-onboarding.css' service-worker.js
+          grep -q 'lastset-offline.js' service-worker.js
+          grep -q 'lastset-offline.css' service-worker.js
+          grep -q 'lastset-explore.js' service-worker.js
+          grep -q 'lastset-explore.css' service-worker.js
           grep -q 'assets/lastset-mark.svg' service-worker.js
           grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
           grep -q 'lastset-core-reliability.js' build-cloudflare.sh
@@ -127,6 +145,10 @@ jobs:
           grep -q 'lastset-v0140.css' build-cloudflare.sh
           grep -q 'lastset-onboarding.js' build-cloudflare.sh
           grep -q 'lastset-onboarding.css' build-cloudflare.sh
+          grep -q 'lastset-offline.js' build-cloudflare.sh
+          grep -q 'lastset-offline.css' build-cloudflare.sh
+          grep -q 'lastset-explore.js' build-cloudflare.sh
+          grep -q 'lastset-explore.css' build-cloudflare.sh
           grep -q 'assets/\*.svg' build-cloudflare.sh
           bash build-cloudflare.sh
           test -s dist/lastset-smartlog-shorthand.js
@@ -142,5 +164,9 @@ jobs:
           test -s dist/lastset-v0140.css
           test -s dist/lastset-onboarding.js
           test -s dist/lastset-onboarding.css
+          test -s dist/lastset-offline.js
+          test -s dist/lastset-offline.css
+          test -s dist/lastset-explore.js
+          test -s dist/lastset-explore.css
           test -s dist/assets/lastset-mark.svg
           test -s dist/apple-touch-icon.png
