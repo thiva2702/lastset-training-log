@@ -1,0 +1,102 @@
+name: LastSet Muscle Explorer mobile visuals
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/explorer-mobile-visuals.yml'
+      - 'lastset-anatomy.js'
+      - 'lastset-explore.js'
+      - 'lastset-explore.css'
+      - 'lastset-atlas-regions.js'
+      - 'assets/anatomy-*.webp'
+      - 'index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lastset-explorer-visuals
+  cancel-in-progress: true
+
+env:
+  LASTSET_BASE_URL: https://lastset-training-log.thiva-claimflow.workers.dev/
+  CI: 'true'
+
+jobs:
+  mobile-visuals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout LastSet
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium webkit
+      - name: Targeted anatomy and forearm tests
+        run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Muscle Explorer filters" --project=mobile-chromium --project=mobile-webkit
+      - name: Capture mobile front, back and selected anatomy
+        run: |
+          node <<'NODE'
+          const {chromium,devices}=require('@playwright/test');
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          (async()=>{
+            fs.mkdirSync('test-results',{recursive:true});
+            const browser=await chromium.launch();
+            try {
+              const context=await browser.newContext({...devices['iPhone 13'],timezoneId:'Asia/Kuala_Lumpur'});
+              const page=await context.newPage();
+              await page.goto(process.env.LASTSET_BASE_URL,{waitUntil:'domcontentloaded'});
+              await page.locator('#ls-onboard-name').fill('LastSet Visual QA');
+              await page.locator('#ls-onboard-unit').selectOption('kg');
+              await page.locator('[data-onboard-save]').click();
+              await page.locator('[data-start="day"]').click();
+              await page.locator('[data-nav="explore"]').click();
+              await page.locator('.ls-anatomy-premium.male').waitFor();
+              for(const side of ['front','back']){
+                await page.locator('[data-explore-side="'+side+'"]').click();
+                const facts=await page.evaluate(()=>{
+                  const svg=document.querySelector('.ls-anatomy-premium');
+                  const stage=document.querySelector('.ls-anatomy-stage');
+                  const photo=svg?.querySelector('image.ls-realistic-anatomy');
+                  const sr=stage?.getBoundingClientRect(),fr=svg?.getBoundingClientRect();
+                  return {viewport:window.innerWidth,document:document.documentElement.scrollWidth,
+                    stageWidth:sr?.width,figureWidth:fr?.width,figureHeight:fr?.height,
+                    image:photo?.getAttribute('href'),groups:svg?.querySelectorAll('[data-explore-group]').length};
+                });
+                assert(facts.document<=facts.viewport+2,'Horizontal overflow: '+JSON.stringify(facts));
+                assert(facts.image?.includes('anatomy-'+side+'.webp'),'Photographic atlas missing: '+side);
+                assert(facts.figureHeight>350&&facts.groups>=4,'Anatomy failed to render: '+JSON.stringify(facts));
+                const asset=await page.request.get(new URL(facts.image,process.env.LASTSET_BASE_URL).toString());
+                assert(asset.ok(),'Anatomy image did not load: '+side);
+                await page.screenshot({path:'test-results/lastset-'+side+'-iphone.png'});
+                console.log(side+' '+JSON.stringify(facts));
+              }
+              await page.locator('[data-explore-side="front"]').click();
+              await page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first().click();
+              await page.locator('[data-explore-subregion="Wrist Flexors"]').click();
+              await page.locator('[data-explore-exercise="barbell-wrist-curl"]').waitFor();
+              await page.screenshot({path:'test-results/lastset-forearm-iphone.png'});
+              console.log('Mobile anatomy layout and forearm visual checks passed');
+            } finally {
+              await browser.close();
+            }
+          })().catch(err=>{console.error(err);process.exit(1)});
+          NODE
+      - name: Upload screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lastset-explorer-mobile-visuals
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
