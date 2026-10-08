@@ -272,7 +272,9 @@ test.describe('LastSet production v0.14.0', () => {
 
     const cacheState = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
-      const cache = await caches.open('lastset-v1-beta1-02000');
+      const cacheNames = (await caches.keys()).filter(name => /^lastset-v1-beta1-\d+$/.test(name));
+      if (cacheNames.length === 0) throw new Error('No LastSet offline cache installed');
+      const cache = await caches.open(cacheNames.sort().at(-1));
       const shellUrl = new URL('./__lastset_offline_shell__', registration.scope).toString();
       const shell = await cache.match(shellUrl);
       const index = await cache.match('./index.html', { ignoreSearch: true });
