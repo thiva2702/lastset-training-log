@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/explorer-mobile-visuals.yml'
       - 'lastset-anatomy.js'
+      - 'lastset-anatomy.css'
       - 'lastset-explore.js'
       - 'lastset-explore.css'
       - 'lastset-atlas-regions.js'
@@ -40,7 +41,7 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium webkit
       - name: Targeted anatomy and forearm tests
-        run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Muscle Explorer filters" --project=mobile-chromium --project=mobile-webkit
+        run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Muscle Explorer filters|Atlas uses source pixel" --project=mobile-chromium --project=mobile-webkit
       - name: Verify WebKit offline cache readiness
         run: npx playwright test --grep "offline cache is installed" --project=mobile-webkit
       - name: Capture mobile front, back and selected anatomy
@@ -72,12 +73,13 @@ jobs:
                   const sr=stage?.getBoundingClientRect(),fr=svg?.getBoundingClientRect();
                   return {viewport:window.innerWidth,document:document.documentElement.scrollWidth,
                     stageWidth:sr?.width,stageBottom:sr?.bottom,navTop:document.querySelector('.bottom-nav')?.getBoundingClientRect()?.top,figureWidth:fr?.width,figureHeight:fr?.height,
-                    image:photo?.getAttribute('href'),groups:svg?.querySelectorAll('[data-explore-group]').length};
+                    image:photo?.getAttribute('href'),groups:svg?.querySelectorAll('[data-explore-group]').length,viewBox:svg?.getAttribute('viewBox'),visuals:svg?.querySelectorAll('.ls-atlas-visual').length};
                 });
                 assert(facts.document<=facts.viewport+2,'Horizontal overflow: '+JSON.stringify(facts));
                 assert(facts.stageBottom<=facts.navTop+12,'Anatomy extends beneath bottom navigation: '+JSON.stringify(facts));
                 assert(facts.image?.includes('anatomy-'+side+'.webp'),'Photographic atlas missing: '+side);
-                assert(facts.figureHeight>270&&facts.groups>=4,'Anatomy failed to render: '+JSON.stringify(facts));
+                assert(facts.figureHeight>270&&facts.groups>=4&&facts.visuals>=15,'Anatomy overlays failed to render: '+JSON.stringify(facts));
+                assert(facts.viewBox==='0 0 '+(side==='front'?346:356)+' 631','Photo and overlay coordinates do not match source image: '+JSON.stringify(facts));
                 const asset=await page.request.get(new URL(facts.image,process.env.LASTSET_BASE_URL).toString());
                 assert(asset.ok(),'Anatomy image did not load: '+side);
                 await page.screenshot({path:'test-results/lastset-'+side+'-iphone.png'});

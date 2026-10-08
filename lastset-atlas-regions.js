@@ -78,56 +78,61 @@
   };
 
 
-  /* Touch geometry drawn against the photographic front and back figures.
-     All paths use the same 300 x 596 SVG coordinates as the displayed photo. */
+
+  /* Coordinates are measured directly against the unmodified anatomical photographs:
+     front 346 x 631, back 356 x 631. Mirroring uses each image's real width. */
   const photoPair=(region,d)=>[{region,d},{region,d,mirror:true}];
-  const PHOTO={
+  const PHOTO=Object.freeze({
     front:{
       Shoulders:[
-        ...photoPair('Side Delts','M97 104 Q78 101 65 116 Q54 131 60 150 Q65 165 79 171 Q93 155 102 126 Z')
+        ...photoPair('Front Delts','M111 117 Q92 117 79 129 Q67 143 68 161 Q70 171 78 181 Q86 179 93 164 Q101 145 113 132 Z'),
+        ...photoPair('Side Delts','M92 119 Q75 120 69 136 Q62 149 69 165 L79 178 Q85 159 103 127 Z')
       ],
       Chest:[
-        ...photoPair('Upper Chest','M108 126 Q128 116 148 126 L148 148 Q128 144 105 153 Z'),
-        ...photoPair('Mid Chest','M105 152 Q126 146 148 151 L148 180 Q133 191 117 182 Q107 178 105 152 Z'),
-        ...photoPair('Lower Chest','M115 184 Q131 190 148 184 L148 196 Q129 202 116 194 Z')
+        ...photoPair('Upper Chest','M118 124 Q139 114 168 123 L168 150 Q151 146 135 151 Q113 150 101 157 Q104 135 118 124 Z'),
+        ...photoPair('Mid Chest','M102 158 Q124 148 148 153 Q159 155 168 152 L168 183 Q143 197 123 190 Q108 186 102 174 Z'),
+        ...photoPair('Lower Chest','M119 190 Q141 197 168 186 L168 198 Q146 207 123 200 Z')
       ],
       Arms:[
-        ...photoPair('Biceps','M75 151 Q59 156 52 174 Q43 196 43 218 L50 232 Q62 226 72 207 Q82 184 83 163 Z'),
-        ...photoPair('Triceps','M84 143 Q93 156 90 177 Q85 193 75 205 L71 201 Q79 167 78 147 Z'),
-        ...photoPair('Forearms','M47 220 Q36 220 30 238 L13 276 Q4 293 3 310 Q13 318 24 301 L42 281 L57 237 Q57 224 47 220 Z')
+        ...photoPair('Biceps','M83 162 Q96 171 97 187 Q94 213 78 231 Q65 229 64 214 Q68 189 83 162 Z'),
+        ...photoPair('Triceps','M71 161 Q79 163 80 177 Q77 195 66 219 L61 219 Q57 197 66 175 Z'),
+        ...photoPair('Forearms','M65 225 Q76 233 73 246 Q62 272 49 300 L31 320 Q24 314 29 301 L42 260 Q53 234 65 225 Z'),
+        ...photoPair('Forearms','M51 230 Q55 247 42 272 L25 309 Q19 316 13 317 Q17 302 30 266 Q43 237 51 230 Z')
       ],
       Core:[
-        ...photoPair('Abs','M127 184 L147 187 L146 287 Q131 285 119 272 Q122 225 127 184 Z'),
-        ...photoPair('Obliques','M114 190 Q108 210 107 239 Q108 271 123 292 L130 287 Q116 260 119 236 L123 197 Z')
+        ...photoPair('Abs','M149 186 Q158 184 168 188 L168 261 Q169 286 169 304 Q153 293 146 271 Q140 244 142 212 Z'),
+        ...photoPair('Obliques','M118 191 Q130 190 142 204 Q140 231 145 258 Q146 277 155 290 L144 294 Q126 277 120 258 Q116 240 117 218 Z')
       ],
       Legs:[
-        ...photoPair('Quads','M107 297 Q118 301 139 304 L135 399 Q125 429 105 432 Q87 411 91 373 Q91 327 107 297 Z'),
-        ...photoPair('Adductors','M143 307 Q151 336 145 384 Q146 403 139 419 L129 416 Q134 357 133 311 Z'),
-        ...photoPair('Calves','M108 424 Q128 422 136 449 L130 512 Q122 531 104 524 Q98 483 103 447 Z'),
-        ...photoPair('Calves','M110 513 Q122 529 130 513 L126 566 Q121 575 111 563 Z')
+        ...photoPair('Quads','M115 318 Q130 317 148 331 L153 367 Q152 411 140 439 Q123 445 111 424 Q103 398 101 363 Q102 337 115 318 Z'),
+        ...photoPair('Adductors','M151 331 Q163 326 168 346 L168 387 Q161 415 155 433 L144 428 Q148 395 146 363 Z'),
+        ...photoPair('Calves','M115 464 Q132 460 139 478 Q143 507 136 534 L122 558 Q112 546 108 523 Q106 495 115 464 Z'),
+        ...photoPair('Calves','M111 539 Q119 554 128 551 L126 580 Q119 592 109 587 Z')
       ]
     },
     back:{
       Shoulders:[
-        ...photoPair('Rear Delts','M106 102 Q83 100 67 116 Q61 134 65 153 Q69 165 87 174 Q104 149 110 123 Z')
+        ...photoPair('Rear Delts','M118 112 Q94 108 82 124 Q72 141 79 160 Q84 167 96 165 Q114 148 129 124 Z')
       ],
       Back:[
-        ...photoPair('Traps','M144 104 Q120 109 107 119 Q115 133 137 150 L148 171 L149 109 Z'),
-        ...photoPair('Upper Back','M104 121 Q116 150 147 170 L146 209 Q117 200 94 174 L84 153 Z'),
-        ...photoPair('Lats','M93 168 Q113 192 146 219 L147 265 Q130 271 115 281 Q90 254 91 224 Z'),
-        ...photoPair('Lower Back','M119 263 Q135 270 148 263 L149 294 L129 302 Q116 286 119 263 Z')
+        ...photoPair('Traps','M169 64 Q159 84 138 97 Q128 104 113 109 Q139 124 154 148 Q165 163 174 178 L176 111 Q168 93 169 64 Z'),
+        ...photoPair('Upper Back','M114 122 Q128 131 149 145 Q164 168 173 179 L173 221 Q146 207 130 189 Q113 169 103 146 Z'),
+        ...photoPair('Lats','M110 162 Q126 187 151 210 L173 230 L174 267 Q150 260 135 268 Q116 251 109 223 Q100 190 110 162 Z'),
+        ...photoPair('Lower Back','M143 258 Q159 258 175 269 L175 290 Q153 281 132 284 Q132 271 143 258 Z')
       ],
       Arms:[
-        ...photoPair('Triceps','M76 154 Q58 161 52 185 Q48 208 47 226 L58 232 Q72 209 79 183 Q86 165 84 150 Z'),
-        ...photoPair('Forearms','M48 222 Q37 225 29 245 L12 284 Q2 304 6 317 Q15 325 26 307 L46 279 L59 240 Z')
+        ...photoPair('Triceps','M84 157 Q98 159 105 179 Q110 199 94 224 L81 227 Q73 208 78 183 Z'),
+        ...photoPair('Forearms','M71 222 Q84 233 81 253 L56 297 Q44 318 30 317 Q26 306 39 283 Q56 246 71 222 Z'),
+        ...photoPair('Forearms','M60 231 Q65 246 50 276 L32 314 Q26 317 21 313 Q25 293 39 264 Z')
       ],
       Legs:[
-        ...photoPair('Glutes','M112 282 Q129 269 146 285 L146 334 Q135 356 109 351 Q93 342 104 309 Z'),
-        ...photoPair('Hamstrings','M109 354 Q130 359 144 343 L137 431 Q125 447 108 439 Q99 398 109 354 Z'),
-        ...photoPair('Calves','M111 432 Q130 422 139 454 L131 514 Q119 530 106 513 Q99 465 111 432 Z')
+        ...photoPair('Glutes','M140 269 Q160 266 175 288 L175 337 Q157 355 132 348 Q114 339 124 306 Z'),
+        ...photoPair('Hamstrings','M132 351 Q154 357 173 340 L171 418 Q157 443 146 453 Q126 433 120 403 Q118 369 132 351 Z'),
+        ...photoPair('Calves','M127 448 Q141 432 156 450 Q162 475 155 505 Q147 531 128 537 Q113 518 110 490 Q109 465 127 448 Z'),
+        ...photoPair('Calves','M122 522 Q133 539 145 531 Q140 568 130 586 L119 585 Z')
       ]
     }
-  };
+  });
 
  globalThis.LastSetAtlasRegions=Object.freeze({front:FRONT,back:BACK,photo:PHOTO});
 })();

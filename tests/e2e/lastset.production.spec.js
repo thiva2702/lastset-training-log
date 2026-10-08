@@ -225,6 +225,21 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveAttribute('aria-pressed','true');
   });
 
+  test('Atlas uses source pixel coordinates and distinct selectable vs selected colors', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    const svg=page.locator('.ls-anatomy-premium.male');
+    await expect(svg).toHaveAttribute('viewBox','0 0 346 631');
+    const defaultVisual=svg.locator('.ls-atlas-visual').first();
+    await expect(defaultVisual).toBeVisible();
+    const purple=await defaultVisual.evaluate(el=>getComputedStyle(el).fill);
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Quads"]').first().click();
+    await expect(svg.locator('.ls-region-selected').first()).toBeVisible();
+    const lime=await svg.locator('.ls-region-selected').first().evaluate(el=>getComputedStyle(el).fill);
+    expect(lime).not.toEqual(purple);
+    await page.locator('[data-explore-side="back"]').click();
+    await expect(page.locator('.ls-anatomy-premium.male')).toHaveAttribute('viewBox','0 0 356 631');
+  });
+
   test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     const forearm=page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first();

@@ -192,3 +192,56 @@
 @media (max-width:380px) {
   .ls-anatomy-stage { height:clamp(275px,calc(100dvh - 355px),425px)!important; }
 }
+
+
+/* Anatomical photo accurate muscle atlas v0.22. Both the image and all hit/visual
+   geometry use the natural pixel viewBox. Zoom transforms the enclosing SVG. */
+.ls-anatomy-stage .ls-anatomy-premium.male.ls-anatomy-front {
+  aspect-ratio:346 / 631!important;
+}
+.ls-anatomy-stage .ls-anatomy-premium.male.ls-anatomy-back {
+  aspect-ratio:356 / 631!important;
+}
+.ls-anatomy-premium.male .ls-atlas-figure > image {
+  pointer-events:none!important;
+  image-rendering:auto;
+}
+.ls-anatomy-premium.male .ls-atlas-muscle .ls-atlas-visual,
+.ls-anatomy-premium.male .ls-atlas-group.active .ls-atlas-muscle .ls-atlas-visual,
+.ls-anatomy-premium.male:has(.ls-atlas-group.active) .ls-atlas-group:not(.active) .ls-atlas-muscle .ls-atlas-visual {
+  fill:rgba(171,94,238,.25)!important;
+  stroke:rgba(214,170,250,.68)!important;
+  stroke-width:1.45!important;
+  opacity:1!important;
+  filter:none!important;
+  pointer-events:none!important;
+  transition:fill .15s ease,stroke .15s ease,filter .15s ease!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle .ls-atlas-visual.ls-region-selected,
+.ls-anatomy-premium.male .ls-atlas-group.active .ls-atlas-muscle .ls-atlas-visual.ls-region-selected {
+  fill:rgba(119,255,67,.64)!important;
+  stroke:#dcff9f!important;
+  stroke-width:2.15!important;
+  filter:drop-shadow(0 0 5px rgba(145,255,67,.55))!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle:hover .ls-atlas-visual,
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle:focus-within .ls-atlas-visual {
+  fill:rgba(203,136,255,.42)!important;
+  stroke:#e7cbff!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle .ls-atlas-hit{
+  pointer-events:all!important;
+  fill:rgba(0,0,0,.001)!important;
+  stroke:rgba(0,0,0,.001)!important;
+  stroke-width:10!important;
+  stroke-linejoin:round;
+  cursor:pointer;
+  vector-effect:non-scaling-stroke;
+}
+.ls-anatomy-premium.male .ls-atlas-muscle .ls-atlas-hit:focus-visible {
+  outline:2px solid #d3ff91;
+  outline-offset:2px;
+}
+.ls-anatomy-premium.male .ls-atlas-guide,
+.ls-anatomy-premium.male .ls-atlas-ring,
+.ls-anatomy-premium.male .ls-atlas-etch {display:none!important;}

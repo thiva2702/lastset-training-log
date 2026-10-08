@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.20.1';
+  const VERSION='0.22.0';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -268,7 +268,16 @@
     const side=event.target.closest?.('[data-explore-side]');
     if(side){event.preventDefault();state.exploreSide=side.dataset.exploreSide;state.exploreGroup='';state.exploreRegion='';state.exploreSubregion='';state.exploreExerciseId='';state.exploreZoom=1;render();return;}
     const region=event.target.closest?.('[data-explore-region]');
-    if(region){event.preventDefault();state.exploreRegion=region.dataset.exploreRegion;state.exploreSubregion=state.exploreRegion==='Forearms'?FOREARM_CHOICES[0]:'';state.exploreExerciseId='';render();return;}
+    if(region){
+      event.preventDefault();
+      state.exploreRegion=region.dataset.exploreRegion;
+      state.exploreSubregion=state.exploreRegion==='Forearms'?FOREARM_CHOICES[0]:'';
+      const reverseSide=['Hamstrings','Glutes','Rear Delts','Lats','Upper Back','Traps','Lower Back'].includes(state.exploreRegion);
+      const forwardSide=['Quads','Adductors','Abs','Obliques','Upper Chest','Mid Chest','Lower Chest','Biceps','Front Delts','Side Delts'].includes(state.exploreRegion);
+      if(reverseSide)state.exploreSide='back';
+      if(forwardSide)state.exploreSide='front';
+      state.exploreExerciseId='';render();return;
+    }
     const subregion=event.target.closest?.('[data-explore-subregion]');
     if(subregion){event.preventDefault();state.exploreSubregion=subregion.dataset.exploreSubregion;state.exploreExerciseId='';render();return;}
     const equipment=event.target.closest?.('[data-explore-equipment]');
