@@ -29,6 +29,7 @@ for(const gender of ['male','female']){
   }
 }
 assert(atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
+assert(atlas.render({side:'back',gender:'male'}).includes('ls-central-back-target'));
 for(const [side,regions] of Object.entries({front:['Biceps','Forearms','Upper Chest','Mid Chest','Lower Chest','Quads','Calves','Abs'],back:['Triceps','Forearms','Lats','Glutes','Hamstrings','Calves']})){
   const html=atlas.render({side,gender:'male'});
   for(const region of regions)assert(html.includes('data-anatomy-region="'+region+'"'),'No photographic tap region: '+side+' '+region);
