@@ -11,7 +11,7 @@ assert.equal(T.sameOriginAsset('/api/sync','https://lastset.example'),false);
 const fs=require('fs');
 const sw=fs.readFileSync('service-worker.js','utf8');
 const boot=fs.readFileSync('app-v12.html','utf8');
-assert.ok(sw.includes("const CACHE = 'lastset-v1-beta1-01500'"),'Offline cache version missing');
+assert.ok(sw.includes("const CACHE = 'lastset-v1-beta1-01700'"),'Offline cache version missing');
 assert.ok(sw.includes("caches.match(request,{ignoreSearch:true})"),'Versioned asset cache matching must ignore search params');
 assert.ok(sw.includes("LASTSET_WARM_OFFLINE"),'Offline warm-cache message handler missing');
 assert.ok(sw.includes("OFFLINE_SHELL"),'Dedicated WebKit offline shell key missing');
