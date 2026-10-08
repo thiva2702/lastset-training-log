@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.20.0';
+  const VERSION='0.20.1';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -12,6 +12,8 @@
     Back:{side:'back',regions:['Lats','Upper Back','Traps','Lower Back']},
     Legs:{side:'front',regions:['Quads','Hamstrings','Glutes','Calves','Adductors']}
   });
+
+  const FOREARM_CHOICES=Object.freeze(['Brachioradialis','Wrist Flexors','Wrist Extensors','Other Forearms']);
 
   const EQUIPMENT=Object.freeze([
     {id:'all',label:'All'},
@@ -57,6 +59,10 @@
       case'Biceps':return hasMuscle(ex,'Biceps');
       case'Triceps':return hasMuscle(ex,'Triceps');
       case'Forearms':return hasMuscle(ex,'Forearms');
+      case'Brachioradialis':return hasMuscle(ex,'Brachioradialis')||n.includes('hammer curl')||n.includes('reverse curl');
+      case'Wrist Flexors':return hasMuscle(ex,'Wrist Flexors')||(n.includes('wrist curl')&&!n.includes('reverse'));
+      case'Wrist Extensors':return hasMuscle(ex,'Wrist Extensors')||n.includes('reverse wrist curl')||n.includes('wrist extension');
+      case'Other Forearms':return hasMuscle(ex,'Forearms')&&/(carry|grip|hold|roller)/.test(n);
       case'Abs':return hasMuscle(ex,'Abs')||hasMuscle(ex,'Core')||n.includes('crunch')||n.includes('plank')||n.includes('leg raise');
       case'Obliques':return n.includes('oblique')||movement.includes('rotation')||n.includes('rotary')||n.includes('wood chop');
       case'Lats':return hasMuscle(ex,'Lats')||movement.includes('vertical pull')||n.includes('pulldown')||n.includes('pull up');
@@ -112,6 +118,7 @@
     state.exploreSide=state.exploreSide||'front';
     state.exploreGroup=state.exploreGroup||'';
     state.exploreRegion=state.exploreRegion||'';
+    state.exploreSubregion=state.exploreSubregion||'';
     state.exploreEquipment=state.exploreEquipment||'all';
     state.exploreExerciseId=state.exploreExerciseId||'';
     state.explorePlanDate=state.explorePlanDate||today();
@@ -168,8 +175,10 @@
     initState();
     const gender=modelGender(db()?.profile);
     const group=GROUPS[state.exploreGroup];
-    const regions=group?.regions||[];
-    const results=state.exploreRegion?filterExploreExercises(cat(),state.exploreRegion,state.exploreEquipment):[];
+    const forearmDetail=state.exploreGroup==='Arms'&&state.exploreRegion==='Forearms';
+    const regions=forearmDetail?FOREARM_CHOICES:(group?.regions||[]);
+    const chosenRegion=forearmDetail?(state.exploreSubregion||FOREARM_CHOICES[0]):state.exploreRegion;
+    const results=chosenRegion?filterExploreExercises(cat(),chosenRegion,state.exploreEquipment):[];
     return '<main class="container ls-explore-screen">'+
       '<section class="ls-explore-hero"><div class="ls-explore-bulb">'+BULB+'</div><div><div class="ls-explore-kicker">Learn · choose · train</div><h2>Muscle Explorer</h2><p>Tap the body, choose your focus and equipment, then add an exercise straight to your training plan.</p></div></section>'+
       '<section class="card ls-anatomy-card">'+
@@ -179,7 +188,7 @@
       '</section>'+
       (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
         '<div class="ls-sheet-grabber" aria-hidden="true"></div><div class="ls-sheet-head"><div><small>SELECT A MUSCLE</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>Choose a specific muscle to see exercises</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+
-        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(state.exploreRegion===r?'active':'')+'" data-explore-region="'+esc(r)+'" aria-pressed="'+(state.exploreRegion===r)+'"><span class="ls-option-thumb" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
+        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(forearmDetail?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'"><span class="ls-option-thumb" data-thumb-region="'+esc(r)+'" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
         (state.exploreRegion?'<div class="ls-sheet-equipment"><strong>Equipment</strong><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></div>':'')+
         (state.exploreRegion?'<div class="ls-explore-results"><div class="ls-result-head"><strong>Common exercises</strong><span>'+results.length+' found</span></div>'+
           (results.length?results.map(exerciseCard).join(''):'<div class="empty">No exercises match this equipment. Try All.</div>')+'</div>':'')+
@@ -247,18 +256,21 @@
       state.exploreGroup=name;
       const photoRegion=event.target.closest?.('[data-anatomy-region]');
       state.exploreRegion=photoRegion?.dataset.anatomyRegion||'';
+      state.exploreSubregion=state.exploreRegion==='Forearms'?FOREARM_CHOICES[0]:'';
       state.exploreEquipment='all';
       state.exploreExerciseId='';
       render();return;
     }
     const close=event.target.closest?.('[data-explore-close]');
-    if(close){event.preventDefault();state.exploreGroup='';state.exploreRegion='';state.exploreExerciseId='';render();return;}
+    if(close){event.preventDefault();state.exploreGroup='';state.exploreRegion='';state.exploreSubregion='';state.exploreExerciseId='';render();return;}
     const zoom=event.target.closest?.('[data-explore-zoom]');
     if(zoom){event.preventDefault();state.exploreZoom=zoom.dataset.exploreZoom==='reset'?1:Math.max(1,Math.min(2.2,Number((state.exploreZoom+(zoom.dataset.exploreZoom==='in'?0.2:-0.2)).toFixed(2))));render();return;}
     const side=event.target.closest?.('[data-explore-side]');
-    if(side){event.preventDefault();state.exploreSide=side.dataset.exploreSide;state.exploreGroup='';state.exploreRegion='';state.exploreExerciseId='';render();return;}
+    if(side){event.preventDefault();state.exploreSide=side.dataset.exploreSide;state.exploreGroup='';state.exploreRegion='';state.exploreSubregion='';state.exploreExerciseId='';state.exploreZoom=1;render();return;}
     const region=event.target.closest?.('[data-explore-region]');
-    if(region){event.preventDefault();state.exploreRegion=region.dataset.exploreRegion;state.exploreExerciseId='';render();return;}
+    if(region){event.preventDefault();state.exploreRegion=region.dataset.exploreRegion;state.exploreSubregion=state.exploreRegion==='Forearms'?FOREARM_CHOICES[0]:'';state.exploreExerciseId='';render();return;}
+    const subregion=event.target.closest?.('[data-explore-subregion]');
+    if(subregion){event.preventDefault();state.exploreSubregion=subregion.dataset.exploreSubregion;state.exploreExerciseId='';render();return;}
     const equipment=event.target.closest?.('[data-explore-equipment]');
     if(equipment){event.preventDefault();state.exploreEquipment=equipment.dataset.exploreEquipment;state.exploreExerciseId='';render();return;}
     const exercise=event.target.closest?.('[data-explore-exercise]');

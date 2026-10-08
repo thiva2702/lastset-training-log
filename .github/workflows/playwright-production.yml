@@ -77,8 +77,8 @@ jobs:
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-offline.js?v=0141" > /tmp/lastset-offline.js; then
               grep -q "const VERSION='0.14.1'" /tmp/lastset-offline.js && offline_ok=1 || true
             fi
-            if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-explore.js?v=0200" > /tmp/lastset-explore.js; then
-              grep -q "const VERSION='0.20.0'" /tmp/lastset-explore.js && explore_ok=1 || true
+            if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-explore.js?v=0201" > /tmp/lastset-explore.js; then
+              grep -q "const VERSION='0.20.1'" /tmp/lastset-explore.js && explore_ok=1 || true
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-anatomy.js?v=0210" > /tmp/lastset-anatomy.js; then
               grep -q "const VERSION='0.21.0'" /tmp/lastset-anatomy.js && anatomy_ok=1 || true

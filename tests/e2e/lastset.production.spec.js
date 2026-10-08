@@ -227,6 +227,21 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveAttribute('aria-pressed','true');
   });
 
+  test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    const forearm=page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first();
+    await expect(forearm).toBeVisible();
+    await forearm.click();
+    await expect(page.locator('.ls-sheet-head strong')).toHaveText('Forearms');
+    await expect(page.locator('[data-explore-subregion="Brachioradialis"]')).toHaveAttribute('aria-pressed','true');
+    await page.locator('[data-explore-subregion="Wrist Flexors"]').click();
+    await expect(page.locator('[data-explore-exercise="barbell-wrist-curl"]')).toBeVisible();
+    await page.locator('[data-explore-subregion="Wrist Extensors"]').click();
+    await expect(page.locator('[data-explore-exercise="reverse-wrist-curl"]')).toBeVisible();
+    await expect(page.locator('[data-explore-exercise="barbell-wrist-curl"]')).toHaveCount(0);
+    await page.screenshot({path:'test-results/lastset-forearm-'+test.info().project.name+'.png'});
+  });
+
   test('Muscle Explorer filters Upper Chest dumbbell exercises and adds one to Today', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     await expect(page.getByRole('heading', { name: 'Muscle Explorer' })).toBeVisible();

@@ -38,4 +38,15 @@ assert.equal(T.addExerciseToPlan(db,'2026-10-09','incline',100),true);
 assert.deepEqual(db.plans['2026-10-09'].exerciseIds,['incline']);
 assert.equal(T.addExerciseToPlan(db,'2026-10-09','incline',101),false);
 assert.deepEqual(db.plans['2026-10-09'].exerciseIds,['incline']);
+const forearmCatalogue=[
+ {id:'hammer',name:'Hammer Curl',equipment:'Dumbbell',muscles:['Biceps','Forearms']},
+ {id:'barbell-wrist-curl',name:'Barbell Wrist Curl',equipment:'Barbell',muscles:['Forearms','Wrist Flexors']},
+ {id:'reverse-wrist-curl',name:'Reverse Wrist Curl',equipment:'Barbell',muscles:['Forearms','Wrist Extensors']},
+ {id:'reverse-barbell-curl',name:'Reverse Barbell Curl',equipment:'Barbell',muscles:['Forearms','Brachioradialis']},
+ {id:'farmers-carry',name:'Farmer Carry',equipment:'Dumbbell',muscles:['Forearms']}
+];
+for(const [region,id] of [['Brachioradialis','hammer'],['Brachioradialis','reverse-barbell-curl'],['Wrist Flexors','barbell-wrist-curl'],['Wrist Extensors','reverse-wrist-curl'],['Other Forearms','farmers-carry']]){
+ assert(T.filterExploreExercises(forearmCatalogue,region).some(x=>x.id===id),'Missing forearm region '+region+' '+id);
+}
+assert(!T.filterExploreExercises(forearmCatalogue,'Wrist Extensors').some(x=>x.id==='barbell-wrist-curl'),'Do not confuse wrist flexion with extension');
 console.log('LastSet Muscle Explorer smoke tests passed');

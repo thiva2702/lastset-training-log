@@ -145,3 +145,20 @@
 .ls-explore-sheet .ls-explore-exercise-main b{border:1px solid #bb73e4;border-radius:50%;width:30px;height:30px;text-align:center;line-height:26px;color:#dbaaff}
 @media(max-width:380px){.ls-explore-sheet{max-height:55vh}.ls-muscle-options .ls-explore-chip{flex-basis:79px;min-width:79px}.ls-zoom-controls{right:3px}}
 @media(prefers-reduced-motion:reduce){.ls-anatomy-zoom-frame{transition:none}}
+
+/* Detailed photographic forearm selector with anatomical thumbnails */
+.ls-muscle-options .ls-option-thumb{
+  width:46px;height:42px;flex:0 0 42px;border-radius:9px;
+  background-color:#2b1726;background-image:url('/assets/anatomy-front.webp');
+  background-repeat:no-repeat;background-size:auto 230px;
+  background-position:45% 34%;border:1px solid rgba(237,190,187,.24);
+}
+.ls-option-thumb[data-thumb-region="Biceps"],.ls-option-thumb[data-thumb-region="Brachioradialis"]{background-position:13% 36%}
+.ls-option-thumb[data-thumb-region="Triceps"]{background-position:78% 37%}
+.ls-option-thumb[data-thumb-region="Forearms"],.ls-option-thumb[data-thumb-region="Wrist Flexors"]{background-position:7% 61%}
+.ls-option-thumb[data-thumb-region="Wrist Extensors"]{background-position:87% 61%}
+.ls-option-thumb[data-thumb-region="Other Forearms"]{background-position:82% 55%}
+.ls-option-thumb[data-thumb-region="Upper Chest"],.ls-option-thumb[data-thumb-region="Mid Chest"],.ls-option-thumb[data-thumb-region="Lower Chest"]{background-position:51% 31%}
+.ls-explore-sheet .ls-muscle-options .ls-explore-chip{min-height:91px;justify-content:flex-start;padding-top:8px!important}
+.ls-explore-sheet .ls-muscle-options .ls-explore-chip span:last-child{display:block;font-size:9px;line-height:1.25;overflow-wrap:anywhere}
+@media(max-width:380px){.ls-muscle-options .ls-option-thumb{width:39px;height:39px;flex-basis:39px}}
