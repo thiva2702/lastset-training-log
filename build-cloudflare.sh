@@ -39,6 +39,7 @@ cp lastset-identity.js dist/
 cp lastset-v0140.js dist/
 cp lastset-onboarding.js dist/
 cp lastset-offline.js dist/
+cp lastset-atlas-regions.js dist/
 cp lastset-anatomy.js dist/
 cp lastset-explore.js dist/
 cp service-worker.js dist/
