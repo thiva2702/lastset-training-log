@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.18.0');
+assert.equal(atlas.version,'0.19.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
@@ -26,6 +26,10 @@ for(const gender of ['male','female']){
     assert(!/<rect[^>]+rx="13"/.test(html),'Old stickman arm shape should not remain');
   }
 }
+const biceps=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Biceps'});
+assert.equal((biceps.match(/ls-region-selected/g)||[]).length,2);
+const forearms=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Forearms'});
+assert.equal((forearms.match(/ls-region-selected/g)||[]).length,2);
 const unknown=atlas.render({side:'sideways',gender:'other',activeGroup:'Unknown'});
 assert(unknown.includes('male'));
 assert(unknown.includes('front'));
