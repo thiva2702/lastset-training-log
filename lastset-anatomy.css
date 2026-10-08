@@ -155,3 +155,40 @@
   filter:none!important;
   pointer-events:all!important;
 }
+
+/* Full body visibility on short and tall iPhones, without changing touch geometry. */
+.ls-anatomy-stage {
+  height:clamp(285px,calc(100dvh - 355px),445px)!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:7px auto 0!important;
+  overflow:hidden!important;
+  background:radial-gradient(ellipse at center,rgba(50,27,50,.34),rgba(13,9,23,.16) 70%)!important;
+}
+.ls-anatomy-stage::before { display:none!important; }
+.ls-anatomy-zoom-frame .ls-anatomy.ls-anatomy-premium {
+  height:calc(100% - 4px)!important;
+  width:auto!important;
+  max-height:100%!important;
+  max-width:100%!important;
+  aspect-ratio:300 / 596;
+  flex-shrink:1;
+  overflow:visible!important;
+}
+.ls-realistic-anatomy {
+  image-rendering:auto;
+  filter:saturate(1.06) contrast(1.03);
+  mask-image:radial-gradient(ellipse 74% 74% at 50% 50%,black 67%,transparent 100%);
+}
+.ls-anatomy-hint { margin:4px auto 0!important; }
+@media (max-height:720px) {
+  .ls-explore-hero { margin-top:0!important;margin-bottom:6px!important;gap:8px!important; }
+  .ls-explore-hero h2 { font-size:21px!important; }
+  .ls-explore-hero p { font-size:10px!important;line-height:1.32!important; }
+  .ls-explore-bulb { width:42px!important;height:42px!important;flex-basis:42px!important; }
+  .ls-anatomy-stage { height:clamp(285px,calc(100dvh - 340px),410px)!important; }
+  .ls-anatomy-card { padding-top:11px!important;padding-bottom:9px!important; }
+}
+@media (max-width:380px) {
+  .ls-anatomy-stage { height:clamp(275px,calc(100dvh - 355px),425px)!important; }
+}
