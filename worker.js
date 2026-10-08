@@ -11,8 +11,8 @@ const STYLE_TAGS = [
   ["/lastset-v0140.css","01402"],
   ["/lastset-onboarding.css","0140"],
   ["/lastset-offline.css","0141"],
-  ["/lastset-explore.css","0150"],
-  ["/lastset-anatomy.css","0180"]
+  ["/lastset-explore.css","0190"],
+  ["/lastset-anatomy.css","0190"]
 ];
 
 const SCRIPT_TAGS = [
@@ -35,8 +35,8 @@ const SCRIPT_TAGS = [
   ["/lastset-onboarding.js","0140"],
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0180"],
-  ["/lastset-anatomy.js","0180"],
-  ["/lastset-explore.js","0150"]
+  ["/lastset-anatomy.js","0190"],
+  ["/lastset-explore.js","0190"]
 ];
 
 function injectPremiumLayer(html) {
