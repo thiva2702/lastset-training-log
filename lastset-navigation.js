@@ -1,9 +1,9 @@
 (() => {
   'use strict';
 
-  const VERSION='0.13.1';
+  const VERSION='0.14.1';
   const navStack=[];
-  const TOP_LEVEL_VIEWS=new Set(['calendar','progress','profile']);
+  const TOP_LEVEL_VIEWS=new Set(['calendar','explore','progress','profile']);
 
   function cloneState(){
     try{
