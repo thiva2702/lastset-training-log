@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.14.1';
+  const VERSION='0.15.0';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -117,37 +117,13 @@
     state.explorePlanDate=state.explorePlanDate||today();
   }
 
-  function hotspot(group,label,shape){
-    const active=state.exploreGroup===group?' active':'';
-    return '<g class="ls-muscle-hit'+active+'" data-explore-group="'+group+'" role="button" tabindex="0" aria-label="'+esc(label||group)+'">'+shape+'</g>';
-  }
-
   function anatomySvg(side,gender){
-    const female=gender==='female';
-    const torso=female
-      ?'<path class="ls-body-base" d="M91 74Q120 59 149 74L157 153Q146 179 151 217Q120 235 89 217Q94 179 83 153Z"/>'
-      :'<path class="ls-body-base" d="M82 74Q120 55 158 74L166 164Q153 194 143 222H97Q87 194 74 164Z"/>';
-    const arms=female
-      ?'<rect class="ls-body-base" x="62" y="82" width="22" height="142" rx="11"/><rect class="ls-body-base" x="156" y="82" width="22" height="142" rx="11"/>'
-      :'<rect class="ls-body-base" x="54" y="80" width="27" height="149" rx="13"/><rect class="ls-body-base" x="159" y="80" width="27" height="149" rx="13"/>';
-    const legs=female
-      ?'<path class="ls-body-base" d="M92 211h26l-5 172H80l7-118Z"/><path class="ls-body-base" d="M122 211h26l5 54 7 118h-33Z"/>'
-      :'<path class="ls-body-base" d="M91 214h27l-4 169H78l8-119Z"/><path class="ls-body-base" d="M122 214h27l5 50 8 119h-36Z"/>';
-    const head='<circle class="ls-body-base" cx="120" cy="39" r="24"/><rect class="ls-body-base" x="111" y="59" width="18" height="22" rx="7"/>';
-    let hits='';
-    if(side==='front'){
-      hits+=hotspot('Shoulders','Shoulders','<ellipse cx="79" cy="92" rx="22" ry="18"/><ellipse cx="161" cy="92" rx="22" ry="18"/>');
-      hits+=hotspot('Chest','Chest','<path d="M91 98Q120 88 149 98L145 144Q120 153 95 144Z"/>');
-      hits+=hotspot('Arms','Arms','<rect x="58" y="106" width="20" height="88" rx="10"/><rect x="162" y="106" width="20" height="88" rx="10"/>');
-      hits+=hotspot('Core','Core','<rect x="99" y="149" width="42" height="68" rx="16"/>');
-      hits+=hotspot('Legs','Legs','<path d="M89 225h27l-6 94H83Z"/><path d="M124 225h27l7 94h-28Z"/>');
-    }else{
-      hits+=hotspot('Shoulders','Rear shoulders','<ellipse cx="79" cy="92" rx="22" ry="18"/><ellipse cx="161" cy="92" rx="22" ry="18"/>');
-      hits+=hotspot('Back','Back','<path d="M91 96Q120 84 149 96L151 174Q137 198 120 204Q103 198 89 174Z"/>');
-      hits+=hotspot('Arms','Triceps and arms','<rect x="58" y="106" width="20" height="88" rx="10"/><rect x="162" y="106" width="20" height="88" rx="10"/>');
-      hits+=hotspot('Legs','Glutes and legs','<ellipse cx="105" cy="220" rx="22" ry="18"/><ellipse cx="135" cy="220" rx="22" ry="18"/><path d="M89 242h27l-6 76H83Z"/><path d="M124 242h27l7 76h-28Z"/><path d="M83 321h27l-3 60H79Z"/><path d="M130 321h27l4 60h-31Z"/>');
+    if(globalThis.LastSetAnatomy?.render){
+      return globalThis.LastSetAnatomy.render({side,gender,activeGroup:state.exploreGroup});
     }
-    return '<svg class="ls-anatomy '+gender+'" viewBox="0 0 240 410" aria-label="'+(gender==='female'?'Female':'Male')+' anatomy, '+side+' view">'+head+torso+arms+legs+hits+'</svg>';
+    const available=side==='back'?['Shoulders','Back','Arms','Legs']:['Shoulders','Chest','Arms','Core','Legs'];
+    return '<div class="ls-anatomy-fallback" role="group" aria-label="Choose muscle group">'+
+      available.map(group=>'<button data-explore-group="'+group+'" type="button">'+group+'</button>').join('')+'</div>';
   }
 
   function guide(ex){
@@ -196,9 +172,9 @@
     return '<main class="container ls-explore-screen">'+
       '<section class="ls-explore-hero"><div class="ls-explore-bulb">'+BULB+'</div><div><div class="ls-explore-kicker">Learn · choose · train</div><h2>Muscle Explorer</h2><p>Tap the body, choose your focus and equipment, then add an exercise straight to your training plan.</p></div></section>'+
       '<section class="card ls-anatomy-card">'+
-        '<div class="ls-anatomy-head"><div><strong>'+(gender==='female'?'Female':'Male')+' anatomy</strong><span>Based on this user profile · male is the default</span></div><div class="ls-side-toggle"><button class="'+(state.exploreSide==='front'?'active':'')+'" data-explore-side="front">Front</button><button class="'+(state.exploreSide==='back'?'active':'')+'" data-explore-side="back">Back</button></div></div>'+
+        '<div class="ls-anatomy-head"><div><strong>'+(gender==='female'?'Female':'Male')+' anatomy</strong><span>Original interactive atlas · based on your profile</span></div><div class="ls-side-toggle"><button class="'+(state.exploreSide==='front'?'active':'')+'" data-explore-side="front">Front</button><button class="'+(state.exploreSide==='back'?'active':'')+'" data-explore-side="back">Back</button></div></div>'+
         '<div class="ls-anatomy-stage">'+anatomySvg(state.exploreSide,gender)+'</div>'+
-        '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreGroup)+'</strong>':'Tap a highlighted muscle area')+'</div>'+
+        '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreGroup)+'</strong>':'Tap a muscle group to explore')+'</div>'+
       '</section>'+
       (group?'<section class="card ls-explore-step"><div class="ls-step-no">1</div><div class="ls-step-copy"><strong>Choose your focus</strong><span>'+esc(state.exploreGroup)+'</span></div><div class="ls-chip-grid">'+regions.map(r=>'<button class="ls-explore-chip '+(state.exploreRegion===r?'active':'')+'" data-explore-region="'+esc(r)+'">'+esc(r)+'</button>').join('')+'</div></section>':'')+
       (state.exploreRegion?'<section class="card ls-explore-step"><div class="ls-step-no">2</div><div class="ls-step-copy"><strong>Choose equipment</strong><span>'+esc(state.exploreRegion)+'</span></div><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></section>':'')+

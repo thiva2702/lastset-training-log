@@ -212,6 +212,21 @@ test.describe('LastSet production v0.14.0', () => {
   });
 
 
+  test('Premium anatomy atlas has clickable front and back muscle regions', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    await expect(page.locator('.ls-anatomy-premium.male')).toBeVisible();
+    await expect(page.locator('.ls-anatomy-premium [data-explore-group="Chest"]')).toHaveCount(1);
+    await expect(page.locator('.ls-anatomy-premium .ls-atlas-segment').first()).toBeVisible();
+    await page.locator('.ls-anatomy-premium [data-explore-group="Chest"]').click();
+    await expect(page.locator('[data-explore-region="Upper Chest"]')).toBeVisible();
+    await expect(page.locator('.ls-anatomy-premium [data-explore-group="Chest"]')).toHaveAttribute('aria-pressed','true');
+    await page.locator('[data-explore-side="back"]').click();
+    await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveCount(1);
+    await page.locator('.ls-anatomy-premium [data-explore-group="Back"]').click();
+    await expect(page.locator('[data-explore-region="Lats"]')).toBeVisible();
+    await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveAttribute('aria-pressed','true');
+  });
+
   test('Muscle Explorer filters Upper Chest dumbbell exercises and adds one to Today', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     await expect(page.getByRole('heading', { name: 'Muscle Explorer' })).toBeVisible();

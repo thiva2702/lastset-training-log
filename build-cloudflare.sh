@@ -17,6 +17,7 @@ cp lastset-v0140.css dist/
 cp lastset-onboarding.css dist/
 cp lastset-offline.css dist/
 cp lastset-explore.css dist/
+cp lastset-anatomy.css dist/
 cp lastset-images.css dist/
 cp lastset-hotfix.css dist/
 cp lastset-calendar.css dist/
@@ -38,6 +39,7 @@ cp lastset-identity.js dist/
 cp lastset-v0140.js dist/
 cp lastset-onboarding.js dist/
 cp lastset-offline.js dist/
+cp lastset-anatomy.js dist/
 cp lastset-explore.js dist/
 cp service-worker.js dist/
 cp _headers dist/

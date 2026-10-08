@@ -31,6 +31,8 @@ jobs:
           node --check lastset-v0140.js
           node --check lastset-onboarding.js
           node --check lastset-offline.js
+          node --check lastset-anatomy.js
+          node --check tests/anatomy-smoke.js
           node --check lastset-explore.js
           node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
@@ -64,6 +66,8 @@ jobs:
         run: node tests/offline-smoke.js
       - name: Muscle Explorer smoke tests
         run: node tests/explore-smoke.js
+      - name: Premium anatomy smoke tests
+        run: node tests/anatomy-smoke.js
       - name: Verify production bundle inputs
         run: |
           test -s lastset-integrity.js
@@ -84,6 +88,8 @@ jobs:
           test -s lastset-onboarding.css
           test -s lastset-offline.js
           test -s lastset-offline.css
+          test -s lastset-anatomy.js
+          test -s lastset-anatomy.css
           test -s lastset-explore.js
           test -s lastset-explore.css
           test -s assets/lastset-mark.svg
@@ -112,6 +118,8 @@ jobs:
           grep -q 'lastset-onboarding.css' worker.js
           grep -q 'lastset-offline.js' worker.js
           grep -q 'lastset-offline.css' worker.js
+          grep -q 'lastset-anatomy.js' worker.js
+          grep -q 'lastset-anatomy.css' worker.js
           grep -q 'lastset-explore.js' worker.js
           grep -q 'lastset-explore.css' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
@@ -129,6 +137,8 @@ jobs:
           grep -q 'lastset-onboarding.css' service-worker.js
           grep -q 'lastset-offline.js' service-worker.js
           grep -q 'lastset-offline.css' service-worker.js
+          grep -q 'lastset-anatomy.js' service-worker.js
+          grep -q 'lastset-anatomy.css' service-worker.js
           grep -q 'lastset-explore.js' service-worker.js
           grep -q 'lastset-explore.css' service-worker.js
           grep -q 'assets/lastset-mark.svg' service-worker.js
@@ -147,6 +157,8 @@ jobs:
           grep -q 'lastset-onboarding.css' build-cloudflare.sh
           grep -q 'lastset-offline.js' build-cloudflare.sh
           grep -q 'lastset-offline.css' build-cloudflare.sh
+          grep -q 'lastset-anatomy.js' build-cloudflare.sh
+          grep -q 'lastset-anatomy.css' build-cloudflare.sh
           grep -q 'lastset-explore.js' build-cloudflare.sh
           grep -q 'lastset-explore.css' build-cloudflare.sh
           grep -q 'assets/\*.svg' build-cloudflare.sh
@@ -166,6 +178,8 @@ jobs:
           test -s dist/lastset-onboarding.css
           test -s dist/lastset-offline.js
           test -s dist/lastset-offline.css
+          test -s dist/lastset-anatomy.js
+          test -s dist/lastset-anatomy.css
           test -s dist/lastset-explore.js
           test -s dist/lastset-explore.css
           test -s dist/assets/lastset-mark.svg

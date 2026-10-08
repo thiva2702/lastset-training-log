@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-01411';
+const CACHE = 'lastset-v1-beta1-01500';
 const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',
@@ -15,6 +15,7 @@ const ASSETS = [
   './lastset-onboarding.css',
   './lastset-offline.css',
   './lastset-explore.css',
+  './lastset-anatomy.css',
   './lastset-images.css',
   './lastset-hotfix.css',
   './lastset-calendar.css',
@@ -36,6 +37,7 @@ const ASSETS = [
   './lastset-v0140.js',
   './lastset-onboarding.js',
   './lastset-offline.js',
+  './lastset-anatomy.js',
   './lastset-explore.js',
   './assets/hero.webp',
   './assets/equipment.webp',
@@ -89,7 +91,8 @@ function enhanceHtml(text) {
     ['./lastset-v0140.css','01402'],
     ['./lastset-onboarding.css','0140'],
     ['./lastset-offline.css','0141'],
-    ['./lastset-explore.css','0141']
+    ['./lastset-explore.css','0150'],
+    ['./lastset-anatomy.css','0150']
   ];
   const scripts = [
     ['./lastset-enhancements.js','0132'],
@@ -110,7 +113,8 @@ function enhanceHtml(text) {
     ['./lastset-v0140.js','01402'],
     ['./lastset-onboarding.js','0140'],
     ['./lastset-offline.js','0141'],
-    ['./lastset-explore.js','0141']
+    ['./lastset-anatomy.js','0150'],
+    ['./lastset-explore.js','0150']
   ];
 
   for(const [path,version] of styles){
