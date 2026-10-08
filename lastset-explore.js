@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.23.0';
+  const VERSION='0.23.1';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -204,7 +204,7 @@
       '</section>'+
       (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
         '<div class="ls-sheet-head"><div><small>SELECT YOUR FOCUS</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>'+(specialist?'Choose a '+esc(state.exploreRegion.toLowerCase())+' emphasis. Exercises bias these regions rather than isolate them.':'Choose a specific muscle to see exercises')+'</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+
-        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(specialist?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'"><span class="ls-option-thumb" data-thumb-region="'+esc(r)+'" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
+        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(specialist?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'"><span class="ls-option-thumb" data-thumb-region="'+esc(r)+'" data-thumb-parent="'+esc(state.exploreRegion)+'" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
         (state.exploreRegion?'<div class="ls-sheet-equipment"><strong>Equipment</strong><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></div>':'')+
         (state.exploreRegion?'<div class="ls-explore-results"><div class="ls-result-head"><strong>Common exercises</strong><span>'+results.length+' found</span></div>'+
           (results.length?results.map(exerciseCard).join(''):'<div class="empty">No exercises match this equipment. Try All.</div>')+'</div>':'')+

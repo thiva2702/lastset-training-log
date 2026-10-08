@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-02310';
+const CACHE = 'lastset-v1-beta1-02311';
 const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',

@@ -208,3 +208,16 @@
 .ls-explore-screen .ls-muscle-options{overflow-x:auto;overflow-y:hidden}
 .ls-explore-screen .ls-anatomy-card{margin-bottom:12px!important}
 .ls-explore-screen .ls-sheet-head strong{overflow-wrap:anywhere}
+
+/* Accurate per-muscle thumbnails for specialist anatomy choices. */
+.ls-option-thumb[data-thumb-parent="Biceps"]{background-image:url('/assets/anatomy-front.webp');background-size:auto 330px}
+.ls-option-thumb[data-thumb-parent="Biceps"][data-thumb-region="Long Head"]{background-position:16% 30%}
+.ls-option-thumb[data-thumb-parent="Biceps"][data-thumb-region="Short Head"]{background-position:28% 31%}
+.ls-option-thumb[data-thumb-parent="Biceps"][data-thumb-region="Brachialis"]{background-position:17% 39%}
+.ls-option-thumb[data-thumb-parent="Triceps"]{background-image:url('/assets/anatomy-back.webp');background-size:auto 330px}
+.ls-option-thumb[data-thumb-parent="Triceps"][data-thumb-region="Long Head"]{background-position:19% 31%}
+.ls-option-thumb[data-thumb-parent="Triceps"][data-thumb-region="Lateral Head"]{background-position:13% 34%}
+.ls-option-thumb[data-thumb-parent="Triceps"][data-thumb-region="Medial Head"]{background-position:16% 38%}
+.ls-option-thumb[data-thumb-region="Upper Chest"]{background-position:44% 23%}
+.ls-option-thumb[data-thumb-region="Mid Chest"]{background-position:44% 31%}
+.ls-option-thumb[data-thumb-region="Lower Chest"]{background-position:44% 36%}
