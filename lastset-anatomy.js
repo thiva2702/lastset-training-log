@@ -71,12 +71,13 @@
     const shapeOrder=side==='front'?['Shoulders','Chest','Arms','Core','Legs']:['Shoulders','Back','Arms','Legs'];
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
+      const centerHit=group==='Chest'?'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="rgba(120,250,75,.004)"/>':'';
       const segments=groups[group].map((d,index)=>{
         const selected=(group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
         return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'" d="'+d+'"/>';
       }).join('');
       return '<g class="ls-muscle-hit ls-atlas-group'+(isActive?' active':'')+'" data-explore-group="'+group+'" role="button" tabindex="0" aria-pressed="'+(isActive?'true':'false')+'" aria-label="Explore '+escape(GROUP_LABELS[group])+'">'+
-        '<title>'+escape(GROUP_LABELS[group])+'</title>'+segments+'</g>';
+        '<title>'+escape(GROUP_LABELS[group])+'</title>'+centerHit+segments+'</g>';
     }).join('');
     const details='<g class="ls-atlas-etch" aria-hidden="true">'+LINE_ART[side].map(d=>'<path d="'+d+'"/>').join('')+'</g>';
     const photo=gender==='male'?'<image class="ls-realistic-anatomy" href="/assets/anatomy-'+side+'.webp" x="0" y="0" width="300" height="596" preserveAspectRatio="none"/>':'';
