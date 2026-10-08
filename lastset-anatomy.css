@@ -128,3 +128,13 @@
 /* Fine grained region highlight inside the approved mobile atlas */
 .ls-atlas-group.active:has(.ls-region-selected) .ls-atlas-segment:not(.ls-region-selected){fill:rgba(182,115,161,.14);stroke:rgba(219,172,191,.2);filter:none}
 .ls-atlas-group .ls-atlas-segment.ls-region-selected{fill:rgba(122,250,85,.69)!important;stroke:#caff8c!important;stroke-width:1.2;filter:drop-shadow(0 0 6px rgba(121,255,69,.37))}
+
+/* Photographic anatomical atlas, with invisible native SVG touch geometry */
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-segment{fill:rgba(255,255,255,.004);stroke:rgba(255,255,255,.002);stroke-width:1;filter:none}
+.ls-anatomy-premium.male .ls-atlas-group:hover .ls-atlas-segment,
+.ls-anatomy-premium.male .ls-atlas-group:focus-visible .ls-atlas-segment{fill:rgba(112,249,78,.34);stroke:rgba(203,255,159,.6)}
+.ls-anatomy-premium.male .ls-atlas-group.active .ls-atlas-segment{fill:rgba(112,249,78,.42);stroke:rgba(194,255,155,.6)}
+.ls-anatomy-premium.male .ls-atlas-group.active:has(.ls-region-selected) .ls-atlas-segment:not(.ls-region-selected){fill:rgba(255,255,255,.004);stroke:rgba(255,255,255,.002)}
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-segment.ls-region-selected{fill:rgba(108,255,70,.6)!important;stroke:#c9ffaf!important;filter:drop-shadow(0 0 4px #83ed69)}
+.ls-anatomy-premium.male .ls-atlas-guide,.ls-anatomy-premium.male .ls-atlas-ring{display:none}
+.ls-realistic-anatomy{pointer-events:none}
