@@ -32,7 +32,7 @@ vm.runInContext(source,context,{filename:'lastset-navigation.js'});
 
 const nav=context.LastSetNavigation;
 assert(nav,'navigation API should exist');
-assert.strictEqual(nav.version,'0.13.1');
+assert.strictEqual(nav.version,'0.14.1');
 
 // Direct Today is a top level destination and must not show Back.
 nav.clearHistory();

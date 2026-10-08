@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-01402';
+const CACHE = 'lastset-v1-beta1-0141';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const ASSETS = [
   './lastset-identity.css',
   './lastset-v0140.css',
   './lastset-onboarding.css',
+  './lastset-offline.css',
+  './lastset-explore.css',
   './lastset-images.css',
   './lastset-hotfix.css',
   './lastset-calendar.css',
@@ -32,6 +34,8 @@ const ASSETS = [
   './lastset-identity.js',
   './lastset-v0140.js',
   './lastset-onboarding.js',
+  './lastset-offline.js',
+  './lastset-explore.js',
   './assets/hero.webp',
   './assets/equipment.webp',
   './assets/home-hero-thiva.webp',
@@ -44,83 +48,145 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+  );
   self.clients.claim();
+});
+
+self.addEventListener('message', event => {
+  if(event.data?.type !== 'LASTSET_WARM_OFFLINE') return;
+  event.waitUntil(
+    caches.open(CACHE).then(async cache => {
+      await Promise.allSettled(ASSETS.map(asset => cache.add(asset)));
+    })
+  );
 });
 
 function enhanceHtml(text) {
   let html = text;
-  if (!html.includes('lastset-theme.css')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-theme.css?v=0138">\n  <link rel="stylesheet" href="./lastset-premium.css?v=0138">\n  <link rel="stylesheet" href="./lastset-images.css?v=0132">\n  <link rel="stylesheet" href="./lastset-hotfix.css?v=0132">\n  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n  <link rel="stylesheet" href="./lastset-brand.css?v=0139">\n  <link rel="stylesheet" href="./lastset-identity.css?v=01310">\n  <link rel="stylesheet" href="./lastset-v0140.css?v=01402">\n  <link rel="stylesheet" href="./lastset-onboarding.css?v=0140">\n</head>');
-  } else {
-    if (!html.includes('lastset-hotfix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-hotfix.css?v=0132">\n</head>');
-    if (!html.includes('lastset-calendar.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-calendar.css?v=0132">\n</head>');
-    if (!html.includes('lastset-brand.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-brand.css?v=0139">\n</head>');
-    if (!html.includes('lastset-identity.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-identity.css?v=01310">\n</head>');
-    if (!html.includes('lastset-v0140.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-v0140.css?v=01402">\n</head>');
-    if (!html.includes('lastset-onboarding.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="./lastset-onboarding.css?v=0140">\n</head>');
+  const styles = [
+    ['./lastset-theme.css','0138'],
+    ['./lastset-premium.css','0138'],
+    ['./lastset-images.css','0132'],
+    ['./lastset-hotfix.css','0132'],
+    ['./lastset-calendar.css','0132'],
+    ['./lastset-brand.css','0139'],
+    ['./lastset-identity.css','01310'],
+    ['./lastset-v0140.css','01402'],
+    ['./lastset-onboarding.css','0140'],
+    ['./lastset-offline.css','0141'],
+    ['./lastset-explore.css','0141']
+  ];
+  const scripts = [
+    ['./lastset-enhancements.js','0132'],
+    ['./lastset-premium.js','0132'],
+    ['./lastset-hotfix.js','0132'],
+    ['./lastset-smartlog-shorthand.js','01402'],
+    ['./lastset-core-reliability.js','0133'],
+    ['./lastset-memory.js','0134'],
+    ['./lastset-intelligence.js','0137'],
+    ['./lastset-calendar.js','0132'],
+    ['./lastset-workouts.js','0132'],
+    ['./lastset-integrity.js','0132'],
+    ['./lastset-profile-equipment.js','0135'],
+    ['./lastset-navigation.js','0141'],
+    ['./lastset-beta.js','1beta1'],
+    ['./lastset-brand.js','0139'],
+    ['./lastset-identity.js','01401'],
+    ['./lastset-v0140.js','01402'],
+    ['./lastset-onboarding.js','0140'],
+    ['./lastset-offline.js','0141'],
+    ['./lastset-explore.js','0141']
+  ];
+
+  for(const [path,version] of styles){
+    const name=path.split('/').pop();
+    if(!html.includes(name)) html=html.replace('</head>', '  <link rel="stylesheet" href="'+path+'?v='+version+'">\n</head>');
   }
-  if (!html.includes('lastset-enhancements.js')) {
-    html = html.replace('</body>', '  <script src="./lastset-enhancements.js?v=0132"></script>\n  <script src="./lastset-premium.js?v=0132"></script>\n  <script src="./lastset-hotfix.js?v=0132"></script>\n  <script src="./lastset-smartlog-shorthand.js?v=01402"></script>\n  <script src="./lastset-core-reliability.js?v=0133"></script>\n  <script src="./lastset-memory.js?v=0134"></script>\n  <script src="./lastset-intelligence.js?v=0137"></script>\n  <script src="./lastset-calendar.js?v=0132"></script>\n  <script src="./lastset-workouts.js?v=0132"></script>\n  <script src="./lastset-integrity.js?v=0132"></script>\n  <script src="./lastset-profile-equipment.js?v=0135"></script>\n  <script src="./lastset-navigation.js?v=0132"></script>\n  <script src="./lastset-beta.js?v=1beta1"></script>\n  <script src="./lastset-brand.js?v=0139"></script>\n  <script src="./lastset-identity.js?v=01401"></script>\n  <script src="./lastset-v0140.js?v=01402"></script>\n  <script src="./lastset-onboarding.js?v=0140"></script>\n</body>');
-  } else {
-    if (!html.includes('lastset-hotfix.js')) html = html.replace('</body>', '  <script src="./lastset-hotfix.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-smartlog-shorthand.js')) html = html.replace('</body>', '  <script src="./lastset-smartlog-shorthand.js?v=01402"></script>\n</body>');
-    if (!html.includes('lastset-core-reliability.js')) html = html.replace('</body>', '  <script src="./lastset-core-reliability.js?v=0133"></script>\n</body>');
-    if (!html.includes('lastset-memory.js')) html = html.replace('</body>', '  <script src="./lastset-memory.js?v=0134"></script>\n</body>');
-    if (!html.includes('lastset-intelligence.js')) html = html.replace('</body>', '  <script src="./lastset-intelligence.js?v=0137"></script>\n</body>');
-    if (!html.includes('lastset-calendar.js')) html = html.replace('</body>', '  <script src="./lastset-calendar.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-workouts.js')) html = html.replace('</body>', '  <script src="./lastset-workouts.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-integrity.js')) html = html.replace('</body>', '  <script src="./lastset-integrity.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-profile-equipment.js')) html = html.replace('</body>', '  <script src="./lastset-profile-equipment.js?v=0135"></script>\n</body>');
-    if (!html.includes('lastset-navigation.js')) html = html.replace('</body>', '  <script src="./lastset-navigation.js?v=0132"></script>\n</body>');
-    if (!html.includes('lastset-beta.js')) html = html.replace('</body>', '  <script src="./lastset-beta.js?v=1beta1"></script>\n</body>');
-    if (!html.includes('lastset-brand.js')) html = html.replace('</body>', '  <script src="./lastset-brand.js?v=0139"></script>\n</body>');
-    if (!html.includes('lastset-identity.js')) html = html.replace('</body>', '  <script src="./lastset-identity.js?v=01401"></script>\n</body>');
-    if (!html.includes('lastset-v0140.js')) html = html.replace('</body>', '  <script src="./lastset-v0140.js?v=01402"></script>\n</body>');
-    if (!html.includes('lastset-onboarding.js')) html = html.replace('</body>', '  <script src="./lastset-onboarding.js?v=0140"></script>\n</body>');
+  for(const [path,version] of scripts){
+    const name=path.split('/').pop();
+    if(!html.includes(name)) html=html.replace('</body>', '  <script src="'+path+'?v='+version+'"></script>\n</body>');
   }
-  html = html.replace('<meta name="theme-color" content="#0b1220" />', '<meta name="theme-color" content="#090713" />');
+
+  html = html.replace('<meta name="theme-color" content="#0b1220" />','<meta name="theme-color" content="#090713" />');
   return html;
 }
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+async function navigationResponse(request){
+  try{
+    const response=await fetch(request,{cache:'no-store'});
+    const text=await response.clone().text();
+    const cache=await caches.open(CACHE);
+    await cache.put('./index.html',new Response(text,{
+      status:200,
+      headers:{'content-type':'text/html; charset=utf-8'}
+    }));
+    return new Response(enhanceHtml(text),{
+      status:response.status,
+      statusText:response.statusText,
+      headers:{
+        'content-type':'text/html; charset=utf-8',
+        'cache-control':'no-store, max-age=0'
+      }
+    });
+  }catch(_){
+    const cached=await caches.match('./index.html',{ignoreSearch:true});
+    if(!cached)return Response.error();
+    const text=await cached.text();
+    return new Response(enhanceHtml(text),{
+      headers:{
+        'content-type':'text/html; charset=utf-8',
+        'cache-control':'no-store, max-age=0'
+      }
+    });
+  }
+}
 
-  const url = new URL(event.request.url);
-  const wantsHtml = event.request.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
-
-  if (wantsHtml) {
-    event.respondWith(
-      fetch(event.request, { cache: 'no-store' })
-        .then(async response => {
-          const text = await response.clone().text();
-          const enhanced = enhanceHtml(text);
-          return new Response(enhanced, {
-            status: response.status,
-            statusText: response.statusText,
-            headers: new Headers({
-              'content-type': 'text/html; charset=utf-8',
-              'cache-control': 'no-store, max-age=0'
-            })
-          });
+async function staticResponse(request,event){
+  const cached=await caches.match(request,{ignoreSearch:true});
+  if(cached){
+    event.waitUntil(
+      fetch(request)
+        .then(async response=>{
+          if(!response||!response.ok)return;
+          const cache=await caches.open(CACHE);
+          await cache.put(request,response.clone());
         })
-        .catch(async () => {
-          const cached = await caches.match('./index.html');
-          if (!cached) return Response.error();
-          const text = await cached.text();
-          return new Response(enhanceHtml(text), { headers: { 'content-type': 'text/html; charset=utf-8' } });
-        })
+        .catch(()=>{})
     );
+    return cached;
+  }
+
+  try{
+    const response=await fetch(request);
+    if(response&&response.ok){
+      const cache=await caches.open(CACHE);
+      await cache.put(request,response.clone());
+    }
+    return response;
+  }catch(_){
+    return caches.match(request,{ignoreSearch:true}).then(hit=>hit||Response.error());
+  }
+}
+
+self.addEventListener('fetch', event => {
+  const request=event.request;
+  if(request.method!=='GET')return;
+
+  const url=new URL(request.url);
+  const sameOrigin=url.origin===self.location.origin;
+  const wantsHtml=request.mode==='navigate'||url.pathname.endsWith('/')||url.pathname.endsWith('/index.html')||url.pathname.endsWith('/app-v12')||url.pathname.endsWith('/app-v12.html');
+
+  if(wantsHtml){
+    event.respondWith(navigationResponse(request));
     return;
   }
 
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request))
-  );
+  if(sameOrigin){
+    event.respondWith(staticResponse(request,event));
+    return;
+  }
+
+  event.respondWith(fetch(request).catch(()=>caches.match(request,{ignoreSearch:true})));
 });

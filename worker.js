@@ -1,75 +1,63 @@
 const APP_PATHS = new Set(["/", "/index.html", "/app-v12", "/app-v12.html"]);
 
+const STYLE_TAGS = [
+  ["/lastset-theme.css","0138"],
+  ["/lastset-premium.css","0138"],
+  ["/lastset-images.css","0132"],
+  ["/lastset-hotfix.css","0132"],
+  ["/lastset-calendar.css","0132"],
+  ["/lastset-brand.css","0139"],
+  ["/lastset-identity.css","01310"],
+  ["/lastset-v0140.css","01402"],
+  ["/lastset-onboarding.css","0140"],
+  ["/lastset-offline.css","0141"],
+  ["/lastset-explore.css","0141"]
+];
+
+const SCRIPT_TAGS = [
+  ["/lastset-enhancements.js","0132"],
+  ["/lastset-premium.js","0132"],
+  ["/lastset-hotfix.js","0132"],
+  ["/lastset-smartlog-shorthand.js","01402"],
+  ["/lastset-core-reliability.js","0133"],
+  ["/lastset-memory.js","0134"],
+  ["/lastset-intelligence.js","0137"],
+  ["/lastset-calendar.js","0132"],
+  ["/lastset-workouts.js","0132"],
+  ["/lastset-integrity.js","0132"],
+  ["/lastset-profile-equipment.js","0135"],
+  ["/lastset-navigation.js","0141"],
+  ["/lastset-beta.js","1beta1"],
+  ["/lastset-brand.js","0139"],
+  ["/lastset-identity.js","01401"],
+  ["/lastset-v0140.js","01402"],
+  ["/lastset-onboarding.js","0140"],
+  ["/lastset-offline.js","0141"],
+  ["/lastset-explore.js","0141"]
+];
+
 function injectPremiumLayer(html) {
-  const headInject = `
-<link rel="stylesheet" href="/lastset-theme.css?v=0138">
-<link rel="stylesheet" href="/lastset-premium.css?v=0138">
-<link rel="stylesheet" href="/lastset-images.css?v=0132">
-<link rel="stylesheet" href="/lastset-hotfix.css?v=0132">
-<link rel="stylesheet" href="/lastset-calendar.css?v=0132">
-<link rel="stylesheet" href="/lastset-brand.css?v=0139">
-<link rel="stylesheet" href="/lastset-identity.css?v=01310">
-<link rel="stylesheet" href="/lastset-v0140.css?v=01402">
-<link rel="stylesheet" href="/lastset-onboarding.css?v=0140">
-<meta name="theme-color" content="#090713">
-`;
-
-  const bodyInject = `
-<script src="/lastset-enhancements.js?v=0132"></script>
-<script src="/lastset-premium.js?v=0132"></script>
-<script src="/lastset-hotfix.js?v=0132"></script>
-<script src="/lastset-smartlog-shorthand.js?v=01402"></script>
-<script src="/lastset-core-reliability.js?v=0133"></script>
-<script src="/lastset-memory.js?v=0134"></script>
-<script src="/lastset-intelligence.js?v=0137"></script>
-<script src="/lastset-calendar.js?v=0132"></script>
-<script src="/lastset-workouts.js?v=0132"></script>
-<script src="/lastset-integrity.js?v=0132"></script>
-<script src="/lastset-profile-equipment.js?v=0135"></script>
-<script src="/lastset-navigation.js?v=0132"></script>
-<script src="/lastset-beta.js?v=1beta1"></script>
-<script src="/lastset-brand.js?v=0139"></script>
-<script src="/lastset-identity.js?v=01401"></script>
-<script src="/lastset-v0140.js?v=01402"></script>
-<script src="/lastset-onboarding.js?v=0140"></script>
-`;
-
   let output = html;
-  if (!output.includes("lastset-theme.css")) {
-    output = output.replace("</head>", headInject + "</head>");
-  } else {
-    if (!output.includes("lastset-hotfix.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-hotfix.css?v=0132">\n</head>`);
-    if (!output.includes("lastset-calendar.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-calendar.css?v=0132">\n</head>`);
-    if (!output.includes("lastset-brand.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-brand.css?v=0139">\n</head>`);
-    if (!output.includes("lastset-identity.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-identity.css?v=01310">\n</head>`);
-    if (!output.includes("lastset-v0140.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-v0140.css?v=01402">\n</head>`);
-    if (!output.includes("lastset-onboarding.css")) output = output.replace("</head>", `<link rel="stylesheet" href="/lastset-onboarding.css?v=0140">\n</head>`);
+
+  for (const [path, version] of STYLE_TAGS) {
+    const name = path.split("/").pop();
+    if (!output.includes(name)) {
+      output = output.replace("</head>", `<link rel="stylesheet" href="${path}?v=${version}">\n</head>`);
+    }
   }
 
-  if (!output.includes("lastset-enhancements.js")) {
-    output = output.replace("</body>", bodyInject + "</body>");
-  } else {
-    if (!output.includes("lastset-hotfix.js")) output = output.replace("</body>", `<script src="/lastset-hotfix.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-smartlog-shorthand.js")) output = output.replace("</body>", `<script src="/lastset-smartlog-shorthand.js?v=01402"></script>\n</body>`);
-    if (!output.includes("lastset-core-reliability.js")) output = output.replace("</body>", `<script src="/lastset-core-reliability.js?v=0133"></script>\n</body>`);
-    if (!output.includes("lastset-memory.js")) output = output.replace("</body>", `<script src="/lastset-memory.js?v=0134"></script>\n</body>`);
-    if (!output.includes("lastset-intelligence.js")) output = output.replace("</body>", `<script src="/lastset-intelligence.js?v=0137"></script>\n</body>`);
-    if (!output.includes("lastset-calendar.js")) output = output.replace("</body>", `<script src="/lastset-calendar.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-workouts.js")) output = output.replace("</body>", `<script src="/lastset-workouts.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-integrity.js")) output = output.replace("</body>", `<script src="/lastset-integrity.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-profile-equipment.js")) output = output.replace("</body>", `<script src="/lastset-profile-equipment.js?v=0135"></script>\n</body>`);
-    if (!output.includes("lastset-navigation.js")) output = output.replace("</body>", `<script src="/lastset-navigation.js?v=0132"></script>\n</body>`);
-    if (!output.includes("lastset-beta.js")) output = output.replace("</body>", `<script src="/lastset-beta.js?v=1beta1"></script>\n</body>`);
-    if (!output.includes("lastset-brand.js")) output = output.replace("</body>", `<script src="/lastset-brand.js?v=0139"></script>\n</body>`);
-    if (!output.includes("lastset-identity.js")) output = output.replace("</body>", `<script src="/lastset-identity.js?v=01401"></script>\n</body>`);
-    if (!output.includes("lastset-v0140.js")) output = output.replace("</body>", `<script src="/lastset-v0140.js?v=01402"></script>\n</body>`);
-    if (!output.includes("lastset-onboarding.js")) output = output.replace("</body>", `<script src="/lastset-onboarding.js?v=0140"></script>\n</body>`);
+  for (const [path, version] of SCRIPT_TAGS) {
+    const name = path.split("/").pop();
+    if (!output.includes(name)) {
+      output = output.replace("</body>", `<script src="${path}?v=${version}"></script>\n</body>`);
+    }
   }
 
   output = output.replace(
     '<meta name="theme-color" content="#0b1220" />',
     '<meta name="theme-color" content="#090713" />'
   );
+
   return output;
 }
 
