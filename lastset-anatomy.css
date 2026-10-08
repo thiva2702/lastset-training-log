@@ -118,3 +118,9 @@
 .ls-atlas-body path{stroke:#80688e;stroke-width:1.15}
 .ls-anatomy-hint{margin-top:12px!important}
 @media(max-width:380px){.ls-anatomy-stage{height:421px!important}.ls-anatomy.ls-anatomy-premium{width:222px!important;height:414px!important;max-height:414px!important}}
+
+/* Athlete atlas v0.17: stable full-body layout with safe caption clearance */
+.ls-anatomy-stage{height:480px!important;min-height:0!important;padding-top:4px!important;padding-bottom:0!important;overflow:hidden!important;align-items:flex-start!important}
+.ls-anatomy.ls-anatomy-premium{height:465px!important;max-height:465px!important;width:min(100%,248px)!important;overflow:visible!important}
+.ls-anatomy-stage::after{display:none!important}
+@media(max-width:380px){.ls-anatomy-stage{height:442px!important}.ls-anatomy.ls-anatomy-premium{height:429px!important;max-height:429px!important;width:min(100%,228px)!important}}
