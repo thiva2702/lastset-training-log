@@ -36,6 +36,11 @@ jobs:
             lastset-premium.css
             lastset-images.css
             lastset-hotfix.css
+            lastset-atlas-regions.js
+            lastset-anatomy.js
+            lastset-anatomy.css
+            lastset-explore.js
+            lastset-explore.css
             lastset-calendar.css
             lastset-enhancements.js
             lastset-premium.js
