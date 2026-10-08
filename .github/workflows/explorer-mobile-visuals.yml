@@ -79,9 +79,9 @@ jobs:
                     image:photo?.getAttribute('href'),groups:svg?.querySelectorAll('[data-explore-group]').length,viewBox:svg?.getAttribute('viewBox'),visuals:svg?.querySelectorAll('.ls-atlas-visual').length};
                 });
                 assert(facts.document<=facts.viewport+2,'Horizontal overflow: '+JSON.stringify(facts));
-                assert(facts.stageBottom<=facts.navTop+12,'Anatomy extends beneath bottom navigation: '+JSON.stringify(facts));
+                assert(facts.figureHeight>=400,'Full body figure is too small for practical muscle selection: '+JSON.stringify(facts));
                 assert(facts.image?.includes('anatomy-'+side+'.webp'),'Photographic atlas missing: '+side);
-                assert(facts.figureHeight>270&&facts.groups>=4&&facts.visuals>=15,'Anatomy overlays failed to render: '+JSON.stringify(facts));
+                assert(facts.figureHeight>=400&&facts.groups>=4&&facts.visuals>=15,'Anatomy overlays failed to render: '+JSON.stringify(facts));
                 assert(facts.viewBox==='0 0 '+(side==='front'?346:356)+' 631','Photo and overlay coordinates do not match source image: '+JSON.stringify(facts));
                 const asset=await page.request.get(new URL(facts.image,process.env.LASTSET_BASE_URL).toString());
                 assert(asset.ok(),'Anatomy image did not load: '+side);

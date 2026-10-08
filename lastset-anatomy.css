@@ -267,3 +267,25 @@
 .ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hint .ls-specialist-visual{
   fill:rgba(159,99,234,.07)!important;
 }
+
+/* Full size scannable anatomy now that drilldown is inline, never an overlay. */
+.ls-explore-screen .ls-anatomy-stage,
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-stage{
+  height:clamp(410px,62dvh,630px)!important;
+  min-height:410px!important;
+  margin-top:10px!important;
+  margin-bottom:8px!important;
+}
+.ls-explore-screen .ls-anatomy-zoom-frame{
+  width:100%!important;height:100%!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+}
+.ls-explore-screen .ls-anatomy.ls-anatomy-premium{
+  max-height:calc(100% - 8px)!important;
+  height:calc(100% - 8px)!important;
+  max-width:100%!important;
+  width:auto!important;
+}
+@media(max-height:690px){
+  .ls-explore-screen .ls-anatomy-stage{height:440px!important;min-height:440px!important}
+}
