@@ -194,3 +194,17 @@
 .ls-option-thumb[data-thumb-region="Upper Back"]{background-image:url('/assets/anatomy-back.webp');background-position:32% 32%}
 .ls-option-thumb[data-thumb-region="Lower Back"]{background-image:url('/assets/anatomy-back.webp');background-position:38% 46%}
 .ls-muscle-options .ls-explore-chip.active .ls-option-thumb{border-color:rgba(190,255,132,.75);box-shadow:inset 0 0 12px rgba(133,255,79,.16),0 0 8px rgba(158,255,93,.16)}
+
+/* v0.23: full body is always above the inline focus controls. */
+.ls-explore-screen.ls-explore-has-selection .ls-explore-hero{display:flex!important}
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-hint{display:block!important}
+.ls-explore-screen .ls-explore-sheet,.ls-explore-screen.ls-explore-has-selection .ls-explore-sheet{
+  position:relative!important;left:auto!important;bottom:auto!important;transform:none!important;z-index:auto!important;
+  display:block!important;width:100%!important;max-width:100%!important;max-height:none!important;overflow:visible!important;
+  margin:12px 0 32px!important;padding:18px 14px 20px!important;border-radius:22px!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.27)!important;
+}
+.ls-explore-screen .ls-sheet-grabber{display:none!important}
+.ls-explore-screen .ls-muscle-options{overflow-x:auto;overflow-y:hidden}
+.ls-explore-screen .ls-anatomy-card{margin-bottom:12px!important}
+.ls-explore-screen .ls-sheet-head strong{overflow-wrap:anywhere}

@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.22.0';
+  const VERSION='0.23.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -44,10 +44,13 @@
     const gender=options.gender==='female'?'female':'male';
     const active=GROUP_LABELS[options.activeGroup]?options.activeGroup:'';
     const activeRegion=String(options.activeRegion||'');
+    const activeSubregion=String(options.activeSubregion||'');
     const photographic=gender==='male';
     const imageWidth=side==='front'?346:356;
     const imageHeight=631;
     const groups=(photographic?globalThis.LastSetAtlasRegions?.photo?.[side]:null)||(side==='back'?BACK:FRONT);
+    const detail=photographic&&active==='Arms'?globalThis.LastSetAtlasRegions?.photoDetail?.[side]?.[activeRegion]:null;
+    const detailedSelection=Boolean(detail?.length&&activeSubregion);
     const defs='<defs>'+
       '<linearGradient id="ls-atlas-body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#544663"/><stop offset=".43" stop-color="#30253d"/><stop offset="1" stop-color="#191624"/></linearGradient>'+
       '<linearGradient id="ls-atlas-muscle" x1=".08" y1="0" x2=".94" y2="1"><stop stop-color="#bd82de"/><stop offset=".38" stop-color="#7f4b9f"/><stop offset=".72" stop-color="#573a78"/><stop offset="1" stop-color="#342549"/></linearGradient>'+
@@ -78,7 +81,7 @@
       const segments=groups[group].map((entry,index)=>{
         const region=typeof entry==='string'?'':String(entry.region||'');
         const d=typeof entry==='string'?entry:entry.d;
-        const selected=region ? activeRegion===region : (group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
+        const selected=region ? (activeRegion===region&&!detailedSelection) : (group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
         const mirror=entry.mirror?' transform="translate('+(photographic?imageWidth:300)+' 0) scale(-1 1)"':'';
         if(photographic){
           return '<g class="ls-atlas-muscle">'+
@@ -88,8 +91,16 @@
         }
         return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'"'+(region?' data-anatomy-region="'+escape(region)+'"':'')+mirror+' d="'+d+'"/>';
       }).join('');
+      const specialist=group==='Arms'&&detail?.length?detail.map((entry,index)=>{
+        const mirror=entry.mirror?' transform="translate('+imageWidth+' 0) scale(-1 1)"':'';
+        const selected=activeSubregion===entry.region;
+        return '<g class="ls-atlas-muscle ls-specialist-muscle'+(!activeSubregion?' ls-specialist-hint':'')+'">'+
+          '<path class="ls-atlas-segment ls-atlas-visual ls-specialist-visual'+(selected?' ls-region-selected':'')+'" d="'+entry.d+'"'+mirror+' aria-hidden="true"/>'+
+          '<path class="ls-atlas-hit ls-specialist-hit" data-anatomy-region="'+escape(entry.region)+'" data-anatomy-parent="'+escape(activeRegion)+'" data-anatomy-subregion="'+escape(entry.region)+'" d="'+entry.d+'"'+mirror+'/>'+
+          '</g>';
+      }).join(''):'';
       return '<g class="ls-muscle-hit ls-atlas-group'+(isActive?' active':'')+'" data-explore-group="'+group+'" role="button" tabindex="0" aria-pressed="'+(isActive?'true':'false')+'" aria-label="Explore '+escape(GROUP_LABELS[group])+'">'+
-        '<title>'+escape(GROUP_LABELS[group])+'</title>'+centerHit+segments+'</g>';
+        '<title>'+escape(GROUP_LABELS[group])+'</title>'+centerHit+segments+specialist+'</g>';
     }).join('');
     const details='<g class="ls-atlas-etch" aria-hidden="true">'+LINE_ART[side].map(d=>'<path d="'+d+'"/>').join('')+'</g>';
     const photo=photographic?'<image class="ls-realistic-anatomy" href="/assets/anatomy-'+side+'.webp" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':'';

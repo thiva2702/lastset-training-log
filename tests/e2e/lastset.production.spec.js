@@ -240,6 +240,38 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('.ls-anatomy-premium.male')).toHaveAttribute('viewBox','0 0 356 631');
   });
 
+
+  test('Biceps offers only biceps heads with selectable specialist overlay and inline panel', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+    const panel=page.locator('.ls-explore-sheet');
+    await expect(panel.locator('.ls-sheet-head strong')).toHaveText('Biceps');
+    for(const s of ['Long Head','Short Head','Brachialis'])await expect(panel.locator('[data-explore-subregion="'+s+'"]')).toBeVisible();
+    await expect(panel.locator('[data-explore-region="Triceps"]')).toHaveCount(0);
+    await expect(panel.locator('[data-explore-region="Forearms"]')).toHaveCount(0);
+    const position=await page.evaluate(()=>{
+      const stage=document.querySelector('.ls-anatomy-stage').getBoundingClientRect();
+      const p=document.querySelector('.ls-explore-sheet').getBoundingClientRect();
+      return {gap:p.top-stage.bottom,position:getComputedStyle(document.querySelector('.ls-explore-sheet')).position};
+    });
+    expect(position.position).not.toBe('fixed');
+    expect(position.gap).toBeGreaterThan(0);
+    await panel.locator('[data-explore-subregion="Long Head"]').click();
+    await expect(page.locator('.ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-explore-exercise="incline-biceps-curl"]')).toBeVisible();
+  });
+
+  test('Triceps offers long lateral medial heads and specialist back selection', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Triceps"]').first().click();
+    await expect(page.locator('.ls-anatomy-premium.ls-anatomy-back')).toBeVisible();
+    const panel=page.locator('.ls-explore-sheet');
+    for(const s of ['Long Head','Lateral Head','Medial Head'])await expect(panel.locator('[data-explore-subregion="'+s+'"]')).toBeVisible();
+    await panel.locator('[data-explore-subregion="Medial Head"]').click();
+    await expect(page.locator('.ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-explore-exercise="reverse-grip-triceps-pushdown"]')).toBeVisible();
+  });
+
   test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     const forearm=page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first();
@@ -247,7 +279,7 @@ test.describe('LastSet production v0.14.0', () => {
     await forearm.click();
     await expect(page.locator('.ls-sheet-head strong')).toHaveText('Forearms');
     await expect(page.locator('.ls-explore-has-selection')).toBeVisible();
-    await expect(page.locator('[data-explore-subregion="Brachioradialis"]')).toHaveAttribute('aria-pressed','true');
+    await expect(page.locator('[data-explore-subregion="Brachioradialis"]')).toBeVisible();
     await page.locator('[data-explore-subregion="Wrist Flexors"]').click();
     await expect(page.locator('[data-explore-exercise="barbell-wrist-curl"]')).toBeVisible();
     await page.locator('[data-explore-subregion="Wrist Extensors"]').click();

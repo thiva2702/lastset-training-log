@@ -245,3 +245,16 @@
 .ls-anatomy-premium.male .ls-atlas-guide,
 .ls-anatomy-premium.male .ls-atlas-ring,
 .ls-anatomy-premium.male .ls-atlas-etch {display:none!important;}
+
+/* v0.23: high-visibility muscle overlay with specialist areas. */
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle .ls-atlas-visual,
+.ls-anatomy-premium.male:has(.ls-atlas-group.active) .ls-atlas-group:not(.active) .ls-atlas-muscle .ls-atlas-visual{
+  fill:rgba(165,77,231,.50)!important;stroke:rgba(238,170,255,.90)!important;stroke-width:1.9!important;opacity:1!important;pointer-events:none!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle .ls-atlas-visual.ls-region-selected{
+  fill:rgba(134,255,65,.83)!important;stroke:#e2ffb3!important;stroke-width:2.45!important;filter:drop-shadow(0 0 4px rgba(161,255,86,.7))!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-specialist-muscle .ls-specialist-visual{fill:rgba(150,85,247,.55)!important;stroke:rgba(238,185,255,.92)!important;stroke-width:1.7!important}
+.ls-anatomy-premium.male .ls-atlas-group .ls-specialist-muscle .ls-specialist-visual.ls-region-selected{fill:rgba(131,255,65,.94)!important;stroke:#f0ffc9!important;stroke-width:2.5!important}
+.ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hint .ls-specialist-visual{fill:rgba(159,99,234,.25)!important;stroke:rgba(223,179,255,.70)!important}
+.ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hit{pointer-events:all!important;fill:rgba(0,0,0,.001)!important;stroke:rgba(0,0,0,.001)!important;stroke-width:6!important}

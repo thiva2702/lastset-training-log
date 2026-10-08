@@ -49,4 +49,17 @@ for(const [region,id] of [['Brachioradialis','hammer'],['Brachioradialis','rever
  assert(T.filterExploreExercises(forearmCatalogue,region).some(x=>x.id===id),'Missing forearm region '+region+' '+id);
 }
 assert(!T.filterExploreExercises(forearmCatalogue,'Wrist Extensors').some(x=>x.id==='barbell-wrist-curl'),'Do not confuse wrist flexion with extension');
+
+assert.deepEqual(T.focusChoices('Arms','Biceps'),['Long Head','Short Head','Brachialis']);
+assert.deepEqual(T.focusChoices('Arms','Triceps'),['Long Head','Lateral Head','Medial Head']);
+assert.deepEqual(T.focusChoices('Chest','Upper Chest'),['Upper Chest','Mid Chest','Lower Chest']);
+const specialists=[
+ ['Biceps Long Head','Incline Dumbbell Curl','Biceps'],
+ ['Biceps Short Head','Preacher Curl','Biceps'],
+ ['Brachialis','Hammer Curl','Biceps'],
+ ['Triceps Long Head','Overhead Triceps Extension','Triceps'],
+ ['Triceps Lateral Head','Triceps Pushdown','Triceps'],
+ ['Triceps Medial Head','Reverse Grip Triceps Pushdown','Triceps']
+];
+for(const [region,name,muscle] of specialists)assert(T.exerciseMatchesRegion({name,muscles:[muscle]},region),region+' matching failed');
 console.log('LastSet Muscle Explorer smoke tests passed');

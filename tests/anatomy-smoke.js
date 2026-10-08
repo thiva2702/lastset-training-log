@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.22.0');
+assert.equal(atlas.version,'0.23.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
@@ -51,4 +51,10 @@ for(const side of ['front','back']){
   assert(html.includes('width="'+(side==='front'?346:356)+'" height="631"'),'Anatomy photo stretched away from source pixels');
   assert(!html.includes('preserveAspectRatio="none"'),'Photo should not be stretched');
   assert(html.includes('translate('+(side==='front'?346:356)+' 0) scale(-1 1)'),'Mirrored mapping must use the real image width');
+}
+
+for(const [side,parent,sub] of [['front','Biceps','Long Head'],['front','Biceps','Short Head'],['front','Biceps','Brachialis'],['back','Triceps','Lateral Head'],['back','Triceps','Medial Head']]){
+  const html=atlas.render({side,gender:'male',activeGroup:'Arms',activeRegion:parent,activeSubregion:sub});
+  assert(html.includes('data-anatomy-subregion="'+sub+'"'),'Missing specialist touch target '+sub);
+  assert(html.includes('ls-specialist-visual ls-region-selected'),'Missing specialist highlight '+sub);
 }

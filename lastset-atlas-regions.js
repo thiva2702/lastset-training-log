@@ -134,5 +134,32 @@
     }
   });
 
- globalThis.LastSetAtlasRegions=Object.freeze({front:FRONT,back:BACK,photo:PHOTO});
+
+  const PHOTO_DETAIL={
+    front:{
+      Biceps:[
+        ...photoPair('Long Head','M74 169 Q65 180 64 201 Q63 212 67 218 L76 225 Q81 211 83 194 Q84 178 74 169 Z'),
+        ...photoPair('Short Head','M83 172 Q92 178 96 191 Q98 207 87 221 L77 225 Q88 201 83 172 Z'),
+        ...photoPair('Brachialis','M66 208 Q74 219 86 211 L83 226 Q72 233 63 221 Z')
+      ],
+      Forearms:[
+        ...photoPair('Brachioradialis','M66 228 Q77 231 73 243 L60 268 L49 277 Q54 251 66 228 Z'),
+        ...photoPair('Wrist Flexors','M56 238 Q65 240 60 261 L43 297 L30 311 Q31 294 43 267 Z'),
+        ...photoPair('Wrist Extensors','M49 235 Q56 241 50 257 L30 298 L20 314 L16 307 Q24 280 37 251 Z')
+      ]
+    },
+    back:{
+      Triceps:[
+        ...photoPair('Long Head','M88 163 Q104 169 106 185 L95 209 L86 217 Q81 195 88 163 Z'),
+        ...photoPair('Lateral Head','M79 167 Q90 169 90 189 L79 211 L74 203 Q74 182 79 167 Z'),
+        ...photoPair('Medial Head','M83 204 Q93 207 93 219 L83 230 L78 224 Z')
+      ],
+      Forearms:[
+        ...photoPair('Brachioradialis','M72 225 Q84 234 81 251 L62 273 L56 262 Q61 244 72 225 Z'),
+        ...photoPair('Wrist Flexors','M59 241 Q70 250 62 273 L43 301 L31 316 Q31 296 44 272 Z'),
+        ...photoPair('Wrist Extensors','M68 230 Q75 241 68 264 L51 294 L32 317 Q37 292 48 259 Z')
+      ]
+    }
+  };
+ globalThis.LastSetAtlasRegions=Object.freeze({front:FRONT,back:BACK,photo:PHOTO,photoDetail:PHOTO_DETAIL});
 })();
