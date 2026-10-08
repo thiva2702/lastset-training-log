@@ -44,6 +44,7 @@ jobs:
       - name: Verify WebKit offline cache readiness
         run: npx playwright test --grep "offline cache is installed" --project=mobile-webkit
       - name: Capture mobile front, back and selected anatomy
+        if: always()
         run: |
           node <<'NODE'
           const {chromium,devices}=require('@playwright/test');

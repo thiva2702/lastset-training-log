@@ -8,12 +8,10 @@ async function resetToOnboarding(page) {
   await page.evaluate(async () => {
     localStorage.clear();
     sessionStorage.clear();
-    if ('caches' in window) {
-      for (const key of await caches.keys()) await caches.delete(key);
-    }
-    if ('serviceWorker' in navigator) {
-      for (const reg of await navigator.serviceWorker.getRegistrations()) await reg.unregister();
-    }
+    // Every Playwright test uses an isolated new browser context. Clearing
+    // CacheStorage and unregistering while the worker is installing can leave
+    // WebKit controlled by an old worker with an empty offline cache.
+    // Reset user data only; let the service worker complete its installation.
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.locator('.ls-onboard-screen')).toBeVisible();
