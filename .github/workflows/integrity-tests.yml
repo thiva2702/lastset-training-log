@@ -31,6 +31,7 @@ jobs:
           node --check lastset-v0140.js
           node --check lastset-onboarding.js
           node --check lastset-offline.js
+          node --check lastset-atlas-regions.js
           node --check lastset-anatomy.js
           node --check tests/anatomy-smoke.js
           node --check lastset-explore.js
@@ -88,6 +89,7 @@ jobs:
           test -s lastset-onboarding.css
           test -s lastset-offline.js
           test -s lastset-offline.css
+          test -s lastset-atlas-regions.js
           test -s lastset-anatomy.js
           test -s lastset-anatomy.css
           test -s lastset-explore.js
@@ -178,6 +180,7 @@ jobs:
           test -s dist/lastset-onboarding.css
           test -s dist/lastset-offline.js
           test -s dist/lastset-offline.css
+          test -s dist/lastset-atlas-regions.js
           test -s dist/lastset-anatomy.js
           test -s dist/lastset-anatomy.css
           test -s dist/lastset-explore.js
