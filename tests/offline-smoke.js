@@ -1,0 +1,11 @@
+const assert=require('assert');
+global.__LASTSET_TEST_ONLY__=true;
+require('../lastset-offline.js');
+const T=global.LastSetOfflineTest;
+assert(T,'Offline test API missing');
+assert.deepEqual(T.statusCopy(true),{label:'Offline',detail:'Training is saved on this device.'});
+assert.equal(T.sameOriginAsset('/lastset-explore.js','https://lastset.example'),true);
+assert.equal(T.sameOriginAsset('https://lastset.example/assets/a.svg','https://lastset.example'),true);
+assert.equal(T.sameOriginAsset('https://other.example/a.js','https://lastset.example'),false);
+assert.equal(T.sameOriginAsset('/api/sync','https://lastset.example'),false);
+console.log('LastSet offline smoke tests passed');
