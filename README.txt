@@ -1,3 +1,13 @@
+LASTSET PWA v0.14.1.1 — WEBKIT OFFLINE SHELL HOTFIX
+
+This hotfix strengthens offline startup specifically for iPhone/WebKit after production QA found that WebKit could activate the service worker but fail to resolve the normal cached index.html key during an offline reload.
+
+1. LastSet now stores a dedicated stable offline HTML shell key during service-worker install.
+2. Offline navigation tries that dedicated shell before normal index/root cache entries.
+3. Offline precaching is resilient: one optional asset failure no longer invalidates the entire cache population.
+4. Successful online navigation refreshes both the normal index cache and the dedicated offline shell.
+5. Chromium behavior remains unchanged; this patch targets the WebKit/iPhone navigation-cache difference caught by production QA.
+
 LASTSET PWA v0.14.1 — OFFLINE + MUSCLE EXPLORER
 
 This release adds two major product capabilities: reliable offline gym use and a new interactive Muscle Explorer.
