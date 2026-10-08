@@ -12,6 +12,9 @@ on:
       - 'lastset-atlas-regions.js'
       - 'assets/anatomy-*.webp'
       - 'index.html'
+      - 'scripts/restore-anatomy-detail.mjs'
+      - 'build-cloudflare.sh'
+      - 'package.json'
   workflow_dispatch:
 
 permissions:
@@ -97,6 +100,21 @@ jobs:
               });
               assert(focused.muscleCenter<focused.sheetTop-10,'Focused muscle is obscured by exercise sheet: '+JSON.stringify(focused));
               await page.screenshot({path:'test-results/lastset-forearm-iphone.png'});
+              await page.locator('[data-explore-close]').click();
+              await page.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+              await page.locator('[data-explore-subregion="Long Head"]').click();
+              await page.locator('.ls-specialist-visual.ls-region-selected').first().waitFor();
+              const pair=await page.evaluate(()=>{
+                const model=document.querySelector('.ls-anatomy-stage').getBoundingClientRect();
+                const panel=document.querySelector('.ls-explore-sheet').getBoundingClientRect();
+                const highlight=document.querySelector('.ls-specialist-visual.ls-region-selected');
+                const purple=document.querySelector('.ls-atlas-visual:not(.ls-region-selected)');
+                return {gap:panel.top-model.bottom,green:getComputedStyle(highlight).fill,purple:getComputedStyle(purple).fill};
+              });
+              assert(pair.gap>0,'Biceps drilldown overlaps body: '+JSON.stringify(pair));
+              assert(pair.green!==pair.purple,'Biceps specialist highlight is not distinguishable: '+JSON.stringify(pair));
+              await page.screenshot({path:'test-results/lastset-biceps-specialist-iphone.png',fullPage:true});
+
               await page.locator('[data-explore-close]').click();
               await page.locator('.ls-anatomy-premium .ls-atlas-hit[data-anatomy-region="Quads"]').first().click();
               await page.locator('.ls-sheet-head strong').waitFor();
