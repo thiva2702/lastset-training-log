@@ -97,7 +97,19 @@ jobs:
               });
               assert(focused.muscleCenter<focused.sheetTop-10,'Focused muscle is obscured by exercise sheet: '+JSON.stringify(focused));
               await page.screenshot({path:'test-results/lastset-forearm-iphone.png'});
-              console.log('Mobile anatomy layout and forearm visual checks passed');
+              await page.locator('[data-explore-close]').click();
+              await page.locator('.ls-anatomy-premium .ls-atlas-hit[data-anatomy-region="Quads"]').first().click();
+              await page.locator('.ls-sheet-head strong').waitFor();
+              const legs=await page.evaluate(()=>{
+                const green=document.querySelector('.ls-atlas-group.active .ls-region-selected');
+                const sheet=document.querySelector('.ls-explore-sheet');
+                const gr=green?.getBoundingClientRect(),sr=sheet?.getBoundingClientRect();
+                return {selection:document.querySelector('.ls-sheet-head strong')?.textContent,center:gr?(gr.top+gr.bottom)/2:null,sheetTop:sr?.top};
+              });
+              assert.equal(legs.selection,'Quads','The Quads tap did not select Quads');
+              assert(legs.center<legs.sheetTop-10,'Selected Quads are covered by exercise sheet: '+JSON.stringify(legs));
+              await page.screenshot({path:'test-results/lastset-quads-iphone.png'});
+              console.log('Mobile front, back, forearm and quads visual checks passed');
             } finally {
               await browser.close();
             }
