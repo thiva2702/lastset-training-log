@@ -12,7 +12,7 @@ const STYLE_TAGS = [
   ["/lastset-onboarding.css","0140"],
   ["/lastset-offline.css","0141"],
   ["/lastset-explore.css","0230"],
-  ["/lastset-anatomy.css","0230"]
+  ["/lastset-anatomy.css","0231"]
 ];
 
 const SCRIPT_TAGS = [
@@ -35,7 +35,7 @@ const SCRIPT_TAGS = [
   ["/lastset-onboarding.js","0140"],
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0230"],
-  ["/lastset-anatomy.js","0230"],
+  ["/lastset-anatomy.js","0231"],
   ["/lastset-explore.js","0230"]
 ];
 

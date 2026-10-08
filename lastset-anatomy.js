@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.23.0';
+  const VERSION='0.23.1';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -78,7 +78,10 @@
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
       const centerHit=group==='Chest'?(photographic?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="165" y="153" width="16" height="30" fill="transparent"/>':'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="transparent"/>'):group==='Back'?(photographic?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="166" y="169" width="24" height="68" fill="transparent"/>':'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="transparent"/>'):'';
-      const segments=groups[group].map((entry,index)=>{
+      const muscleEntries=photographic&&group==='Arms'&&side==='front'
+        ?[...groups[group]].sort((a,b)=>({Triceps:0,Forearms:1,Biceps:2}[a.region]??3)-({Triceps:0,Forearms:1,Biceps:2}[b.region]??3))
+        :groups[group];
+      const segments=muscleEntries.map((entry,index)=>{
         const region=typeof entry==='string'?'':String(entry.region||'');
         const d=typeof entry==='string'?entry:entry.d;
         const selected=region ? (activeRegion===region&&!detailedSelection) : (group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));

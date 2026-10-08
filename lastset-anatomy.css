@@ -258,3 +258,12 @@
 .ls-anatomy-premium.male .ls-atlas-group .ls-specialist-muscle .ls-specialist-visual.ls-region-selected{fill:rgba(131,255,65,.94)!important;stroke:#f0ffc9!important;stroke-width:2.5!important}
 .ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hint .ls-specialist-visual{fill:rgba(159,99,234,.25)!important;stroke:rgba(223,179,255,.70)!important}
 .ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hit{pointer-events:all!important;fill:rgba(0,0,0,.001)!important;stroke:rgba(0,0,0,.001)!important;stroke-width:6!important}
+
+/* Prevent the neighbouring triceps hit stroke from stealing a biceps tap. */
+.ls-anatomy-premium.male .ls-atlas-group .ls-atlas-muscle .ls-atlas-hit:not(.ls-specialist-hit){
+  stroke-width:2!important;
+  pointer-events:visibleFill!important;
+}
+.ls-anatomy-premium.male .ls-atlas-group .ls-specialist-hint .ls-specialist-visual{
+  fill:rgba(159,99,234,.07)!important;
+}
