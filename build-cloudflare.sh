@@ -46,6 +46,10 @@ cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
 cp assets/*.webp dist/assets/
+# GitHub integrity jobs skip npm installation; make the image build self sufficient.
+if ! node -e "require.resolve('sharp')" >/dev/null 2>&1; then
+  npm install --no-audit --no-fund --no-package-lock --no-save sharp@0.34.4
+fi
 node scripts/restore-anatomy-detail.mjs
 cp assets/*.svg dist/assets/
 
