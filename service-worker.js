@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-01700';
+const CACHE = 'lastset-v1-beta1-01710';
 const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',
@@ -37,6 +37,7 @@ const ASSETS = [
   './lastset-v0140.js',
   './lastset-onboarding.js',
   './lastset-offline.js',
+  './lastset-atlas-regions.js',
   './lastset-anatomy.js',
   './lastset-explore.js',
   './assets/hero.webp',
@@ -113,7 +114,8 @@ function enhanceHtml(text) {
     ['./lastset-v0140.js','01402'],
     ['./lastset-onboarding.js','0140'],
     ['./lastset-offline.js','0141'],
-    ['./lastset-anatomy.js','0170'],
+    ['./lastset-atlas-regions.js','0171'],
+    ['./lastset-anatomy.js','0171'],
     ['./lastset-explore.js','0170']
   ];
 
