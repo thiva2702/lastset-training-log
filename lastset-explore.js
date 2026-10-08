@@ -115,11 +115,12 @@
     state.exploreEquipment=state.exploreEquipment||'all';
     state.exploreExerciseId=state.exploreExerciseId||'';
     state.explorePlanDate=state.explorePlanDate||today();
+    state.exploreZoom=Number(state.exploreZoom)||1;
   }
 
   function anatomySvg(side,gender){
     if(globalThis.LastSetAnatomy?.render){
-      return globalThis.LastSetAnatomy.render({side,gender,activeGroup:state.exploreGroup});
+      return globalThis.LastSetAnatomy.render({side,gender,activeGroup:state.exploreGroup,activeRegion:state.exploreRegion});
     }
     const available=side==='back'?['Shoulders','Back','Arms','Legs']:['Shoulders','Chest','Arms','Core','Legs'];
     return '<div class="ls-anatomy-fallback" role="group" aria-label="Choose muscle group">'+
@@ -173,13 +174,15 @@
       '<section class="ls-explore-hero"><div class="ls-explore-bulb">'+BULB+'</div><div><div class="ls-explore-kicker">Learn · choose · train</div><h2>Muscle Explorer</h2><p>Tap the body, choose your focus and equipment, then add an exercise straight to your training plan.</p></div></section>'+
       '<section class="card ls-anatomy-card">'+
         '<div class="ls-anatomy-head"><div><strong>'+(gender==='female'?'Female':'Male')+' anatomy</strong><span>Original interactive atlas · based on your profile</span></div><div class="ls-side-toggle"><button class="'+(state.exploreSide==='front'?'active':'')+'" data-explore-side="front">Front</button><button class="'+(state.exploreSide==='back'?'active':'')+'" data-explore-side="back">Back</button></div></div>'+
-        '<div class="ls-anatomy-stage">'+anatomySvg(state.exploreSide,gender)+'</div>'+
+        '<div class="ls-anatomy-stage"><div class="ls-anatomy-zoom-frame" style="transform:scale('+state.exploreZoom+')">'+anatomySvg(state.exploreSide,gender)+'</div><div class="ls-zoom-controls" aria-label="Anatomy zoom"><button type="button" data-explore-zoom="in" aria-label="Zoom in">+</button><button type="button" data-explore-zoom="out" aria-label="Zoom out">−</button><button type="button" data-explore-zoom="reset" aria-label="Reset zoom">⟳</button></div></div>'+
         '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreGroup)+'</strong>':'Tap a muscle group to explore')+'</div>'+
       '</section>'+
-      (group?'<section class="card ls-explore-step"><div class="ls-step-no">1</div><div class="ls-step-copy"><strong>Choose your focus</strong><span>'+esc(state.exploreGroup)+'</span></div><div class="ls-chip-grid">'+regions.map(r=>'<button class="ls-explore-chip '+(state.exploreRegion===r?'active':'')+'" data-explore-region="'+esc(r)+'">'+esc(r)+'</button>').join('')+'</div></section>':'')+
-      (state.exploreRegion?'<section class="card ls-explore-step"><div class="ls-step-no">2</div><div class="ls-step-copy"><strong>Choose equipment</strong><span>'+esc(state.exploreRegion)+'</span></div><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></section>':'')+
-      (state.exploreRegion?'<section class="ls-explore-results"><div class="ls-result-head"><div><strong>'+results.length+' exercise'+(results.length===1?'':'s')+'</strong><span>'+esc(state.exploreRegion)+' · '+esc(EQUIPMENT.find(x=>x.id===state.exploreEquipment)?.label||'All')+'</span></div></div>'+
-        (results.length?results.map(exerciseCard).join(''):'<div class="card empty">No exercises match this combination yet. Try another equipment type.</div>')+
+      (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
+        '<div class="ls-sheet-grabber" aria-hidden="true"></div><div class="ls-sheet-head"><div><small>SELECT A MUSCLE</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>Choose a specific muscle to see exercises</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+
+        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(state.exploreRegion===r?'active':'')+'" data-explore-region="'+esc(r)+'" aria-pressed="'+(state.exploreRegion===r)+'"><span class="ls-option-thumb" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
+        (state.exploreRegion?'<div class="ls-sheet-equipment"><strong>Equipment</strong><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></div>':'')+
+        (state.exploreRegion?'<div class="ls-explore-results"><div class="ls-result-head"><strong>Common exercises</strong><span>'+results.length+' found</span></div>'+
+          (results.length?results.map(exerciseCard).join(''):'<div class="empty">No exercises match this equipment. Try All.</div>')+'</div>':'')+
       '</section>':'')+
     '</main>';
   }
@@ -242,10 +245,14 @@
       event.preventDefault();
       const name=group.dataset.exploreGroup;
       state.exploreGroup=name;
-      state.exploreRegion='';
+      state.exploreRegion=name==='Arms'?'Biceps':'';
       state.exploreExerciseId='';
       render();return;
     }
+    const close=event.target.closest?.('[data-explore-close]');
+    if(close){event.preventDefault();state.exploreGroup='';state.exploreRegion='';state.exploreExerciseId='';render();return;}
+    const zoom=event.target.closest?.('[data-explore-zoom]');
+    if(zoom){event.preventDefault();state.exploreZoom=zoom.dataset.exploreZoom==='reset'?1:Math.max(1,Math.min(2.2,Number((state.exploreZoom+(zoom.dataset.exploreZoom==='in'?0.2:-0.2)).toFixed(2))));render();return;}
     const side=event.target.closest?.('[data-explore-side]');
     if(side){event.preventDefault();state.exploreSide=side.dataset.exploreSide;state.exploreGroup='';state.exploreRegion='';state.exploreExerciseId='';render();return;}
     const region=event.target.closest?.('[data-explore-region]');
