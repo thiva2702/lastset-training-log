@@ -29,7 +29,7 @@ async function completeOnboarding(page, name = 'QA Primary') {
   await page.locator('[data-start="day"]').click();
   await expect(page.locator('.bottom-nav')).toBeVisible();
   await expect(page.locator('[data-nav="day"]')).toBeVisible();
-  await page.waitForFunction(() => document.documentElement.dataset.lastsetNavigation === '0.13.1');
+  await page.waitForFunction(() => document.documentElement.dataset.lastsetNavigation === '0.14.1');
 }
 
 async function cleanStart(page) {
@@ -209,6 +209,54 @@ test.describe('LastSet production v0.14.0', () => {
     await page.locator('.ls-user-chip').click();
     await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
     await expect(page.locator('[data-action="back"]')).toHaveCount(0);
+  });
+
+
+  test('Muscle Explorer filters Upper Chest dumbbell exercises and adds one to Today', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    await expect(page.getByRole('heading', { name: 'Muscle Explorer' })).toBeVisible();
+    await expect(page.locator('.ls-anatomy.male')).toBeVisible();
+
+    await page.locator('[data-explore-group="Chest"]').first().click();
+    await page.locator('[data-explore-region="Upper Chest"]').click();
+    await page.locator('[data-explore-equipment="dumbbell"]').click();
+
+    await expect(page.locator('[data-explore-exercise="incline-dumbbell-press"]')).toBeVisible();
+    await page.locator('[data-explore-exercise="incline-dumbbell-press"]').click();
+    await expect(page.locator('[data-explore-today="incline-dumbbell-press"]')).toBeVisible();
+    await page.locator('[data-explore-today="incline-dumbbell-press"]').click();
+
+    const iso = await todayIso(page);
+    const data = await storedData(page);
+    expect(data.plans?.[iso]?.exerciseIds || []).toContain('incline-dumbbell-press');
+
+    await page.locator('[data-nav="day"]').click();
+    await expect(page.locator('.plan-card')).toContainText('Incline Dumbbell Press');
+  });
+
+  test('installed app shell reloads and stays usable without internet', async ({ page, context }) => {
+    await page.evaluate(async () => {
+      if ('serviceWorker' in navigator) await navigator.serviceWorker.ready;
+    });
+    await page.waitForFunction(() => !!navigator.serviceWorker?.controller, null, { timeout: 10_000 });
+
+    await context.setOffline(true);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
+    await expect(page.locator('.bottom-nav')).toBeVisible();
+    await expect(page.locator('.ls-offline-pill')).toContainText('Offline');
+
+    await page.locator('[data-nav="day"]').click();
+    await expect(page.locator('[data-day-action="resistance"]').first()).toBeVisible();
+
+    await page.locator('[data-nav="explore"]').click();
+    await expect(page.getByRole('heading', { name: 'Muscle Explorer' })).toBeVisible();
+
+    await page.locator('[data-explore-group="Chest"]').first().click();
+    await page.locator('[data-explore-region="Mid Chest"]').click();
+    await expect(page.locator('[data-explore-exercise]')).toHaveCount(await page.locator('[data-explore-exercise]').count());
+
+    await context.setOffline(false);
   });
 
   test('equipment filters and aliases find the new v0.13.0 exercise variants', async ({ page }) => {
