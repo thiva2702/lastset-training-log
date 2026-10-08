@@ -114,3 +114,34 @@
 @media(prefers-reduced-motion:reduce){
   .ls-muscle-hit>*{transition:none!important;}
 }
+/* Muscle Explorer mobile atlas and drilldown sheet, v0.19 */
+.ls-anatomy-stage{isolation:isolate;position:relative}
+.ls-anatomy-zoom-frame{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-origin:center center;transition:transform .2s ease}
+.ls-zoom-controls{position:absolute;top:28px;right:9px;z-index:8;display:grid;gap:6px;align-items:center;padding:5px;border:1px solid #453353;border-radius:18px;background:rgba(11,8,22,.84);box-shadow:0 8px 20px rgba(0,0,0,.26)}
+.ls-zoom-controls button{width:34px;height:34px;border:1px solid #6c5b7a;border-radius:50%;color:#f0e4ff;background:rgba(17,10,29,.86);font-size:22px;line-height:1}
+.ls-zoom-controls button:focus-visible{outline:2px solid #bafe70}
+.ls-explore-screen{padding-bottom:110px!important}
+.ls-explore-sheet{position:fixed;z-index:29;left:50%;bottom:calc(73px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(100%,760px);max-height:min(54vh,570px);overflow:auto;overscroll-behavior:contain;margin:0!important;padding:11px 13px 17px!important;border:1px solid #524064!important;border-radius:24px 24px 0 0!important;background:linear-gradient(180deg,#171321 0%,#100c19 100%)!important;box-shadow:0 -10px 35px rgba(0,0,0,.6)}
+.ls-sheet-grabber{height:4px;width:33px;border-radius:5px;background:#746785;margin:0 auto 12px}
+.ls-sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ls-sheet-head small{display:block;color:#b0ff63;font-size:9px;letter-spacing:.12em;font-weight:800;margin:0 0 3px}
+.ls-sheet-head strong{display:block;color:#fff;font-size:20px;font-weight:800}
+.ls-sheet-head span{display:block;color:#a59bb2;font-size:11px;margin-top:4px}
+.ls-sheet-close{width:37px;height:37px;border-radius:50%;border:1px solid #4f415c;background:#241b31;color:#f0e7f5;font-size:25px;line-height:1}
+.ls-muscle-options{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;margin:14px -1px;padding:0 1px 8px;scrollbar-width:thin}
+.ls-muscle-options .ls-explore-chip{flex:0 0 92px;min-width:92px;max-width:92px;padding:7px 6px!important;min-height:74px;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;line-height:1.1}
+.ls-muscle-options .ls-explore-chip.active{border-color:#c5ff73;box-shadow:0 0 0 1px rgba(186,255,116,.7),0 0 15px rgba(186,255,116,.14);color:#f9fff3}
+.ls-option-thumb{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 40% 37%,#bf7276 0,#8c4852 38%,#322232 72%);border:1px solid rgba(244,207,224,.2);box-shadow:inset 0 1px 4px rgba(255,255,255,.13)}
+.ls-sheet-equipment{margin:0 0 10px}
+.ls-sheet-equipment>strong{display:block;font-size:11px;margin:0 0 4px;color:#efe4f7}
+.ls-sheet-equipment .ls-equipment-grid{margin:0;padding:0;gap:5px;display:flex;flex-wrap:nowrap;overflow-x:auto}
+.ls-sheet-equipment .ls-explore-chip{flex-shrink:0;min-height:29px;padding:5px 9px}
+.ls-explore-sheet .ls-explore-results{margin:13px 0 0}
+.ls-explore-sheet .ls-result-head{align-items:center}
+.ls-explore-sheet .ls-result-head strong{font-size:13px}
+.ls-explore-sheet .ls-explore-exercise{margin-bottom:6px}
+.ls-explore-sheet .ls-explore-exercise-main{padding:10px 12px}
+.ls-explore-sheet .ls-explore-exercise-main strong{font-size:12px}
+.ls-explore-sheet .ls-explore-exercise-main b{border:1px solid #bb73e4;border-radius:50%;width:30px;height:30px;text-align:center;line-height:26px;color:#dbaaff}
+@media(max-width:380px){.ls-explore-sheet{max-height:55vh}.ls-muscle-options .ls-explore-chip{flex-basis:79px;min-width:79px}.ls-zoom-controls{right:3px}}
+@media(prefers-reduced-motion:reduce){.ls-anatomy-zoom-frame{transition:none}}
