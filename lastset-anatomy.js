@@ -71,7 +71,7 @@
     const shapeOrder=side==='front'?['Shoulders','Chest','Arms','Core','Legs']:['Shoulders','Back','Arms','Legs'];
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
-      const centerHit=group==='Chest'?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="144" y="151" width="12" height="28" fill="rgba(120,250,75,.004)"/>':'';
+      const centerHit=group==='Chest'?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="144" y="151" width="12" height="28" fill="rgba(120,250,75,.004)"/>':group==='Back'?'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="rgba(120,250,75,.004)"/>':'';
       const segments=groups[group].map((entry,index)=>{
         const region=typeof entry==='string'?'':String(entry.region||'');
         const d=typeof entry==='string'?entry:entry.d;
