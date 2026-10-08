@@ -287,7 +287,7 @@ test.describe('LastSet production v0.14.0', () => {
     };
     await expect.poll(async () => page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
-      const cacheNames = (await caches.keys()).filter(name => /^lastset-v1-beta1-\\d+$/.test(name));
+      const cacheNames = (await caches.keys()).filter(name => name.startsWith('lastset-v1-beta1-'));
       const shellUrl = new URL('./__lastset_offline_shell__', registration.scope).toString();
       const versions = await Promise.all(cacheNames.map(async name => {
         const cache = await caches.open(name);
