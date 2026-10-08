@@ -124,3 +124,7 @@
 .ls-anatomy.ls-anatomy-premium{height:465px!important;max-height:465px!important;width:min(100%,248px)!important;overflow:visible!important}
 .ls-anatomy-stage::after{display:none!important}
 @media(max-width:380px){.ls-anatomy-stage{height:442px!important}.ls-anatomy.ls-anatomy-premium{height:429px!important;max-height:429px!important;width:min(100%,228px)!important}}
+
+/* Fine grained region highlight inside the approved mobile atlas */
+.ls-atlas-group.active:has(.ls-region-selected) .ls-atlas-segment:not(.ls-region-selected){fill:rgba(182,115,161,.14);stroke:rgba(219,172,191,.2);filter:none}
+.ls-atlas-group .ls-atlas-segment.ls-region-selected{fill:rgba(122,250,85,.69)!important;stroke:#caff8c!important;stroke-width:1.2;filter:drop-shadow(0 0 6px rgba(121,255,69,.37))}
