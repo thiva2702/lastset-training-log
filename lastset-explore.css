@@ -176,3 +176,8 @@
 .ls-explore-screen.ls-explore-has-selection .ls-anatomy-stage{margin-top:4px!important}
 .ls-explore-screen.ls-explore-has-selection .ls-anatomy-hint{display:none!important}
 .ls-anatomy-zoom-frame{will-change:transform}
+
+/* Preserve a usable view of selected muscles while the exercise sheet is open. */
+.ls-explore-screen.ls-explore-has-selection .ls-explore-sheet{
+  max-height:min(43dvh,430px)!important;
+}
