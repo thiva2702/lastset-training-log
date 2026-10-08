@@ -144,3 +144,14 @@
 .ls-anatomy-premium .ls-central-chest-target{pointer-events:all}
 .ls-anatomy-stage{scroll-margin-top:124px}
 .ls-atlas-group{scroll-margin-top:126px}
+
+/* Transparent centre hit zones make SVG group taps reliable in Chromium and WebKit */
+.ls-anatomy-premium .ls-central-back-target,
+.ls-anatomy-premium .ls-central-chest-target,
+.ls-anatomy-premium .ls-atlas-group.active .ls-central-back-target,
+.ls-anatomy-premium .ls-atlas-group.active .ls-central-chest-target{
+  fill:rgba(120,250,75,.004)!important;
+  stroke:none!important;
+  filter:none!important;
+  pointer-events:all!important;
+}
