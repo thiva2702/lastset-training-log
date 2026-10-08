@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.19.0';
+  const VERSION='0.20.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -79,10 +79,12 @@
         '<title>'+escape(GROUP_LABELS[group])+'</title>'+segments+'</g>';
     }).join('');
     const details='<g class="ls-atlas-etch" aria-hidden="true">'+LINE_ART[side].map(d=>'<path d="'+d+'"/>').join('')+'</g>';
+    const photo=gender==='male'?'<image class="ls-realistic-anatomy" href="/assets/anatomy-'+side+'.webp" x="0" y="0" width="300" height="596" preserveAspectRatio="none"/>':'';
+    const figure=gender==='male'?photo+shapes:base+shapes+details;
     const footer='';
     return '<svg class="ls-anatomy ls-anatomy-premium '+gender+'" viewBox="0 0 300 596" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="'+(gender==='female'?'Female':'Male')+' muscular anatomy, '+side+' view. Select a muscle group." preserveAspectRatio="xMidYMid meet">'+
       '<title>'+escape(gender==='female'?'Female':'Male')+' anatomy, '+side+' view</title>'+defs+bg+
-      '<g class="ls-atlas-figure">'+base+shapes+details+'</g>'+footer+'</svg>';
+      '<g class="ls-atlas-figure">'+figure+'</g>'+footer+'</svg>';
   }
   globalThis.LastSetAnatomy=Object.freeze({version:VERSION,render,frontGroups:Object.keys(FRONT),backGroups:Object.keys(BACK)});
 })();
