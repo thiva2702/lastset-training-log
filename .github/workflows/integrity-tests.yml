@@ -183,6 +183,8 @@ jobs:
           test -s dist/lastset-atlas-regions.js
           test -s dist/lastset-anatomy.js
           test -s dist/lastset-anatomy.css
+          test -s dist/assets/anatomy-front.webp
+          test -s dist/assets/anatomy-back.webp
           test -s dist/lastset-explore.js
           test -s dist/lastset-explore.css
           test -s dist/assets/lastset-mark.svg
