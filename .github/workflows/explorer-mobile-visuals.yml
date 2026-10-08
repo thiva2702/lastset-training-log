@@ -41,6 +41,8 @@ jobs:
           npx playwright install --with-deps chromium webkit
       - name: Targeted anatomy and forearm tests
         run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Muscle Explorer filters" --project=mobile-chromium --project=mobile-webkit
+      - name: Verify WebKit offline cache readiness
+        run: npx playwright test --grep "offline cache is installed" --project=mobile-webkit
       - name: Capture mobile front, back and selected anatomy
         run: |
           node <<'NODE'
