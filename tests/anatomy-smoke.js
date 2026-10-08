@@ -28,6 +28,7 @@ for(const gender of ['male','female']){
     assert(!/<rect[^>]+rx="13"/.test(html),'Old stickman arm shape should not remain');
   }
 }
+assert(atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
 const biceps=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Biceps'});
 assert.equal((biceps.match(/ls-region-selected/g)||[]).length,2);
 const forearms=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Forearms'});
