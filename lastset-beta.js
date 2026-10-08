@@ -4,7 +4,7 @@
   const RELEASE = Object.freeze({
     label: 'V1 Beta',
     semver: '1.0.0-beta.1',
-    build: '0.14.1'
+    build: '0.14.1.1'
   });
 
   window.LASTSET_RELEASE = RELEASE;
