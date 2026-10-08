@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.18.0';
+  const VERSION='0.19.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -43,6 +43,7 @@
     const side=options.side==='back'?'back':'front';
     const gender=options.gender==='female'?'female':'male';
     const active=GROUP_LABELS[options.activeGroup]?options.activeGroup:'';
+    const activeRegion=String(options.activeRegion||'');
     const groups=side==='back'?BACK:FRONT;
     const defs='<defs>'+
       '<linearGradient id="ls-atlas-body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#544663"/><stop offset=".43" stop-color="#30253d"/><stop offset="1" stop-color="#191624"/></linearGradient>'+
@@ -70,8 +71,10 @@
     const shapeOrder=side==='front'?['Shoulders','Chest','Arms','Core','Legs']:['Shoulders','Back','Arms','Legs'];
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
-      const segments=groups[group].map((d,index)=>
-        '<path class="ls-atlas-segment" data-segment="'+index+'" d="'+d+'"/>').join('');
+      const segments=groups[group].map((d,index)=>{
+        const selected=(group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
+        return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'" d="'+d+'"/>';
+      }).join('');
       return '<g class="ls-muscle-hit ls-atlas-group'+(isActive?' active':'')+'" data-explore-group="'+group+'" role="button" tabindex="0" aria-pressed="'+(isActive?'true':'false')+'" aria-label="Explore '+escape(GROUP_LABELS[group])+'">'+
         '<title>'+escape(GROUP_LABELS[group])+'</title>'+segments+'</g>';
     }).join('');
