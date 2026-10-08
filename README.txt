@@ -1,3 +1,45 @@
+LASTSET PWA v0.14.1 — OFFLINE + MUSCLE EXPLORER
+
+This release adds two major product capabilities: reliable offline gym use and a new interactive Muscle Explorer.
+
+OFFLINE RELIABILITY
+
+1. Core app shell works offline after one successful online load.
+2. Static LastSet assets are served cache-first, including versioned CSS/JS URLs.
+3. Calendar, Today, Profile, Progress, Exercise Search, typed Smart Log, plans, history and Muscle Explorer remain available without signal.
+4. A compact Offline pill confirms that training is being saved on the device.
+5. Typed Smart Log is guaranteed locally; Voice Smart Log clearly notes that speech recognition still depends on the phone/browser speech service.
+6. The bootstrap no longer unregisters the service worker or deletes caches.
+7. LastSet requests persistent browser storage where supported.
+8. Returning online shows a small confirmation without requiring a manual sync because workout data is already stored locally.
+
+MUSCLE EXPLORER
+
+1. New fifth top-level Explore tab with a light-bulb icon.
+2. Interactive front/back anatomy model.
+3. Female presentation follows a saved Female profile; Male is the default for all other/unspecified profiles.
+4. Tappable body regions open focused sub-muscle choices:
+   - Chest: Upper / Mid / Lower Chest
+   - Shoulders: Front / Side / Rear Delts
+   - Arms: Biceps / Triceps / Forearms
+   - Core: Abs / Obliques
+   - Back: Lats / Upper Back / Traps / Lower Back
+   - Legs: Quads / Hamstrings / Glutes / Calves / Adductors
+5. Equipment filters:
+   - Bodyweight
+   - Barbell / Free weight
+   - Dumbbells
+   - Machines
+   - Cable / Rope
+6. Exercise cards include last performance plus lightweight Setup / Do / Avoid guidance.
+7. Exercises can be added directly to Today's plan or planned for a selected future date.
+8. Explore-created plans use the existing LastSet plan structure and remain fully offline.
+9. The bottom navigation now supports Calendar · Today · Explore · Progress · Profile.
+
+CALENDAR INTEGRATION
+
+Phone calendar sync/export remains intentionally on hold for a later release.
+
 LASTSET PWA v0.14.0.2 — VOICE RELIABILITY HOTFIX
 
 This hotfix addresses two field issues found on iPhone Voice Smart Log.
