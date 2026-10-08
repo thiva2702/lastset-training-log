@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.22.0';
+  const VERSION='0.22.1';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -179,11 +179,11 @@
     const regions=forearmDetail?FOREARM_CHOICES:(group?.regions||[]);
     const chosenRegion=forearmDetail?(state.exploreSubregion||FOREARM_CHOICES[0]):state.exploreRegion;
     const results=chosenRegion?filterExploreExercises(cat(),chosenRegion,state.exploreEquipment):[];
-    return '<main class="container ls-explore-screen">'+
+    return '<main class="container ls-explore-screen'+(group?' ls-explore-has-selection':'')+'">'+
       '<section class="ls-explore-hero"><div class="ls-explore-bulb">'+BULB+'</div><div><div class="ls-explore-kicker">Learn · choose · train</div><h2>Muscle Explorer</h2><p>Tap the body, choose your focus and equipment, then add an exercise straight to your training plan.</p></div></section>'+
       '<section class="card ls-anatomy-card">'+
         '<div class="ls-anatomy-head"><div><strong>'+(gender==='female'?'Female':'Male')+' anatomy</strong><span>Original interactive atlas · based on your profile</span></div><div class="ls-side-toggle"><button class="'+(state.exploreSide==='front'?'active':'')+'" data-explore-side="front">Front</button><button class="'+(state.exploreSide==='back'?'active':'')+'" data-explore-side="back">Back</button></div></div>'+
-        '<div class="ls-anatomy-stage"><div class="ls-anatomy-zoom-frame" style="transform:scale('+state.exploreZoom+')">'+anatomySvg(state.exploreSide,gender)+'</div><div class="ls-zoom-controls" aria-label="Anatomy zoom"><button type="button" data-explore-zoom="in" aria-label="Zoom in">+</button><button type="button" data-explore-zoom="out" aria-label="Zoom out">−</button><button type="button" data-explore-zoom="reset" aria-label="Reset zoom">⟳</button></div></div>'+
+        '<div class="ls-anatomy-stage"><div class="ls-anatomy-zoom-frame" style="transform:translateY('+(group&&state.exploreGroup==='Legs'?-55:0)+'px) scale('+state.exploreZoom+')">'+anatomySvg(state.exploreSide,gender)+'</div><div class="ls-zoom-controls" aria-label="Anatomy zoom"><button type="button" data-explore-zoom="in" aria-label="Zoom in">+</button><button type="button" data-explore-zoom="out" aria-label="Zoom out">−</button><button type="button" data-explore-zoom="reset" aria-label="Reset zoom">⟳</button></div></div>'+
         '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreGroup)+'</strong>':'Tap a muscle group to explore')+'</div>'+
       '</section>'+
       (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
@@ -259,7 +259,7 @@
       state.exploreSubregion=state.exploreRegion==='Forearms'?FOREARM_CHOICES[0]:'';
       state.exploreEquipment='all';
       state.exploreExerciseId='';
-      render();return;
+      render();window.scrollTo(0,0);return;
     }
     const close=event.target.closest?.('[data-explore-close]');
     if(close){event.preventDefault();state.exploreGroup='';state.exploreRegion='';state.exploreSubregion='';state.exploreExerciseId='';render();return;}

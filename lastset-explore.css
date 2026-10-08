@@ -169,3 +169,10 @@
 .ls-sheet-head>div { min-width:0; }
 .ls-muscle-options .ls-explore-chip { scroll-snap-align:start; }
 .ls-muscle-options { scroll-snap-type:x proximity; }
+
+/* Focused muscle view preserves the selected region above the exercise sheet. */
+.ls-explore-screen.ls-explore-has-selection .ls-explore-hero{display:none!important}
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-card{margin-top:0!important;padding-top:9px!important}
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-stage{margin-top:4px!important}
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-hint{display:none!important}
+.ls-anatomy-zoom-frame{will-change:transform}

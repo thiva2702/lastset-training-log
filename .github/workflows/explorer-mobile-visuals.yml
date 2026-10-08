@@ -89,6 +89,13 @@ jobs:
               await page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first().click();
               await page.locator('[data-explore-subregion="Wrist Flexors"]').click();
               await page.locator('[data-explore-exercise="barbell-wrist-curl"]').waitFor();
+              const focused=await page.evaluate(()=>{
+                const selected=document.querySelector('.ls-atlas-visual.ls-region-selected');
+                const sheet=document.querySelector('.ls-explore-sheet');
+                const sel=selected?.getBoundingClientRect(),sh=sheet?.getBoundingClientRect();
+                return {muscleCenter:sel?(sel.top+sel.bottom)/2:null,sheetTop:sh?.top};
+              });
+              assert(focused.muscleCenter<focused.sheetTop-10,'Focused muscle is obscured by exercise sheet: '+JSON.stringify(focused));
               await page.screenshot({path:'test-results/lastset-forearm-iphone.png'});
               console.log('Mobile anatomy layout and forearm visual checks passed');
             } finally {

@@ -246,6 +246,7 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(forearm).toBeVisible();
     await forearm.click();
     await expect(page.locator('.ls-sheet-head strong')).toHaveText('Forearms');
+    await expect(page.locator('.ls-explore-has-selection')).toBeVisible();
     await expect(page.locator('[data-explore-subregion="Brachioradialis"]')).toHaveAttribute('aria-pressed','true');
     await page.locator('[data-explore-subregion="Wrist Flexors"]').click();
     await expect(page.locator('[data-explore-exercise="barbell-wrist-curl"]')).toBeVisible();
