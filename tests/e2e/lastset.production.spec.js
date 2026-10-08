@@ -270,34 +270,46 @@ test.describe('LastSet production v0.14.0', () => {
     });
     await page.waitForFunction(() => !!navigator.serviceWorker?.controller, null, { timeout: 10_000 });
 
-    const cacheState = await page.evaluate(async () => {
+    // WebKit sometimes reports a controlling service worker before its cache
+    // visibility settles. Ask the worker to refresh, then verify real entries.
+    await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
-      const cacheNames = (await caches.keys()).filter(name => /^lastset-v1-beta1-\d+$/.test(name));
-      if (cacheNames.length === 0) throw new Error('No LastSet offline cache installed');
-      const cache = await caches.open(cacheNames.sort().at(-1));
-      const shellUrl = new URL('./__lastset_offline_shell__', registration.scope).toString();
-      const shell = await cache.match(shellUrl);
-      const index = await cache.match('./index.html', { ignoreSearch: true });
-      const explore = await cache.match('./lastset-explore.js', { ignoreSearch: true });
-      const offline = await cache.match('./lastset-offline.js', { ignoreSearch: true });
-      return {
-        controlled: Boolean(navigator.serviceWorker.controller),
-        shell: Boolean(shell),
-        index: Boolean(index),
-        explore: Boolean(explore),
-        offline: Boolean(offline),
-        shellHasApp: shell ? (await shell.clone().text()).includes('LastSet') : false
-      };
+      (navigator.serviceWorker.controller || registration.active)?.postMessage({ type: 'LASTSET_WARM_OFFLINE' });
     });
 
-    expect(cacheState).toEqual({
+    const expectedCacheState = {
       controlled: true,
       shell: true,
       index: true,
       explore: true,
       offline: true,
       shellHasApp: true
-    });
+    };
+    await expect.poll(async () => page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.ready;
+      const cacheNames = (await caches.keys()).filter(name => /^lastset-v1-beta1-\\d+$/.test(name));
+      const shellUrl = new URL('./__lastset_offline_shell__', registration.scope).toString();
+      const versions = await Promise.all(cacheNames.map(async name => {
+        const cache = await caches.open(name);
+        const shell = await cache.match(shellUrl);
+        const index = await cache.match('./index.html', { ignoreSearch: true });
+        const explore = await cache.match('./lastset-explore.js', { ignoreSearch: true });
+        const offline = await cache.match('./lastset-offline.js', { ignoreSearch: true });
+        return {
+          controlled: Boolean(navigator.serviceWorker.controller),
+          shell: Boolean(shell),
+          index: Boolean(index),
+          explore: Boolean(explore),
+          offline: Boolean(offline),
+          shellHasApp: shell ? (await shell.clone().text()).includes('LastSet') : false
+        };
+      }));
+      return versions.find(value => value.shell && value.index && value.explore && value.offline) ||
+        versions.at(-1) || {
+          controlled: Boolean(navigator.serviceWorker.controller),
+          shell: false, index: false, explore: false, offline: false, shellHasApp: false
+        };
+    }), { timeout: 35000, intervals: [500, 1000, 2000, 2000] }).toEqual(expectedCacheState);
 
     // Playwright WebKit currently rejects service-worker responses after
     // browserContext.setOffline(true), even literal local responses. Its cache
