@@ -27,27 +27,28 @@
   <script>
     (async()=>{
       try{
-        if('serviceWorker' in navigator){
-          const regs=await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(r=>r.unregister()));
+        let html='';
+        try{
+          const res=await fetch('/index.html?legacy=0141',{cache:'no-store'});
+          if(!res.ok)throw new Error('network');
+          html=await res.text();
+        }catch(networkError){
+          if('caches' in window){
+            const cached=await caches.match('/index.html',{ignoreSearch:true})||await caches.match('./index.html',{ignoreSearch:true});
+            if(cached)html=await cached.text();
+          }
+          if(!html)throw networkError;
         }
-        if('caches' in window){
-          const keys=await caches.keys();
-          await Promise.all(keys.map(k=>caches.delete(k)));
-        }
-      }catch(_){ }
-      try{
-        const res=await fetch('/index.html?legacy=01402',{cache:'no-store'});
-        let html=await res.text();
-        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0138">\n<link rel="stylesheet" href="/lastset-premium.css?v=0138">\n<link rel="stylesheet" href="/lastset-images.css?v=0132">\n<link rel="stylesheet" href="/lastset-brand.css?v=0139">\n<link rel="stylesheet" href="/lastset-identity.css?v=01310">\n<link rel="stylesheet" href="/lastset-v0140.css?v=01402">\n<link rel="stylesheet" href="/lastset-onboarding.css?v=0140">\n<meta name="theme-color" content="#090713">\n`;
-        const bodyInject=`\n<script src="/lastset-enhancements.js?v=0132"><\/script>\n<script src="/lastset-premium.js?v=0132"><\/script>\n<script src="/lastset-hotfix.js?v=0132"><\/script>\n<script src="/lastset-smartlog-shorthand.js?v=01402"><\/script>\n<script src="/lastset-core-reliability.js?v=0133"><\/script>\n<script src="/lastset-memory.js?v=0134"><\/script>\n<script src="/lastset-intelligence.js?v=0137"><\/script>\n<script src="/lastset-calendar.js?v=0132"><\/script>\n<script src="/lastset-workouts.js?v=0132"><\/script>\n<script src="/lastset-integrity.js?v=0132"><\/script>\n<script src="/lastset-profile-equipment.js?v=0135"><\/script>\n<script src="/lastset-navigation.js?v=0132"><\/script>\n<script src="/lastset-beta.js?v=1beta1"><\/script>\n<script src="/lastset-brand.js?v=0139"><\/script>\n<script src="/lastset-identity.js?v=01401"><\/script>\n<script src="/lastset-v0140.js?v=01402"><\/script>\n<script src="/lastset-onboarding.js?v=0140"><\/script>\n`;
-        if(!html.includes('lastset-brand.css')) html=html.replace('</head>',headInject+'</head>');
-        if(!html.includes('lastset-brand.js')) html=html.replace('</body>',bodyInject+'</body>');
+
+        const headInject=`\n<link rel="stylesheet" href="/lastset-theme.css?v=0138">\n<link rel="stylesheet" href="/lastset-premium.css?v=0138">\n<link rel="stylesheet" href="/lastset-images.css?v=0132">\n<link rel="stylesheet" href="/lastset-brand.css?v=0139">\n<link rel="stylesheet" href="/lastset-identity.css?v=01310">\n<link rel="stylesheet" href="/lastset-v0140.css?v=01402">\n<link rel="stylesheet" href="/lastset-onboarding.css?v=0140">\n<link rel="stylesheet" href="/lastset-offline.css?v=0141">\n<link rel="stylesheet" href="/lastset-explore.css?v=0141">\n<meta name="theme-color" content="#090713">\n`;
+        const bodyInject=`\n<script src="/lastset-enhancements.js?v=0132"><\/script>\n<script src="/lastset-premium.js?v=0132"><\/script>\n<script src="/lastset-hotfix.js?v=0132"><\/script>\n<script src="/lastset-smartlog-shorthand.js?v=01402"><\/script>\n<script src="/lastset-core-reliability.js?v=0133"><\/script>\n<script src="/lastset-memory.js?v=0134"><\/script>\n<script src="/lastset-intelligence.js?v=0137"><\/script>\n<script src="/lastset-calendar.js?v=0132"><\/script>\n<script src="/lastset-workouts.js?v=0132"><\/script>\n<script src="/lastset-integrity.js?v=0132"><\/script>\n<script src="/lastset-profile-equipment.js?v=0135"><\/script>\n<script src="/lastset-navigation.js?v=0141"><\/script>\n<script src="/lastset-beta.js?v=1beta1"><\/script>\n<script src="/lastset-brand.js?v=0139"><\/script>\n<script src="/lastset-identity.js?v=01401"><\/script>\n<script src="/lastset-v0140.js?v=01402"><\/script>\n<script src="/lastset-onboarding.js?v=0140"><\/script>\n<script src="/lastset-offline.js?v=0141"><\/script>\n<script src="/lastset-explore.js?v=0141"><\/script>\n`;
+        if(!html.includes('lastset-offline.css'))html=html.replace('</head>',headInject+'</head>');
+        if(!html.includes('lastset-offline.js'))html=html.replace('</body>',bodyInject+'</body>');
         document.open();
         document.write(html);
         document.close();
       }catch(err){
-        document.body.innerHTML='<div class="boot"><div class="boot-inner"><img class="boot-icon" src="/assets/lastset-mark.svg?v=0139" alt=""><div class="boot-word"><span class="last">Last</span><span class="set">Set</span></div><div class="sub">Could not load the training log. Refresh once and try again.</div></div></div>';
+        document.body.innerHTML='<div class="boot"><div class="boot-inner"><img class="boot-icon" src="/assets/lastset-mark.svg?v=0139" alt=""><div class="boot-word"><span class="last">Last</span><span class="set">Set</span></div><div class="sub">LastSet could not open. Connect once, reopen the app, then it will be available offline.</div></div></div>';
         console.error('LastSet bootstrap error',err);
       }
     })();
