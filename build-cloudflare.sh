@@ -46,6 +46,7 @@ cp service-worker.js dist/
 cp _headers dist/
 cp _redirects dist/
 cp assets/*.webp dist/assets/
+node scripts/restore-anatomy-detail.mjs
 cp assets/*.svg dist/assets/
 
 echo "Cloudflare bundle ready in dist"

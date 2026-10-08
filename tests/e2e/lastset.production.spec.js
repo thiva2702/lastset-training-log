@@ -229,6 +229,10 @@ test.describe('LastSet production v0.14.0', () => {
     await page.locator('[data-nav="explore"]').click();
     const svg=page.locator('.ls-anatomy-premium.male');
     await expect(svg).toHaveAttribute('viewBox','0 0 346 631');
+    const front=await page.request.get('/assets/anatomy-front.webp');
+    expect(front.status()).toBe(200);
+    expect((await front.body()).byteLength).toBeGreaterThan(16000);
+
     const defaultVisual=svg.locator('.ls-atlas-visual').first();
     await expect(defaultVisual).toBeVisible();
     const purple=await defaultVisual.evaluate(el=>getComputedStyle(el).fill);
