@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.19.0');
+assert.equal(atlas.version,'0.20.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
@@ -15,6 +15,8 @@ for(const gender of ['male','female']){
     assert(html.includes('role="button" tabindex="0"'));
     assert(html.includes('aria-label="Explore '));
     assert(html.includes('ls-atlas-segment'));
+    if(gender==='male')assert(html.includes('/assets/anatomy-'+side+'.webp'));
+    if(gender==='female')assert(!html.includes('ls-realistic-anatomy'));
     assert(html.includes('ls-atlas-figure'));
     assert(!html.includes('NaN'));
     assert.equal((html.match(/<svg/g)||[]).length,1);
