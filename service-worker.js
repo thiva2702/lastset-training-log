@@ -1,4 +1,5 @@
-const CACHE = 'lastset-v1-beta1-0141';
+const CACHE = 'lastset-v1-beta1-01411';
+const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',
   './index.html',
@@ -42,8 +43,24 @@ const ASSETS = [
   './assets/lastset-mark.svg'
 ];
 
+async function primeOfflineCache(){
+  const cache=await caches.open(CACHE);
+
+  // Cache assets independently so one optional asset can never invalidate the whole offline install.
+  await Promise.allSettled(ASSETS.map(async asset=>{
+    const response=await fetch(asset,{cache:'no-store'});
+    if(response&&response.ok)await cache.put(asset,response.clone());
+  }));
+
+  // Keep a dedicated, stable HTML shell key for WebKit/iOS offline navigation.
+  const shell=await fetch('./index.html',{cache:'no-store'});
+  if(!shell||!shell.ok)throw new Error('LastSet offline shell could not be cached');
+  await cache.put('./index.html',shell.clone());
+  await cache.put(OFFLINE_SHELL,shell.clone());
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
+  event.waitUntil(primeOfflineCache());
   self.skipWaiting();
 });
 
@@ -56,11 +73,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('message', event => {
   if(event.data?.type !== 'LASTSET_WARM_OFFLINE') return;
-  event.waitUntil(
-    caches.open(CACHE).then(async cache => {
-      await Promise.allSettled(ASSETS.map(asset => cache.add(asset)));
-    })
-  );
+  event.waitUntil(primeOfflineCache());
 });
 
 function enhanceHtml(text) {
@@ -118,10 +131,12 @@ async function navigationResponse(request){
     const response=await fetch(request,{cache:'no-store'});
     const text=await response.clone().text();
     const cache=await caches.open(CACHE);
-    await cache.put('./index.html',new Response(text,{
+    const shellResponse=new Response(text,{
       status:200,
       headers:{'content-type':'text/html; charset=utf-8'}
-    }));
+    });
+    await cache.put('./index.html',shellResponse.clone());
+    await cache.put(OFFLINE_SHELL,shellResponse.clone());
     return new Response(enhanceHtml(text),{
       status:response.status,
       statusText:response.statusText,
@@ -131,7 +146,11 @@ async function navigationResponse(request){
       }
     });
   }catch(_){
-    const cached=await caches.match('./index.html',{ignoreSearch:true});
+    const cache=await caches.open(CACHE);
+    const cached=
+      await cache.match(OFFLINE_SHELL) ||
+      await cache.match('./index.html',{ignoreSearch:true}) ||
+      await cache.match('./',{ignoreSearch:true});
     if(!cached)return Response.error();
     const text=await cached.text();
     return new Response(enhanceHtml(text),{
