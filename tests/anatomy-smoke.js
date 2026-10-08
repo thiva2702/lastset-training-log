@@ -3,7 +3,7 @@ delete global.LastSetAnatomy;
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.15.0');
+assert.equal(atlas.version,'0.16.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
