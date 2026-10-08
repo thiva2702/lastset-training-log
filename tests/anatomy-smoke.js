@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.20.0');
+assert.equal(atlas.version,'0.21.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
@@ -29,6 +29,11 @@ for(const gender of ['male','female']){
   }
 }
 assert(atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
+for(const [side,regions] of Object.entries({front:['Biceps','Forearms','Upper Chest','Mid Chest','Lower Chest','Quads','Calves','Abs'],back:['Triceps','Forearms','Lats','Glutes','Hamstrings','Calves']})){
+  const html=atlas.render({side,gender:'male'});
+  for(const region of regions)assert(html.includes('data-anatomy-region="'+region+'"'),'No photographic tap region: '+side+' '+region);
+}
+assert(!atlas.render({side:'front',gender:'female'}).includes('data-anatomy-region="Forearms"'),'Keep existing female atlas geometry unchanged');
 const biceps=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Biceps'});
 assert.equal((biceps.match(/ls-region-selected/g)||[]).length,2);
 const forearms=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Forearms'});

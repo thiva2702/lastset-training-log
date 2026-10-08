@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.20.0';
+  const VERSION='0.21.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -44,7 +44,7 @@
     const gender=options.gender==='female'?'female':'male';
     const active=GROUP_LABELS[options.activeGroup]?options.activeGroup:'';
     const activeRegion=String(options.activeRegion||'');
-    const groups=side==='back'?BACK:FRONT;
+    const groups=(gender==='male'?globalThis.LastSetAtlasRegions?.photo?.[side]:null)||(side==='back'?BACK:FRONT);
     const defs='<defs>'+
       '<linearGradient id="ls-atlas-body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#544663"/><stop offset=".43" stop-color="#30253d"/><stop offset="1" stop-color="#191624"/></linearGradient>'+
       '<linearGradient id="ls-atlas-muscle" x1=".08" y1="0" x2=".94" y2="1"><stop stop-color="#bd82de"/><stop offset=".38" stop-color="#7f4b9f"/><stop offset=".72" stop-color="#573a78"/><stop offset="1" stop-color="#342549"/></linearGradient>'+
@@ -71,10 +71,12 @@
     const shapeOrder=side==='front'?['Shoulders','Chest','Arms','Core','Legs']:['Shoulders','Back','Arms','Legs'];
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
-      const centerHit=group==='Chest'?'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="rgba(120,250,75,.004)"/>':'';
-      const segments=groups[group].map((d,index)=>{
-        const selected=(group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
-        return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'" d="'+d+'"/>';
+      const centerHit=group==='Chest'?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="144" y="151" width="12" height="28" fill="rgba(120,250,75,.004)"/>':'';
+      const segments=groups[group].map((entry,index)=>{
+        const region=typeof entry==='string'?'':String(entry.region||'');
+        const d=typeof entry==='string'?entry:entry.d;
+        const selected=region ? activeRegion===region : (group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
+        return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'"'+(region?' data-anatomy-region="'+escape(region)+'"':'')+(entry.mirror?' transform="translate(300 0) scale(-1 1)"':'')+' d="'+d+'"/>';
       }).join('');
       return '<g class="ls-muscle-hit ls-atlas-group'+(isActive?' active':'')+'" data-explore-group="'+group+'" role="button" tabindex="0" aria-pressed="'+(isActive?'true':'false')+'" aria-label="Explore '+escape(GROUP_LABELS[group])+'">'+
         '<title>'+escape(GROUP_LABELS[group])+'</title>'+centerHit+segments+'</g>';

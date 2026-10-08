@@ -77,5 +77,57 @@
     ]
   };
 
- globalThis.LastSetAtlasRegions=Object.freeze({front:FRONT,back:BACK});
+
+  /* Touch geometry drawn against the photographic front and back figures.
+     All paths use the same 300 x 596 SVG coordinates as the displayed photo. */
+  const photoPair=(region,d)=>[{region,d},{region,d,mirror:true}];
+  const PHOTO={
+    front:{
+      Shoulders:[
+        ...photoPair('Side Delts','M97 104 Q78 101 65 116 Q54 131 60 150 Q65 165 79 171 Q93 155 102 126 Z')
+      ],
+      Chest:[
+        ...photoPair('Upper Chest','M108 126 Q128 116 148 126 L148 148 Q128 144 105 153 Z'),
+        ...photoPair('Mid Chest','M105 152 Q126 146 148 151 L148 180 Q133 191 117 182 Q107 178 105 152 Z'),
+        ...photoPair('Lower Chest','M115 184 Q131 190 148 184 L148 196 Q129 202 116 194 Z')
+      ],
+      Arms:[
+        ...photoPair('Biceps','M75 151 Q59 156 52 174 Q43 196 43 218 L50 232 Q62 226 72 207 Q82 184 83 163 Z'),
+        ...photoPair('Triceps','M84 143 Q93 156 90 177 Q85 193 75 205 L71 201 Q79 167 78 147 Z'),
+        ...photoPair('Forearms','M47 220 Q36 220 30 238 L13 276 Q4 293 3 310 Q13 318 24 301 L42 281 L57 237 Q57 224 47 220 Z')
+      ],
+      Core:[
+        ...photoPair('Abs','M127 184 L147 187 L146 287 Q131 285 119 272 Q122 225 127 184 Z'),
+        ...photoPair('Obliques','M114 190 Q108 210 107 239 Q108 271 123 292 L130 287 Q116 260 119 236 L123 197 Z')
+      ],
+      Legs:[
+        ...photoPair('Quads','M107 297 Q118 301 139 304 L135 399 Q125 429 105 432 Q87 411 91 373 Q91 327 107 297 Z'),
+        ...photoPair('Adductors','M143 307 Q151 336 145 384 Q146 403 139 419 L129 416 Q134 357 133 311 Z'),
+        ...photoPair('Calves','M108 424 Q128 422 136 449 L130 512 Q122 531 104 524 Q98 483 103 447 Z'),
+        ...photoPair('Calves','M110 513 Q122 529 130 513 L126 566 Q121 575 111 563 Z')
+      ]
+    },
+    back:{
+      Shoulders:[
+        ...photoPair('Rear Delts','M106 102 Q83 100 67 116 Q61 134 65 153 Q69 165 87 174 Q104 149 110 123 Z')
+      ],
+      Back:[
+        ...photoPair('Traps','M144 104 Q120 109 107 119 Q115 133 137 150 L148 171 L149 109 Z'),
+        ...photoPair('Upper Back','M104 121 Q116 150 147 170 L146 209 Q117 200 94 174 L84 153 Z'),
+        ...photoPair('Lats','M93 168 Q113 192 146 219 L147 265 Q130 271 115 281 Q90 254 91 224 Z'),
+        ...photoPair('Lower Back','M119 263 Q135 270 148 263 L149 294 L129 302 Q116 286 119 263 Z')
+      ],
+      Arms:[
+        ...photoPair('Triceps','M76 154 Q58 161 52 185 Q48 208 47 226 L58 232 Q72 209 79 183 Q86 165 84 150 Z'),
+        ...photoPair('Forearms','M48 222 Q37 225 29 245 L12 284 Q2 304 6 317 Q15 325 26 307 L46 279 L59 240 Z')
+      ],
+      Legs:[
+        ...photoPair('Glutes','M112 282 Q129 269 146 285 L146 334 Q135 356 109 351 Q93 342 104 309 Z'),
+        ...photoPair('Hamstrings','M109 354 Q130 359 144 343 L137 431 Q125 447 108 439 Q99 398 109 354 Z'),
+        ...photoPair('Calves','M111 432 Q130 422 139 454 L131 514 Q119 530 106 513 Q99 465 111 432 Z')
+      ]
+    }
+  };
+
+ globalThis.LastSetAtlasRegions=Object.freeze({front:FRONT,back:BACK,photo:PHOTO});
 })();
