@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.25.0';
+  const VERSION='0.25.1';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -20,6 +20,14 @@
     Forearms:['Brachioradialis','Wrist Flexors','Wrist Extensors','Other Forearms']
   });
   const focusChoices=(group,region)=>group==='Arms'&&DETAIL_REGIONS[region]?DETAIL_REGIONS[region]:GROUPS[group]?.regions||[];
+  function resolveFocusMuscle(parent,subregion){
+    if(!subregion)return parent||'';
+    // Brachialis is anatomically distinct from the two heads of biceps brachii.
+    // The catalogue uses "Brachialis", never the nonexistent "Biceps Brachialis".
+    if(parent==='Biceps'&&subregion!=='Brachialis')return 'Biceps '+subregion;
+    if(parent==='Triceps')return 'Triceps '+subregion;
+    return subregion;
+  }
 
 
   const EQUIPMENT=Object.freeze([
@@ -168,7 +176,7 @@
   }
 
   if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,rankExploreExercises,exercisePrimaryFocus,addExerciseToPlan,focusChoices};
+    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,rankExploreExercises,exercisePrimaryFocus,addExerciseToPlan,focusChoices,resolveFocusMuscle};
     return;
   }
 
@@ -244,8 +252,8 @@
     const specialist=state.exploreGroup==='Arms'&&Boolean(DETAIL_REGIONS[state.exploreRegion]);
     const regions=focusChoices(state.exploreGroup,state.exploreRegion);
     const chosenRegion=specialist?(state.exploreSubregion||''):state.exploreRegion;
-    const targetMuscle=specialist&&state.exploreSubregion
-      ?(state.exploreRegion==='Biceps'?'Biceps ':state.exploreRegion==='Triceps'?'Triceps ':'')+state.exploreSubregion
+    const targetMuscle=specialist
+      ?resolveFocusMuscle(state.exploreRegion,state.exploreSubregion)
       :state.exploreRegion;
     const ranked=rankExploreExercises(cat(),targetMuscle,state.exploreEquipment);
     const results=[...ranked.primary,...ranked.supplementary];
@@ -377,5 +385,5 @@
 
   if(typeof render==='function')render();
 
-  globalThis.LastSetExplore={version:VERSION,exploreScreen,filterExploreExercises,rankExploreExercises,addExerciseToPlan,focusChoices};
+  globalThis.LastSetExplore={version:VERSION,exploreScreen,filterExploreExercises,rankExploreExercises,addExerciseToPlan,focusChoices,resolveFocusMuscle};
 })();

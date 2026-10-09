@@ -98,3 +98,10 @@ assert(actual.primary.some(ex=>ex.id==='reverse-wrist-curl'),'Reverse Wrist Curl
 assert(!actual.supplementary.some(ex=>ex.id==='barbell-wrist-curl'),'Flexor isolation wrongly shown for wrist extensors');
 actual=T.rankExploreExercises(real,'Biceps Long Head','all');
 assert(actual.primary.some(ex=>ex.id==='incline-biceps-curl'),'Incline Curl missing from long head primary');
+
+assert.equal(T.resolveFocusMuscle('Biceps','Brachialis'),'Brachialis');
+assert.equal(T.resolveFocusMuscle('Biceps','Long Head'),'Biceps Long Head');
+assert.equal(T.resolveFocusMuscle('Biceps','Short Head'),'Biceps Short Head');
+assert.equal(T.resolveFocusMuscle('Triceps','Lateral Head'),'Triceps Lateral Head');
+assert.equal(T.resolveFocusMuscle('Forearms','Wrist Flexors'),'Wrist Flexors');
+assert(T.rankExploreExercises(real,T.resolveFocusMuscle('Biceps','Brachialis')).primary.some(ex=>ex.id==='hammer-curl'));

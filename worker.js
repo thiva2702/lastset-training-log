@@ -36,7 +36,7 @@ const SCRIPT_TAGS = [
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0240"],
   ["/lastset-anatomy.js","0250"],
-  ["/lastset-explore.js","0250"]
+  ["/lastset-explore.js","0251"]
 ];
 
 function injectPremiumLayer(html) {
