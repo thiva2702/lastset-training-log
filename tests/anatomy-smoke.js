@@ -34,7 +34,7 @@ for(const [side,regions] of Object.entries({front:['Biceps','Forearms','Upper Ch
   const html=atlas.render({side,gender:'male'});
   for(const region of regions)assert(html.includes('data-anatomy-region="'+region+'"'),'No photographic tap region: '+side+' '+region);
 }
-assert(!atlas.render({side:'front',gender:'female'}).includes('data-anatomy-region="Forearms"'),'Keep existing female atlas geometry unchanged');
+assert(atlas.render({side:'front',gender:'female'}).includes('data-anatomy-region="Forearms"'),'Female atlas must expose forearm selection');
 const biceps=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Biceps'});
 assert.equal((biceps.match(/ls-region-selected/g)||[]).length,2);
 const forearms=atlas.render({side:'front',gender:'male',activeGroup:'Arms',activeRegion:'Forearms'});
