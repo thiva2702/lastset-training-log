@@ -319,6 +319,25 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('[data-focus-kind="supplementary"]')).toBeVisible();
   });
 
+  test('Brachialis lists Hammer Curl as primary and Biceps as selected label', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+    await expect(page.locator('.ls-anatomy-hint')).toContainText('Selected: Biceps');
+    await page.locator('[data-explore-subregion="Brachialis"]').click();
+    await expect(page.locator('.ls-anatomy-hint')).toContainText('Brachialis');
+    await expect(page.locator('[data-focus-kind="primary"] [data-explore-exercise="hammer-curl"]')).toBeVisible();
+    await expect(page.locator('[data-focus-kind="supplementary"] [data-explore-exercise]').first()).toBeVisible();
+  });
+
+  test('Smart Log after onboarding uses refreshed journal layout', async ({ page }) => {
+    await page.locator('[data-nav="day"]').click();
+    await page.locator('[data-day-action="describe"]').click();
+    await expect(page.locator('main.ls-smartlog-screen')).toBeVisible();
+    await expect(page.getByRole('heading',{name:'What did you train?'})).toBeVisible();
+    await expect(page.locator('[data-action="parse-ai"]')).toBeVisible();
+    await expect(page.locator('#ai-text')).toBeVisible();
+  });
+
   test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     const forearm=page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first();

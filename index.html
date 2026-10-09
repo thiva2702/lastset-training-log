@@ -377,7 +377,7 @@ const EXERCISES = [
   { id:'triceps-dip', name:'Triceps Dip', equipment:'Bodyweight', muscles:['Triceps','Chest'], aliases:['triceps dip','dip','dips'] },
 
   { id:'biceps-curl', name:'Dumbbell Biceps Curl', equipment:'Dumbbell', muscles:['Biceps'], aliases:['biceps curl','bicep curl','dumbbell curl','dumbbell biceps curl'] },
-  { id:'hammer-curl', name:'Hammer Curl', equipment:'Dumbbell', muscles:['Biceps','Forearms'], aliases:['hammer curl','hammer curls'] },
+  { id:'hammer-curl', name:'Hammer Curl', equipment:'Dumbbell', muscles:['Biceps','Forearms','Brachialis'], primaryMuscle:'Brachialis', aliases:['hammer curl','hammer curls'] },
   { id:'cable-curl', name:'Cable Curl', equipment:'Cable', muscles:['Biceps'], aliases:['cable curl','cable biceps curl'] },
   { id:'preacher-curl', name:'Preacher Curl', equipment:'Machine', muscles:['Biceps'], aliases:['preacher curl','preacher machine curl'] },
 
@@ -385,7 +385,7 @@ const EXERCISES = [
   { id:'dumbbell-wrist-curl', name:'Dumbbell Wrist Curl', equipment:'Dumbbell', muscles:['Forearms','Wrist Flexors'], aliases:['dumbbell wrist curl','seated dumbbell wrist curl'] },
   { id:'reverse-wrist-curl', name:'Reverse Wrist Curl', equipment:'Barbell', muscles:['Forearms','Wrist Extensors'], aliases:['reverse wrist curl','barbell reverse wrist curl','wrist extension'] },
   { id:'dumbbell-reverse-wrist-curl', name:'Dumbbell Reverse Wrist Curl', equipment:'Dumbbell', muscles:['Forearms','Wrist Extensors'], aliases:['dumbbell reverse wrist curl','dumbbell wrist extension'] },
-  { id:'reverse-barbell-curl', name:'Reverse Barbell Curl', equipment:'Barbell', muscles:['Forearms','Brachioradialis','Biceps'], aliases:['reverse curl','reverse barbell curl','overhand curl'] },
+  { id:'reverse-barbell-curl', name:'Reverse Barbell Curl', equipment:'Barbell', muscles:['Forearms','Brachioradialis','Biceps','Brachialis'], aliases:['reverse curl','reverse barbell curl','overhand curl'] },
   { id:'farmers-carry', name:'Farmer Carry', equipment:'Dumbbell', muscles:['Forearms','Traps','Core'], aliases:['farmer carry','farmers carry','farmer walk','farmers walk'] },
 
 
@@ -655,11 +655,10 @@ function describeScreen(){
   const sourceBadge = state.aiParsed
     ? `<span class="ai-badge">⚡ Smart Log · On device</span>`
     : `<span class="ai-badge">⚡ Smart Log · Free</span>`;
-  return `<main class="container"><div class="card pad"><h2 style="margin:0 0 6px">Smart Log</h2>
-    <p class="muted" style="font-size:13px;margin-top:0;line-height:1.5">Type or speak naturally. Shorthand is fine too, for example “50 twelve, 55 ten and eight”. LastSet interprets your workout on this device, so no paid AI account is required.</p>
+  return `<main class="container ls-smartlog-screen"><div class="ls-smartlog-hero"><span class="ls-smartlog-eyebrow">TRAINING JOURNAL · QUICK ENTRY</span><h2>Smart <span>Log</span></h2><p>Speak or type your workout. Review the interpreted exercises and sets before saving.</p></div><div class="card pad ls-smartlog-entry"><h3>What did you train?</h3><p class="muted ls-smartlog-help">Example: Chest press 50 kg for 12, then 55 kg for 10 and 8. Or: Hammer curl, three sets of 12.</p>
     <div class="ai-toolbar">${sourceBadge}<span class="ai-confidence">${state.aiParsed?.confidence!=null?`Confidence ${Math.round(state.aiParsed.confidence*100)}%`:''}</span></div>
     <div class="field"><textarea id="ai-text" placeholder="Example: Chest press 50 kg for 12, then 55 for 10 and 8. Cable fly 20 kg three sets of 12.">${escapeHtml(state.aiDraft)}</textarea></div>
-    <div class="grid-2"><button class="secondary" data-action="voice-demo">🎙️ Speak</button><button class="primary" data-action="parse-ai">${state.aiLoading?'Understanding…':'Understand workout'}</button></div>
+    <div class="grid-2 ls-smartlog-actions"><button class="secondary" data-action="voice-demo">🎙️ Speak workout</button><button class="primary" data-action="parse-ai">${state.aiLoading?'Understanding…':'Understand workout'}</button></div>
     ${state.aiLoading?`<div class="ai-loading"><div class="ai-spinner"></div><div><strong style="font-size:13px">Understanding your workout</strong><div class="muted" style="font-size:11px;margin-top:3px">Matching exercises, sets and your local workout history.</div></div></div>`:''}
     ${state.aiError?`<div class="ai-error">${escapeHtml(state.aiError)}</div>`:''}
     ${state.aiParsed?aiParsedHtml(state.aiParsed):''}

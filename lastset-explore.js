@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.24.0';
+  const VERSION='0.25.0';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -66,7 +66,7 @@
       case'Biceps':return hasMuscle(ex,'Biceps');
       case'Biceps Long Head':return hasMuscle(ex,'Biceps Long Head')||(/incline|bayesian|behind.*body|drag curl/.test(n)&&hasMuscle(ex,'Biceps'));
       case'Biceps Short Head':return hasMuscle(ex,'Biceps Short Head')||(/preacher|spider|concentration|high cable curl/.test(n)&&hasMuscle(ex,'Biceps'));
-      case'Brachialis':return hasMuscle(ex,'Brachialis')||(/hammer|reverse curl/.test(n)&&hasMuscle(ex,'Biceps'));
+      case'Brachialis':return hasMuscle(ex,'Brachialis')||(/hammer curl|reverse.*curl|neutral.grip.*curl|cross.body.*curl/.test(n)&&hasMuscle(ex,'Biceps'));
       case'Triceps':return hasMuscle(ex,'Triceps');
       case'Triceps Long Head':return hasMuscle(ex,'Triceps Long Head')||(/overhead|skull crusher|lying triceps/.test(n)&&hasMuscle(ex,'Triceps'));
       case'Triceps Lateral Head':return hasMuscle(ex,'Triceps Lateral Head')||(/pushdown|pressdown|close grip/.test(n)&&hasMuscle(ex,'Triceps')&&!n.includes('reverse grip'));
@@ -141,6 +141,10 @@
     const directIds=new Set(primary.map(ex=>ex.id));
     const supplementary=eligible.filter(ex=>{
       if(directIds.has(ex.id))return false;
+      // Wrist flexion and wrist extension are opposing direct emphases.
+      // Do not relabel a flexor isolation as extensor support, or vice versa.
+      if(region==='Wrist Extensors'&&exerciseMatchesRegion(ex,'Wrist Flexors')&&!exerciseMatchesRegion(ex,'Wrist Extensors'))return false;
+      if(region==='Wrist Flexors'&&exerciseMatchesRegion(ex,'Wrist Extensors')&&!exerciseMatchesRegion(ex,'Wrist Flexors'))return false;
       if(exact.includes(ex))return true;
       return parent!==region&&exerciseMatchesRegion(ex,parent);
     });
@@ -250,7 +254,7 @@
       '<section class="card ls-anatomy-card">'+
         '<div class="ls-anatomy-head"><div><strong>'+(gender==='female'?'Female':'Male')+' anatomy</strong><span>Original interactive atlas · based on your profile</span></div><div class="ls-side-toggle"><button class="'+(state.exploreSide==='front'?'active':'')+'" data-explore-side="front">Front</button><button class="'+(state.exploreSide==='back'?'active':'')+'" data-explore-side="back">Back</button></div></div>'+
         '<div class="ls-anatomy-stage"><div class="ls-anatomy-zoom-frame" style="transform:scale('+state.exploreZoom+')">'+anatomySvg(state.exploreSide,gender)+'</div><div class="ls-zoom-controls" aria-label="Anatomy zoom"><button type="button" data-explore-zoom="in" aria-label="Zoom in">+</button><button type="button" data-explore-zoom="out" aria-label="Zoom out">−</button><button type="button" data-explore-zoom="reset" aria-label="Reset zoom">⟳</button></div></div>'+
-        '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreGroup)+'</strong>':'Tap a muscle group to explore')+'</div>'+
+        '<div class="ls-anatomy-hint">'+(state.exploreGroup?'Selected: <strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong>'+(state.exploreSubregion?' · <span>'+esc(state.exploreSubregion)+'</span>':''):'Tap a muscle group to explore')+'</div>'+
       '</section>'+
       (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
         '<div class="ls-sheet-head"><div><small>SELECT YOUR FOCUS</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>'+(specialist?'Choose a '+esc(state.exploreRegion.toLowerCase())+' emphasis. Exercises bias these regions rather than isolate them.':'Choose a specific muscle to see exercises')+'</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+

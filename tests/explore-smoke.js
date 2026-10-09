@@ -80,3 +80,21 @@ ranked=T.rankExploreExercises(focusCatalogue,'Triceps Long Head');
 assert(ranked.primary.some(x=>x.id==='overhead-triceps'));
 assert(ranked.supplementary.some(x=>x.id==='shoulder-press'));
 assert(!ranked.primary.some(x=>x.id==='shoulder-press'));
+
+// Explicit Brachialis primary and forearm isolation checks use real catalogue entries.
+const fs=require('node:fs');
+const vm=require('node:vm');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const pos=html.indexOf('const EXERCISES = [');
+const end=html.indexOf('];',pos)+2;
+assert(pos>0&&end>pos,'Real exercise catalogue not found');
+const real=vm.runInNewContext(html.slice(pos,end)+'\nEXERCISES',Object.create(null));
+let actual=T.rankExploreExercises(real,'Brachialis','all');
+assert(actual.primary.some(ex=>ex.id==='hammer-curl'),'Hammer Curl missing from Brachialis primary');
+assert(actual.supplementary.length>0,'Brachialis needs supplementary exercises');
+assert.equal(new Set([...actual.primary,...actual.supplementary].map(x=>x.id)).size,actual.primary.length+actual.supplementary.length,'Exercise listed twice');
+actual=T.rankExploreExercises(real,'Wrist Extensors','all');
+assert(actual.primary.some(ex=>ex.id==='reverse-wrist-curl'),'Reverse Wrist Curl missing from extensor primary');
+assert(!actual.supplementary.some(ex=>ex.id==='barbell-wrist-curl'),'Flexor isolation wrongly shown for wrist extensors');
+actual=T.rankExploreExercises(real,'Biceps Long Head','all');
+assert(actual.primary.some(ex=>ex.id==='incline-biceps-curl'),'Incline Curl missing from long head primary');
