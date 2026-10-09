@@ -63,3 +63,20 @@ const specialists=[
 ];
 for(const [region,name,muscle] of specialists)assert(T.exerciseMatchesRegion({name,muscles:[muscle]},region),region+' matching failed');
 console.log('LastSet Muscle Explorer smoke tests passed');
+const focusCatalogue=[
+ {id:'incline-curl',name:'Incline Dumbbell Biceps Curl',equipment:'Dumbbell',muscles:['Biceps','Biceps Long Head']},
+ {id:'regular-curl',name:'Dumbbell Bicep Curl',equipment:'Dumbbell',muscles:['Biceps']},
+ {id:'lat-pulldown',name:'Lat Pulldown',equipment:'Cable',muscles:['Back','Biceps']},
+ {id:'overhead-triceps',name:'Overhead Triceps Extension',equipment:'Cable',muscles:['Triceps']},
+ {id:'shoulder-press',name:'Converging Shoulder Press',equipment:'Machine',muscles:['Shoulders','Triceps']},
+ {id:'incline-press',name:'Incline Bench Press',equipment:'Barbell',muscles:['Upper Chest','Triceps','Shoulders']}
+];
+let ranked=T.rankExploreExercises(focusCatalogue,'Biceps Long Head');
+assert.deepEqual(ranked.primary.map(x=>x.id),['incline-curl']);
+assert(ranked.supplementary.some(x=>x.id==='regular-curl'));
+assert(ranked.supplementary.some(x=>x.id==='lat-pulldown'));
+assert(!ranked.supplementary.some(x=>x.id==='incline-curl'));
+ranked=T.rankExploreExercises(focusCatalogue,'Triceps Long Head');
+assert(ranked.primary.some(x=>x.id==='overhead-triceps'));
+assert(ranked.supplementary.some(x=>x.id==='shoulder-press'));
+assert(!ranked.primary.some(x=>x.id==='shoulder-press'));

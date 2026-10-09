@@ -276,6 +276,49 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('[data-explore-exercise="reverse-grip-triceps-pushdown"]')).toBeVisible();
   });
 
+
+  test('Female muscle model selects Biceps Long Head and shows primary versus supplementary exercises', async ({ page }) => {
+    await page.evaluate(() => {
+      const raw=localStorage.getItem('lastset-data-v1');
+      const current=raw?JSON.parse(raw):{};
+      current.profile=current.profile||{};
+      current.profile.gender='Female';
+      localStorage.setItem('lastset-data-v1',JSON.stringify(current));
+    });
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-nav="explore"]').click();
+    await expect(page.locator('.ls-anatomy-premium.female')).toBeVisible();
+    await page.locator('.ls-anatomy-premium.female [data-anatomy-region="Biceps"]').first().click();
+    await expect(page.locator('.ls-sheet-head strong')).toHaveText('Biceps');
+    for(const name of ['Long Head','Short Head','Brachialis']){
+      await expect(page.locator('[data-explore-subregion="'+name+'"]')).toBeVisible();
+    }
+    await page.locator('[data-explore-subregion="Long Head"]').click();
+    await expect(page.locator('.ls-anatomy-premium.female .ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-focus-kind="primary"]')).toBeVisible();
+    await expect(page.locator('[data-focus-kind="supplementary"]')).toBeVisible();
+    await expect(page.locator('[data-focus-kind="primary"] [data-explore-exercise="incline-biceps-curl"]')).toBeVisible();
+    await expect(page.locator('[data-focus-kind="supplementary"] [data-explore-exercise="incline-biceps-curl"]')).toHaveCount(0);
+  });
+
+  test('Female back anatomy provides Triceps Long Head specialist highlighting', async ({ page }) => {
+    await page.evaluate(() => {
+      const raw=localStorage.getItem('lastset-data-v1');
+      const current=raw?JSON.parse(raw):{};
+      current.profile=current.profile||{};current.profile.gender='Female';
+      localStorage.setItem('lastset-data-v1',JSON.stringify(current));
+    });
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-nav="explore"]').click();
+    await page.locator('[data-explore-side="back"]').click();
+    await expect(page.locator('.ls-anatomy-premium.female.ls-anatomy-back')).toBeVisible();
+    await page.locator('.ls-anatomy-premium.female [data-anatomy-region="Triceps"]').first().click();
+    await page.locator('[data-explore-subregion="Long Head"]').click();
+    await expect(page.locator('.ls-anatomy-premium.female .ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-focus-kind="primary"]')).toBeVisible();
+    await expect(page.locator('[data-focus-kind="supplementary"]')).toBeVisible();
+  });
+
   test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     const forearm=page.locator('.ls-anatomy-premium [data-anatomy-region="Forearms"]').first();

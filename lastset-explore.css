@@ -221,3 +221,11 @@
 .ls-option-thumb[data-thumb-region="Upper Chest"]{background-position:44% 23%}
 .ls-option-thumb[data-thumb-region="Mid Chest"]{background-position:44% 31%}
 .ls-option-thumb[data-thumb-region="Lower Chest"]{background-position:44% 36%}
+
+/* Distinct primary movement and supporting movement sections */
+.ls-focus-exercises{margin-top:16px}
+.ls-focus-exercises+.ls-focus-exercises{margin-top:24px;padding-top:18px;border-top:1px solid rgba(196,145,234,.23)}
+.ls-focus-exercises>.ls-result-head{margin-bottom:10px}
+.ls-focus-exercises[data-focus-kind="primary"]>.ls-result-head strong{color:#caff8c}
+.ls-focus-supplementary>.ls-result-head strong{color:#ddb7f5}
+.ls-focus-empty{font-size:12px;color:#b5a6c2;padding:14px 4px}

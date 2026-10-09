@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.23.1';
+  const VERSION='0.24.0';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -103,6 +103,55 @@
       });
   }
 
+
+  // Exercise emphasis is inferred conservatively from explicit primary muscle,
+  // the ordered muscle tags and movement names. Head isolation is not promised.
+  const PARENT_REGION=Object.freeze({
+    'Biceps Long Head':'Biceps','Biceps Short Head':'Biceps',Brachialis:'Biceps',
+    'Triceps Long Head':'Triceps','Triceps Lateral Head':'Triceps','Triceps Medial Head':'Triceps',
+    Brachioradialis:'Forearms','Wrist Flexors':'Forearms','Wrist Extensors':'Forearms','Other Forearms':'Forearms',
+    'Upper Chest':'Chest','Mid Chest':'Chest','Lower Chest':'Chest',
+    'Front Delts':'Shoulders','Side Delts':'Shoulders','Rear Delts':'Shoulders',
+    Abs:'Core',Obliques:'Core',Lats:'Back','Upper Back':'Back',Traps:'Back','Lower Back':'Back'
+  });
+  function exercisePrimaryFocus(ex,region){
+    if(!exerciseMatchesRegion(ex,region))return false;
+    const target=norm(region),title=norm(ex?.name),primary=norm(ex?.primaryMuscle);
+    const first=norm(ex?.muscles?.[0]),second=norm(ex?.muscles?.[1]),parent=norm(PARENT_REGION[region]||region);
+    if(primary===target||first===target||second===target)return true;
+    if(primary&&primary!==target&&primary!==parent)return false;
+    if(first!==parent&&primary!==parent)return false;
+    if(region==='Biceps Long Head')return /incline|bayesian|behind.*body|drag curl/.test(title);
+    if(region==='Biceps Short Head')return /preacher|spider|concentration|high cable/.test(title);
+    if(region==='Brachialis')return /hammer|reverse curl/.test(title);
+    if(region==='Triceps Long Head')return /overhead|skull crusher|lying triceps/.test(title);
+    if(region==='Triceps Lateral Head')return /pushdown|pressdown|close grip/.test(title)&&!title.includes('reverse grip');
+    if(region==='Triceps Medial Head')return /reverse grip|underhand/.test(title);
+    if(region==='Upper Chest')return /incline|low to high/.test(title);
+    if(region==='Lower Chest')return /decline|dip|high to low/.test(title);
+    if(region==='Mid Chest')return !/incline|decline|dip/.test(title);
+    return true;
+  }
+  function rankExploreExercises(catalogue,region,equipment='all'){
+    if(!region)return {primary:[],supplementary:[]};
+    const eligible=(catalogue||[]).filter(ex=>equipment==='all'||equipmentBucket(ex)===equipment);
+    const parent=PARENT_REGION[region]||region;
+    const exact=eligible.filter(ex=>exerciseMatchesRegion(ex,region));
+    const primary=exact.filter(ex=>exercisePrimaryFocus(ex,region));
+    const directIds=new Set(primary.map(ex=>ex.id));
+    const supplementary=eligible.filter(ex=>{
+      if(directIds.has(ex.id))return false;
+      if(exact.includes(ex))return true;
+      return parent!==region&&exerciseMatchesRegion(ex,parent);
+    });
+    const alpha=(a,b)=>String(a.name||'').localeCompare(String(b.name||''));
+    primary.sort(alpha);
+    supplementary.sort((a,b)=>
+      Number(exerciseMatchesRegion(b,region))-Number(exerciseMatchesRegion(a,region))||alpha(a,b)
+    );
+    return {primary,supplementary};
+  }
+
   function addExerciseToPlan(db,date,exerciseId,now=Date.now()){
     if(!db||!date||!exerciseId)return false;
     db.plans=db.plans||{};
@@ -115,7 +164,7 @@
   }
 
   if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,addExerciseToPlan,focusChoices};
+    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,rankExploreExercises,exercisePrimaryFocus,addExerciseToPlan,focusChoices};
     return;
   }
 
@@ -194,7 +243,8 @@
     const targetMuscle=specialist&&state.exploreSubregion
       ?(state.exploreRegion==='Biceps'?'Biceps ':state.exploreRegion==='Triceps'?'Triceps ':'')+state.exploreSubregion
       :state.exploreRegion;
-    const results=targetMuscle?filterExploreExercises(cat(),targetMuscle,state.exploreEquipment):[];
+    const ranked=rankExploreExercises(cat(),targetMuscle,state.exploreEquipment);
+    const results=[...ranked.primary,...ranked.supplementary];
     return '<main class="container ls-explore-screen'+(group?' ls-explore-has-selection':'')+'">'+
       '<section class="ls-explore-hero"><div class="ls-explore-bulb">'+BULB+'</div><div><div class="ls-explore-kicker">Learn · choose · train</div><h2>Muscle Explorer</h2><p>Tap the body, choose your focus and equipment, then add an exercise straight to your training plan.</p></div></section>'+
       '<section class="card ls-anatomy-card">'+
@@ -206,8 +256,12 @@
         '<div class="ls-sheet-head"><div><small>SELECT YOUR FOCUS</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>'+(specialist?'Choose a '+esc(state.exploreRegion.toLowerCase())+' emphasis. Exercises bias these regions rather than isolate them.':'Choose a specific muscle to see exercises')+'</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+
         '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(specialist?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'"><span class="ls-option-thumb" data-thumb-region="'+esc(r)+'" data-thumb-parent="'+esc(state.exploreRegion)+'" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
         (state.exploreRegion?'<div class="ls-sheet-equipment"><strong>Equipment</strong><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></div>':'')+
-        (state.exploreRegion?'<div class="ls-explore-results"><div class="ls-result-head"><strong>Common exercises</strong><span>'+results.length+' found</span></div>'+
-          (results.length?results.map(exerciseCard).join(''):'<div class="empty">No exercises match this equipment. Try All.</div>')+'</div>':'')+
+        (state.exploreRegion?'<div class="ls-explore-results">'+
+          '<section class="ls-focus-exercises" data-focus-kind="primary"><div class="ls-result-head"><strong>Primary Focus</strong><span>'+ranked.primary.length+' exercises</span></div>'+
+          (ranked.primary.length?ranked.primary.map(exerciseCard).join(''):'<div class="ls-focus-empty">No direct focus exercises for this equipment. Try All.</div>')+'</section>'+
+          '<section class="ls-focus-exercises ls-focus-supplementary" data-focus-kind="supplementary"><div class="ls-result-head"><strong>Supplementary</strong><span>'+ranked.supplementary.length+' exercises</span></div>'+
+          (ranked.supplementary.length?ranked.supplementary.map(exerciseCard).join(''):'<div class="ls-focus-empty">No additional supporting exercises.</div>')+'</section>'+
+          '</div>':'')+
       '</section>':'')+
     '</main>';
   }
@@ -319,5 +373,5 @@
 
   if(typeof render==='function')render();
 
-  globalThis.LastSetExplore={version:VERSION,exploreScreen,filterExploreExercises,addExerciseToPlan,focusChoices};
+  globalThis.LastSetExplore={version:VERSION,exploreScreen,filterExploreExercises,rankExploreExercises,addExerciseToPlan,focusChoices};
 })();
