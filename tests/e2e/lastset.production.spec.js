@@ -330,12 +330,31 @@ test.describe('LastSet production v0.14.0', () => {
   });
 
   test('Smart Log after onboarding uses refreshed journal layout', async ({ page }) => {
-    await page.locator('[data-nav="day"]').click();
-    await page.locator('[data-day-action="describe"]').click();
+    await resetToOnboarding(page);
+    await page.locator('#ls-onboard-name').fill('New Training User');
+    await page.locator('#ls-onboard-unit').selectOption('kg');
+    await page.locator('[data-onboard-save]').click();
+    await expect(page.locator('.ls-onboard-finish')).toBeVisible();
+    await page.locator('[data-start="describe"]').click();
     await expect(page.locator('main.ls-smartlog-screen')).toBeVisible();
     await expect(page.getByRole('heading',{name:'What did you train?'})).toBeVisible();
     await expect(page.locator('[data-action="parse-ai"]')).toBeVisible();
     await expect(page.locator('#ai-text')).toBeVisible();
+  });
+
+  test('Front and back 4K atlas assets preserve full body ratios', async ({ page }) => {
+    await page.locator('[data-nav="explore"]').click();
+    for (const side of ['front','back']) {
+      const size=await page.evaluate(async (side)=>{
+        const im=new Image();
+        im.src='/assets/anatomy-'+side+'.webp?v=4k0250';
+        await im.decode();
+        return {width:im.naturalWidth,height:im.naturalHeight};
+      },side);
+      expect(size.height).toBe(4096);
+      expect(size.width).toBeGreaterThan(2100);
+      expect(size.width).toBeLessThan(2450);
+    }
   });
 
   test('Forearm atlas tap opens specific forearm exercises', async ({ page }) => {
