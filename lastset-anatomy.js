@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.23.1';
+  const VERSION='0.24.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -46,15 +46,17 @@
     const activeRegion=String(options.activeRegion||'');
     const activeSubregion=String(options.activeSubregion||'');
     const photographic=gender==='male';
+    const femaleMapped=gender==='female'?globalThis.LastSetAtlasRegions?.female?.[side]:null;
     const imageWidth=side==='front'?346:356;
     const imageHeight=631;
-    const groups=(photographic?globalThis.LastSetAtlasRegions?.photo?.[side]:null)||(side==='back'?BACK:FRONT);
-    const detail=photographic&&active==='Arms'?globalThis.LastSetAtlasRegions?.photoDetail?.[side]?.[activeRegion]:null;
+    const groups=(photographic?globalThis.LastSetAtlasRegions?.photo?.[side]:femaleMapped)||(side==='back'?BACK:FRONT);
+    const detail=active==='Arms'?(photographic?globalThis.LastSetAtlasRegions?.photoDetail?.[side]?.[activeRegion]:globalThis.LastSetAtlasRegions?.femaleDetail?.[side]?.[activeRegion]):null;
     const detailedSelection=Boolean(detail?.length&&activeSubregion);
     const defs='<defs>'+
       '<linearGradient id="ls-atlas-body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#544663"/><stop offset=".43" stop-color="#30253d"/><stop offset="1" stop-color="#191624"/></linearGradient>'+
       '<linearGradient id="ls-atlas-muscle" x1=".08" y1="0" x2=".94" y2="1"><stop stop-color="#bd82de"/><stop offset=".38" stop-color="#7f4b9f"/><stop offset=".72" stop-color="#573a78"/><stop offset="1" stop-color="#342549"/></linearGradient>'+
       '<linearGradient id="ls-atlas-active" x1=".16" y1="0" x2=".89" y2="1"><stop stop-color="#e9ffa5"/><stop offset=".46" stop-color="#b9ff64"/><stop offset="1" stop-color="#59ac58"/></linearGradient>'+
+      '<linearGradient id="ls-female-body-shade" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#342235"/><stop offset=".2" stop-color="#a87789"/><stop offset=".46" stop-color="#c995a0"/><stop offset=".72" stop-color="#915e73"/><stop offset="1" stop-color="#31202e"/></linearGradient>'+ 
       '<radialGradient id="ls-atlas-halo"><stop stop-color="#8b43c5" stop-opacity=".24"/><stop offset="1" stop-color="#8b43c5" stop-opacity="0"/></radialGradient>'+
       '<filter id="ls-atlas-glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>'+
       '</defs>';
@@ -78,7 +80,7 @@
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
       const centerHit=group==='Chest'?(photographic?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="165" y="153" width="16" height="30" fill="transparent"/>':'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="transparent"/>'):group==='Back'?(photographic?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="166" y="169" width="24" height="68" fill="transparent"/>':'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="transparent"/>'):'';
-      const muscleEntries=photographic&&group==='Arms'&&side==='front'
+      const muscleEntries=(photographic||femaleMapped)&&group==='Arms'&&side==='front'
         ?[...groups[group]].sort((a,b)=>({Triceps:0,Forearms:1,Biceps:2}[a.region]??3)-({Triceps:0,Forearms:1,Biceps:2}[b.region]??3))
         :groups[group];
       const segments=muscleEntries.map((entry,index)=>{
@@ -86,7 +88,7 @@
         const d=typeof entry==='string'?entry:entry.d;
         const selected=region ? (activeRegion===region&&!detailedSelection) : (group==='Arms' && ((activeRegion==='Biceps' && index<2)||(activeRegion==='Forearms' && index>=2&&index<4)||(activeRegion==='Triceps'&&index>=4)));
         const mirror=entry.mirror?' transform="translate('+(photographic?imageWidth:300)+' 0) scale(-1 1)"':'';
-        if(photographic){
+        if(photographic||femaleMapped){
           return '<g class="ls-atlas-muscle">'+
             '<path class="ls-atlas-segment ls-atlas-visual'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'"'+mirror+' d="'+d+'" aria-hidden="true"/>'+
             '<path class="ls-atlas-hit" data-segment="'+index+'" data-anatomy-region="'+escape(region)+'"'+mirror+' d="'+d+'"/>'+
@@ -95,7 +97,7 @@
         return '<path class="ls-atlas-segment'+(selected?' ls-region-selected':'')+'" data-segment="'+index+'"'+(region?' data-anatomy-region="'+escape(region)+'"':'')+mirror+' d="'+d+'"/>';
       }).join('');
       const specialist=group==='Arms'&&detail?.length?detail.map((entry,index)=>{
-        const mirror=entry.mirror?' transform="translate('+imageWidth+' 0) scale(-1 1)"':'';
+        const mirror=entry.mirror?' transform="translate('+(photographic?imageWidth:300)+' 0) scale(-1 1)"':'';
         const selected=activeSubregion===entry.region;
         return '<g class="ls-atlas-muscle ls-specialist-muscle'+(!activeSubregion?' ls-specialist-hint':'')+'">'+
           '<path class="ls-atlas-segment ls-atlas-visual ls-specialist-visual'+(selected?' ls-region-selected':'')+'" d="'+entry.d+'"'+mirror+' aria-hidden="true"/>'+

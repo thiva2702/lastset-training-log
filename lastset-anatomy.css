@@ -289,3 +289,33 @@
 @media(max-height:690px){
   .ls-explore-screen .ls-anatomy-stage{height:440px!important;min-height:440px!important}
 }
+
+/* Female atlas: named selectable and independently highlighted muscle heads */
+.ls-anatomy-premium.female .ls-atlas-body path{
+  fill:url(#ls-female-body-shade)!important;
+  stroke:rgba(242,178,183,.44)!important;stroke-width:1.1!important;
+}
+.ls-anatomy-premium.female .ls-atlas-muscle .ls-atlas-visual{
+  fill:rgba(173,102,211,.54)!important;
+  stroke:rgba(244,188,249,.9)!important;
+  stroke-width:1.6!important;
+  pointer-events:none!important;
+}
+.ls-anatomy-premium.female .ls-atlas-muscle .ls-atlas-visual.ls-region-selected{
+  fill:rgba(128,255,70,.82)!important;
+  stroke:#dfffac!important;
+  stroke-width:2.2!important;
+  filter:drop-shadow(0 0 4px rgba(159,255,91,.6))!important;
+}
+.ls-anatomy-premium.female .ls-atlas-muscle .ls-atlas-hit{
+  pointer-events:visibleFill!important;
+  fill:rgba(0,0,0,.001)!important;
+  stroke:transparent!important;stroke-width:2!important;cursor:pointer;
+}
+.ls-anatomy-premium.female .ls-specialist-muscle .ls-specialist-visual:not(.ls-region-selected){
+  fill:rgba(187,122,240,.3)!important;
+  stroke:rgba(250,195,251,.82)!important;
+}
+.ls-anatomy-premium.female .ls-specialist-muscle .ls-specialist-visual.ls-region-selected{
+  fill:rgba(134,255,75,.94)!important;stroke:#efffc7!important;stroke-width:2.4!important;
+}

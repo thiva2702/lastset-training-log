@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.23.1');
+assert.equal(atlas.version,'0.24.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
@@ -57,4 +57,11 @@ for(const [side,parent,sub] of [['front','Biceps','Long Head'],['front','Biceps'
   const html=atlas.render({side,gender:'male',activeGroup:'Arms',activeRegion:parent,activeSubregion:sub});
   assert(html.includes('data-anatomy-subregion="'+sub+'"'),'Missing specialist touch target '+sub);
   assert(html.includes('ls-specialist-visual ls-region-selected'),'Missing specialist highlight '+sub);
+}
+
+for(const [side,parent,sub] of [['front','Biceps','Long Head'],['front','Biceps','Short Head'],['front','Biceps','Brachialis'],['back','Triceps','Long Head'],['back','Triceps','Medial Head'],['front','Forearms','Wrist Flexors']]){
+ const html=atlas.render({side,gender:'female',activeGroup:'Arms',activeRegion:parent,activeSubregion:sub});
+ assert(html.includes('data-anatomy-parent="'+parent+'"'),'Female specialist parent missing: '+parent);
+ assert(html.includes('data-anatomy-subregion="'+sub+'"'),'Female specialist region missing: '+sub);
+ assert(html.includes('ls-specialist-visual ls-region-selected'),'Female specialist highlight missing: '+sub);
 }
