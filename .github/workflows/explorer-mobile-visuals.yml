@@ -44,7 +44,7 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium webkit
       - name: Targeted anatomy and forearm tests
-        run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Biceps offers only|Triceps offers|Muscle Explorer filters|Atlas uses source pixel" --project=mobile-chromium --project=mobile-webkit
+        run: npx playwright test --grep "Premium anatomy atlas|Forearm atlas tap|Biceps offers only|Triceps offers|Female muscle model|Female back anatomy|Muscle Explorer filters|Atlas uses source pixel" --project=mobile-chromium --project=mobile-webkit
       - name: Verify WebKit offline cache readiness
         run: npx playwright test --grep "offline cache is installed" --project=mobile-webkit
       - name: Capture mobile front, back and selected anatomy
@@ -127,7 +127,35 @@ jobs:
               assert.equal(legs.selection,'Quads','The Quads tap did not select Quads');
               assert(legs.center<legs.sheetTop-10,'Selected Quads are covered by exercise sheet: '+JSON.stringify(legs));
               await page.screenshot({path:'test-results/lastset-quads-iphone.png'});
-              console.log('Mobile front, back, forearm and quads visual checks passed');
+              await page.evaluate(() => {
+                const key='lastset-data-v1';
+                const raw=localStorage.getItem(key);
+                const current=raw?JSON.parse(raw):{};
+                current.profile=current.profile||{};
+                current.profile.gender='Female';
+                localStorage.setItem(key,JSON.stringify(current));
+              });
+              await page.reload({waitUntil:'domcontentloaded'});
+              await page.locator('[data-nav="explore"]').click();
+              await page.locator('.ls-anatomy-premium.female').waitFor();
+              const frontVisuals=await page.locator('.ls-anatomy-premium.female .ls-atlas-visual').count();
+              assert(frontVisuals>=20,'Female front anatomy missing selectable colored regions');
+              await page.screenshot({path:'test-results/lastset-female-front-iphone.png',fullPage:true});
+              await page.locator('.ls-anatomy-premium.female [data-anatomy-region="Biceps"]').first().click();
+              await page.locator('[data-explore-subregion="Long Head"]').click();
+              await page.locator('.ls-anatomy-premium.female .ls-specialist-visual.ls-region-selected').first().waitFor();
+              await page.locator('[data-focus-kind="primary"] [data-explore-exercise="incline-biceps-curl"]').waitFor();
+              const gap=await page.evaluate(()=>{
+                const figure=document.querySelector('.ls-anatomy-stage').getBoundingClientRect();
+                const panel=document.querySelector('.ls-explore-sheet').getBoundingClientRect();
+                return panel.top-figure.bottom;
+              });
+              assert(gap>0,'Female specialist sheet overlaps anatomy: '+gap);
+              await page.screenshot({path:'test-results/lastset-female-biceps-iphone.png',fullPage:true});
+              await page.locator('[data-explore-side="back"]').click();
+              await page.locator('.ls-anatomy-premium.female.ls-anatomy-back').waitFor();
+              await page.screenshot({path:'test-results/lastset-female-back-iphone.png',fullPage:true});
+              console.log('Mobile male/female front/back, specialist highlights, exercise sections and inline layout passed');
             } finally {
               await browser.close();
             }
