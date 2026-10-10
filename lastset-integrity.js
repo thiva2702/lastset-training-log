@@ -650,6 +650,7 @@
       card.querySelector('[data-import-backup]').onclick=()=>fileInput.click();
       fileInput.onchange=()=>{const f=fileInput.files?.[0];if(f)importBackupFile(f);fileInput.value='';};
     }
+    const exportCurrent=main.querySelector('[data-action="export-data"]');if(exportCurrent)exportCurrent.textContent='Export current profile only';
     const reset=document.querySelector('[data-action="clear-data"]'); if(reset)reset.textContent="Reset current user's training data";
     const version=[...document.querySelectorAll('.muted')].find(el=>/LastSet v0\.12/i.test(el.textContent||''));
     if(version)version.textContent=`LastSet v${VERSION} Trust + Data Integrity`;
