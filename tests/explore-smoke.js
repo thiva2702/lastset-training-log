@@ -50,9 +50,9 @@ for(const [region,id] of [['Brachioradialis','hammer'],['Brachioradialis','rever
 }
 assert(!T.filterExploreExercises(forearmCatalogue,'Wrist Extensors').some(x=>x.id==='barbell-wrist-curl'),'Do not confuse wrist flexion with extension');
 
-assert.deepEqual(T.focusChoices('Arms','Biceps'),['Long Head','Short Head','Brachialis']);
-assert.deepEqual(T.focusChoices('Arms','Triceps'),['Long Head','Lateral Head','Medial Head']);
-assert.deepEqual(T.focusChoices('Chest','Upper Chest'),['Upper Chest','Mid Chest','Lower Chest']);
+assert.deepEqual(T.focusChoices('Arms','Biceps'),['Normal','Long Head','Short Head','Brachialis']);
+assert.deepEqual(T.focusChoices('Arms','Triceps'),['Normal','Long Head','Lateral Head','Medial Head']);
+assert.deepEqual(T.focusChoices('Chest','Upper Chest'),['Normal','Upper Chest','Mid Chest','Lower Chest']);
 const specialists=[
  ['Biceps Long Head','Incline Dumbbell Curl','Biceps'],
  ['Biceps Short Head','Preacher Curl','Biceps'],
