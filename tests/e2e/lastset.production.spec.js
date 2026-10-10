@@ -142,10 +142,8 @@ async function runSmartLog(page, text, expectedType) {
 test.describe('LastSet production v0.14.0', () => {
   test('Mobility is a visible primary category, while Machine Scan remains hidden',async ({page})=>{
     await goToday(page);
-    const actions=page.locator('[data-day-action]');
-    const names=await actions.allTextContents();
-    expect(names.some(s=>s.includes('Mobility & Recovery'))).toBeTruthy();
-    expect(names.some(s=>s.includes('Scan Machine'))).toBeFalsy();
+    await expect(page.locator('[data-day-action="mobility"]')).toBeVisible();
+    await expect(page.locator('[data-day-action="mobility"]')).toContainText('Mobility');
     expect(await page.locator('[data-day-action="scan"]').count()).toBe(0);
     await page.locator('[data-day-action="mobility"]').click();
     await expect(page.locator('[data-mobility-activity="Yoga"]')).toBeVisible();

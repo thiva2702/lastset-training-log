@@ -198,11 +198,14 @@
     const base=older.progressScreen();
     const sessions=historyMobility();
     const total=sessions.reduce((n,s)=>n+(Number(s.duration)||0),0);
-    return base.replace('<div class="card">','<div class="card pad ls-mobility-progress-card">'+
+    const summary='<div class="card pad ls-mobility-progress-card">'+
       '<strong>🧘 Mobility &amp; Recovery</strong><div class="ls-mobility-progress-numbers">'+
       '<span><b>'+sessions.length+'</b> sessions</span><span><b>'+total+'</b> minutes</span></div>'+
       (sessions.length?'<div class="muted ls-mobility-recent">Latest: '+escapeHtml(sessions.sort((a,b)=>b.date.localeCompare(a.date))[0].activity)+' · '+escapeHtml(sessions[0].date)+'</div>':'<div class="muted ls-mobility-recent">Yoga, Pilates, stretching and recovery sessions will appear here.</div>')+
-      '</div><div class="card">');
+      '</div>';
+    // The v0.14 Progress page no longer begins with a plain .card; inject
+    // at the actual <main> boundary instead of targeting the legacy layout.
+    return base.replace(/<main\b[^>]*>/i,tag=>tag+summary);
   };
   parseSmartWorkout=function(text){
     const mobility=detectMobility(text);

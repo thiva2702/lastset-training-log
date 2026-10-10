@@ -69,5 +69,6 @@ data.sessions['2026-10-10']=[{id:'saved',type:'mobility',activity:'Yoga',duratio
 assert(ctx.sessionCard(data.sessions['2026-10-10'][0]).includes('data-edit-mobility'));
 assert(ctx.calendarScreen().includes('>1</strong><span>Mobility'));
 assert(ctx.progressScreen().includes('45</b> minutes'));
+assert(ctx.progressScreen().includes('ls-mobility-progress-card'));
 assert.equal(rerenders,1);
 console.log('Mobility & Recovery smoke tests passed');
