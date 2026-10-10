@@ -332,44 +332,68 @@
   }
 
   function switchToUser(id){
-    syncActiveSnapshot(data);
-    const reg=readRegistry();
-    const target=reg.users.find(u=>u.id===id);
-    if(!target || !validateBackup(target.data)) return;
-    reg.activeId=id;
-    writeRegistry(reg);
-    data=clone(target.data);
-    data.profile=data.profile||{}; data.profile.userId=id;
-    if(baseSaveData) baseSaveData(data);
-    resetViewTo(isoDate(new Date()));
-    render();
-    showToast(`Switched to ${data.profile.name||'user'}`);
+    try{
+      syncActiveSnapshot(data);
+      const reg=readRegistry();
+      if(registryCorrupted) throw new Error('Profile registry is unreadable');
+      const target=reg.users.find(u=>u.id===id);
+      if(!target || !validateBackup(target.data)) return false;
+      const next=clone(target.data);
+      next.profile=next.profile||{};next.profile.userId=id;
+      const previousActiveId=reg.activeId;
+      reg.activeId=id;
+      if(!writeRegistry(reg)) return false;
+      try{if(baseSaveData) baseSaveData(next);}
+      catch(err){
+        reg.activeId=previousActiveId;
+        writeRegistry(reg);
+        throw err;
+      }
+      data=next;
+      resetViewTo(isoDate(new Date()));
+      render();
+      showToast(`Switched to ${data.profile.name||'user'}`);
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      showToast('Could not switch users safely. Existing workout data is unchanged.');
+      return false;
+    }
   }
 
   function createNewUser(name,deleteCurrent){
-    if(!deleteCurrent) syncActiveSnapshot(data);
-    const reg=readRegistry();
-    const currentId=reg.activeId;
-    if(deleteCurrent) reg.users=reg.users.filter(u=>u.id!==currentId);
-    const id=userId();
-    const fresh=emptyUserData(name);
-    fresh.profile.userId=id;
-    reg.activeId=id;
-    reg.users.push({id,name:name||'New user',data:clone(fresh),updatedAt:Date.now()});
-    writeRegistry(reg);
-    data=fresh;
-    if(baseSaveData) baseSaveData(data);
-    resetViewTo(isoDate(new Date()));
-    render();
-    showToast('New user started fresh');
+    try{
+      syncActiveSnapshot(data);
+      const reg=readRegistry();
+      if(registryCorrupted) throw new Error('Profile registry is unreadable');
+      const original=clone(reg);
+      const currentId=reg.activeId;
+      if(deleteCurrent) reg.users=reg.users.filter(u=>u.id!==currentId);
+      const id=userId();
+      const fresh=emptyUserData(name);
+      fresh.profile.userId=id;
+      reg.activeId=id;
+      reg.users.push({id,name:name||'New user',data:clone(fresh),updatedAt:Date.now()});
+      if(!writeRegistry(reg)) return false;
+      try{if(baseSaveData)baseSaveData(fresh);}
+      catch(err){writeRegistry(original);throw err;}
+      data=fresh;
+      resetViewTo(isoDate(new Date()));
+      render();
+      showToast('New user started fresh');
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function')reportStorageFailure(err);
+      showToast('Could not create a new profile safely.');
+      return false;
+    }
   }
 
   function deleteInactiveUser(id){
     const reg=readRegistry();
     if(id===reg.activeId) return false;
     reg.users=reg.users.filter(u=>u.id!==id);
-    writeRegistry(reg);
-    return true;
+    return writeRegistry(reg);
   }
 
   function openUsersManager(){
@@ -387,11 +411,12 @@
     const close=()=>overlay.remove();
     overlay.querySelector('[data-users-close]').onclick=close;
     overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
-    overlay.querySelectorAll('[data-user-switch]').forEach(btn=>btn.onclick=()=>{close();switchToUser(btn.dataset.userSwitch);});
+    overlay.querySelectorAll('[data-user-switch]').forEach(btn=>btn.onclick=()=>{if(switchToUser(btn.dataset.userSwitch))close();});
     overlay.querySelectorAll('[data-user-delete]').forEach(btn=>btn.onclick=()=>{
       const u=reg.users.find(x=>x.id===btn.dataset.userDelete);
       if(!confirm(`Permanently delete ${u?.name||'this user'} and all stored training data?`)) return;
-      deleteInactiveUser(btn.dataset.userDelete); close(); openUsersManager();
+      if(deleteInactiveUser(btn.dataset.userDelete)){close();openUsersManager();}
+      else showToast('Could not delete profile. Please export a backup first.');
     });
     overlay.querySelector('[data-user-new]').onclick=()=>openNewUserDialog(close);
   }
@@ -412,11 +437,11 @@
     const close=()=>overlay.remove();
     overlay.querySelector('[data-new-close]').onclick=close;
     const name=()=>overlay.querySelector('#ls-new-user-name').value.trim();
-    overlay.querySelector('[data-new-keep]').onclick=()=>{ if(!name()){showToast('Enter the new user name');return;} close(); createNewUser(name(),false); };
+    overlay.querySelector('[data-new-keep]').onclick=()=>{ if(!name()){showToast('Enter the new user name');return;} if(createNewUser(name(),false))close(); };
     overlay.querySelector('[data-new-delete]').onclick=()=>{
       if(!name()){showToast('Enter the new user name');return;}
       if(!confirm(`Permanently delete ${current?.name||'the current user'} and all training data? This cannot be undone unless you exported a backup.`)) return;
-      close(); createNewUser(name(),true);
+      if(createNewUser(name(),true))close();
     };
   }
 
