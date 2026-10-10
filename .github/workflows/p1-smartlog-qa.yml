@@ -53,7 +53,7 @@ jobs:
           cat /tmp/lastset-p1-server.log
           exit 1
       - name: Run mobile Smart Log journeys
-        run: npx playwright test tests/e2e/p1.smartlog.spec.js --project=mobile-chromium --grep 'every bench set persists' --retries=0 --timeout=20000
+        run: npx playwright test tests/e2e/p1.smartlog.spec.js --project=mobile-chromium --project=mobile-webkit --retries=0 --timeout=30000
       - name: Upload mobile failure evidence
         if: always()
         uses: actions/upload-artifact@v4
