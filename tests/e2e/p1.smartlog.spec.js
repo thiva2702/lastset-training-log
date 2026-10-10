@@ -66,6 +66,41 @@ test.describe('P1 progressive Smart Log end-to-end',()=>{
     const session=resistance(await records(page));
     expect(session.exercises[0].sets.map(s=>[s.weight,s.reps])).toEqual([[60,5],[55,7]]);
   });
+  test('squat and deadlift each retain every progressive load and rep',async({page})=>{
+    await start(page);
+    await parse(page,'Back squat 100x5, 110x3, 120x1. Deadlift 140x5 then 150x3 then 160x1');
+    await expect(page.locator('.ls-p1-card')).toHaveCount(2);
+    await expect(page.locator('.ls-p1-set')).toHaveCount(6);
+    await expect(page.locator('[data-action="confirm-ai-workout"]')).toBeEnabled();
+    await page.locator('[data-action="confirm-ai-workout"]').click();
+    let session=resistance(await records(page));
+    expect(session.exercises.map(e=>e.sets.map(set=>[set.weight,set.reps]))).toEqual([
+      [[100,5],[110,3],[120,1]],
+      [[140,5],[150,3],[160,1]]
+    ]);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(page.locator('.bottom-nav')).toBeVisible();
+    session=resistance(await records(page));
+    expect(session.exercises.map(e=>e.sets.map(set=>[set.weight,set.reps]))).toEqual([
+      [[100,5],[110,3],[120,1]],
+      [[140,5],[150,3],[160,1]]
+    ]);
+  });
+  test('warm-up and working-set labels survive saving and reopening',async({page})=>{
+    await start(page);
+    await parse(page,'Warm up bench 60x8, 70x5 then working 80x5, 85x5, 90x3');
+    await expect(page.locator('.ls-p1-set')).toHaveCount(5);
+    await expect(page.locator('[data-p1-type="0:0"]')).toHaveValue('warmup');
+    await expect(page.locator('[data-p1-type="0:1"]')).toHaveValue('warmup');
+    await expect(page.locator('[data-p1-type="0:2"]')).toHaveValue('working');
+    await page.locator('[data-action="confirm-ai-workout"]').click();
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(page.locator('.bottom-nav')).toBeVisible();
+    const session=resistance(await records(page));
+    expect(session.exercises[0].sets.map(x=>[x.weight,x.reps,x.setType])).toEqual([
+      [60,8,'warmup'],[70,5,'warmup'],[80,5,'working'],[85,5,'working'],[90,3,'working']
+    ]);
+  });
   test('compound plus accessory descriptions keep all exercises',async({page})=>{
     await start(page);
     await parse(page,'Bench press 80kg for 8, then 85kg for 6 and 5. Incline dumbbell press 30kg 3x10. Cable fly 15kg 3 sets of 12');
