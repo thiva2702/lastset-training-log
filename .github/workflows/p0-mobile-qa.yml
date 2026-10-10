@@ -1,0 +1,61 @@
+name: LastSet P0 mobile safety QA
+
+on:
+  push:
+    branches: [p0/data-trust-audit-20261011]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'lastset-integrity.js'
+      - 'lastset-onboarding.js'
+      - 'tests/e2e/p0.trust.spec.js'
+      - '.github/workflows/p0-mobile-qa.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lastset-p0-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-p0:
+    name: P0 browser persistence and backup recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+      LASTSET_BASE_URL: http://127.0.0.1:4173/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install mobile browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Build isolated LastSet test site
+        run: bash build-cloudflare.sh
+      - name: Start local test server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist > /tmp/lastset-p0-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ | grep -q 'lastset-release'; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/lastset-p0-server.log
+          exit 1
+      - name: Test mobile Chromium and WebKit against isolated site
+        run: npx playwright test tests/e2e/p0.trust.spec.js --project=mobile-chromium --project=mobile-webkit
+      - name: Publish failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lastset-p0-mobile-traces
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
