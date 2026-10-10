@@ -26,6 +26,11 @@ test.describe('P1 progressive Smart Log end-to-end',()=>{
   test('every bench set persists after full reload',async({page})=>{
     await start(page);
     await parse(page,'Bench press 80kg for 8, then 85kg for 6 and 5');
+    console.log('P1 parsed debug:',JSON.stringify(await page.evaluate(()=>({
+      p1Loaded:document.documentElement.dataset.lastsetSmartLogP1,
+      items:state.aiParsed?.items?.map(it=>({name:it.name,id:it.exerciseId,p1Source:it.p1Source,sets:it.sets,warnings:it.p1Warnings})),
+      mentions:findExerciseMentions('Bench press 80kg for 8, then 85kg for 6 and 5').map(m=>({name:m.exercise?.name,start:m.start,end:m.end,alias:m.alias}))
+    }))));
     await expect(page.locator('.ls-p1-set')).toHaveCount(3);
     for(const [i,w,r] of [[0,'80','8'],[1,'85','6'],[2,'85','5']]){
       await expect(page.locator('[data-p1-weight="0:'+i+'"]')).toHaveValue(w);
