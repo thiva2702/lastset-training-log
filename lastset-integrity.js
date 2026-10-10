@@ -126,7 +126,7 @@
     if(value.plans!=null && !object(value.plans)) return false;
     if(value.schemaVersion!=null && !numeric(value.schemaVersion)) return false;
     for(const [date,sessions] of Object.entries(value.sessions)){
-      if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !Array.isArray(sessions)) return false;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Array.isArray(sessions)) return false;
       for(const session of sessions){
         if(!object(session)) return false;
         if(session.type!=null && typeof session.type!=='string') return false;
