@@ -252,3 +252,29 @@
  .ls-smartlog-hero h2{font-size:30px;}
  .ls-smartlog-entry textarea#ai-text{min-height:150px!important;}
 }
+
+/* v0.29.0: thumbnails use the currently approved male/female anatomy atlas
+   and exact muscle paths. Never reuse the old low-resolution background crops. */
+.ls-explore-sheet .ls-muscle-options .ls-option-thumb.ls-thumb-atlas{
+  display:block!important;
+  width:54px!important;height:54px!important;flex:0 0 54px!important;
+  padding:0!important;overflow:hidden!important;
+  background:none!important;background-image:none!important;
+  border-radius:11px;border:1px solid rgba(194,255,157,.28);
+}
+.ls-explore-sheet .ls-muscle-options .ls-option-thumb.ls-thumb-atlas svg{
+  width:100%;height:100%;display:block;
+  overflow:hidden;
+  background:radial-gradient(circle at center,#38243e,#130f19);
+}
+.ls-explore-sheet .ls-muscle-options .ls-option-thumb.ls-thumb-empty{
+  background-image:none!important;
+}
+.ls-explore-sheet .ls-muscle-options .ls-explore-chip{
+  min-height:100px!important;
+}
+@media(max-width:380px){
+  .ls-explore-sheet .ls-muscle-options .ls-option-thumb.ls-thumb-atlas{
+    width:47px!important;height:47px!important;flex-basis:47px!important;
+  }
+}

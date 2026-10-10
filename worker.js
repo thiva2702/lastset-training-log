@@ -11,7 +11,7 @@ const STYLE_TAGS = [
   ["/lastset-v0140.css","01402"],
   ["/lastset-onboarding.css","0140"],
   ["/lastset-offline.css","0141"],
-  ["/lastset-explore.css","0250"],
+  ["/lastset-explore.css","0290"],
   ["/lastset-anatomy.css","0280"]
 ];
 
@@ -27,6 +27,7 @@ const SCRIPT_TAGS = [
   ["/lastset-workouts.js","0132"],
   ["/lastset-integrity.js","0132"],
   ["/lastset-profile-equipment.js","0135"],
+  ["/lastset-muscle-library.js","0290"],
   ["/lastset-navigation.js","0141"],
   ["/lastset-beta.js","1beta1"],
   ["/lastset-brand.js","0139"],
@@ -36,7 +37,7 @@ const SCRIPT_TAGS = [
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0282"],
   ["/lastset-anatomy.js","0282"],
-  ["/lastset-explore.js","0270"]
+  ["/lastset-explore.js","0290"]
 ];
 
 function injectPremiumLayer(html) {

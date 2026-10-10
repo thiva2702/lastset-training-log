@@ -32,6 +32,7 @@ cp lastset-calendar.js dist/
 cp lastset-workouts.js dist/
 cp lastset-integrity.js dist/
 cp lastset-profile-equipment.js dist/
+cp lastset-muscle-library.js dist/
 cp lastset-navigation.js dist/
 cp lastset-beta.js dist/
 cp lastset-brand.js dist/

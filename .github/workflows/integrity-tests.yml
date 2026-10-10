@@ -34,6 +34,7 @@ jobs:
           node --check lastset-atlas-regions.js
           node --check lastset-anatomy.js
           node --check tests/anatomy-smoke.js
+          node --check lastset-muscle-library.js
           node --check lastset-explore.js
           node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
@@ -67,6 +68,8 @@ jobs:
         run: node tests/offline-smoke.js
       - name: Muscle Explorer smoke tests
         run: node tests/explore-smoke.js
+      - name: Muscle Explorer catalogue and side restrictions
+        run: node tests/muscle-explorer-coverage.js
       - name: Premium anatomy smoke tests
         run: node tests/anatomy-smoke.js
       - name: Verify production bundle inputs
@@ -92,6 +95,7 @@ jobs:
           test -s lastset-atlas-regions.js
           test -s lastset-anatomy.js
           test -s lastset-anatomy.css
+          test -s lastset-muscle-library.js
           test -s lastset-explore.js
           test -s lastset-explore.css
           test -s assets/lastset-mark.svg
@@ -185,6 +189,7 @@ jobs:
           test -s dist/lastset-anatomy.css
           test -s dist/assets/anatomy-front.webp
           test -s dist/assets/anatomy-back.webp
+          test -s dist/lastset-muscle-library.js
           test -s dist/lastset-explore.js
           test -s dist/lastset-explore.css
           test -s dist/assets/lastset-mark.svg

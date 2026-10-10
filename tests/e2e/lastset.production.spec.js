@@ -229,7 +229,7 @@ test.describe('LastSet production v0.14.0', () => {
     await page.locator('[data-nav="explore"]').click();
     const svg=page.locator('.ls-anatomy-premium.male');
     await expect(svg).toHaveAttribute('viewBox','0 0 929 1693');
-    const front=await page.request.get('/assets/anatomy-front.webp');
+    const front=await page.request.get('/assets/anatomy-male-front.webp');
     expect(front.status()).toBe(200);
     expect((await front.body()).byteLength).toBeGreaterThan(16000);
 
@@ -244,6 +244,27 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('.ls-anatomy-premium.male')).toHaveAttribute('viewBox','0 0 929 1693');
   });
 
+
+  test('Normal muscle selections and atlas thumbnails match the selected view', async ({page}) => {
+    await page.locator('[data-nav="explore"]').click();
+    await expect(page.locator('.ls-anatomy-front [data-anatomy-region="Triceps"]')).toHaveCount(0);
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Mid Chest"]').first().click();
+    await expect(page.locator('[data-explore-region="Normal"]')).toBeVisible();
+    await page.locator('[data-explore-region="Normal"]').click();
+    await expect(page.locator('[data-explore-exercise="incline-cable-fly"]')).toBeVisible();
+    const thumbnail=page.locator('.ls-thumb-atlas svg').first();
+    await expect(thumbnail).toBeVisible();
+    expect(await thumbnail.locator('image').getAttribute('href')).toContain('anatomy-male-front.webp');
+    await page.locator('[data-explore-close]').click();
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+    await expect(page.locator('[data-explore-subregion="Normal"]')).toBeVisible();
+    await page.locator('[data-explore-subregion="Normal"]').click();
+    await expect(page.locator('[data-explore-exercise="standing-barbell-curl"]')).toBeVisible();
+    await page.locator('[data-explore-side="back"]').click();
+    await expect(page.locator('.ls-anatomy-back [data-anatomy-region="Biceps"]')).toHaveCount(0);
+    await page.locator('.ls-atlas-hit[data-anatomy-region="Triceps"]').first().click();
+    await expect(page.locator('[data-explore-subregion="Normal"]')).toBeVisible();
+  });
 
   test('Biceps offers only biceps heads with selectable specialist overlay and inline panel', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
@@ -267,6 +288,9 @@ test.describe('LastSet production v0.14.0', () => {
 
   test('Triceps offers long lateral medial heads and specialist back selection', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
+    await expect(page.locator('.ls-anatomy-premium.ls-anatomy-front [data-anatomy-region="Triceps"]')).toHaveCount(0);
+    await page.locator('[data-explore-side="back"]').click();
+    await expect(page.locator('.ls-anatomy-premium.ls-anatomy-back [data-anatomy-region="Biceps"]')).toHaveCount(0);
     await page.locator('.ls-atlas-hit[data-anatomy-region="Triceps"]').first().click();
     await expect(page.locator('.ls-anatomy-premium.ls-anatomy-back')).toBeVisible();
     const panel=page.locator('.ls-explore-sheet');

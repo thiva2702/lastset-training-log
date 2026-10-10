@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION='0.25.1';
+  const VERSION='0.29.0';
   const BULB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 15.7c-1.7-1.1-2.8-3-2.8-5.2a6.3 6.3 0 0 1 12.6 0c0 2.2-1.1 4.1-2.8 5.2-.7.5-1 1.1-1.1 1.8h-4.8c-.1-.7-.4-1.3-1.1-1.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.7 20h4.6M10.2 17.5h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const GROUPS=Object.freeze({
@@ -14,14 +14,30 @@
   });
 
 
+  // A view exposes only muscles actually visible from that side.
+  const SIDE_REGIONS=Object.freeze({
+    front:{
+      Chest:['Normal','Upper Chest','Mid Chest','Lower Chest'],
+      Shoulders:['Normal','Front Delts','Side Delts'],
+      Arms:['Biceps','Forearms'],
+      Core:['Normal','Abs','Obliques'],
+      Legs:['Normal','Quads','Adductors','Calves']
+    },
+    back:{
+      Shoulders:['Normal','Rear Delts'],
+      Arms:['Triceps','Forearms'],
+      Back:['Normal','Lats','Upper Back','Traps','Lower Back'],
+      Legs:['Normal','Glutes','Hamstrings','Calves']
+    }
+  });
   const DETAIL_REGIONS=Object.freeze({
     Biceps:['Long Head','Short Head','Brachialis'],
     Triceps:['Long Head','Lateral Head','Medial Head'],
     Forearms:['Brachioradialis','Wrist Flexors','Wrist Extensors','Other Forearms']
   });
-  const focusChoices=(group,region)=>group==='Arms'&&DETAIL_REGIONS[region]?DETAIL_REGIONS[region]:GROUPS[group]?.regions||[];
+  const focusChoices=(group,region,side='front')=>group==='Arms'&&DETAIL_REGIONS[region]?['Normal',...DETAIL_REGIONS[region]]:(SIDE_REGIONS[side]?.[group]||[]);
   function resolveFocusMuscle(parent,subregion){
-    if(!subregion)return parent||'';
+    if(!subregion||subregion==='Normal')return parent||'';
     // Brachialis is anatomically distinct from the two heads of biceps brachii.
     // The catalogue uses "Brachialis", never the nonexistent "Biceps Brachialis".
     if(parent==='Biceps'&&subregion!=='Brachialis')return 'Biceps '+subregion;
@@ -36,7 +52,8 @@
     {id:'free',label:'Barbell / Free weight'},
     {id:'dumbbell',label:'Dumbbells'},
     {id:'machine',label:'Machines'},
-    {id:'cable',label:'Cable / Rope'}
+    {id:'cable',label:'Cable / Rope'},
+    {id:'band',label:'Resistance Band'}
   ]);
 
   const norm=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
@@ -49,9 +66,10 @@
   function equipmentBucket(ex){
     const value=norm(ex?.equipment);
     if(value.includes('bodyweight'))return'bodyweight';
+    if(value.includes('resistance band')||value==='band')return'band';
     if(value.includes('dumbbell'))return'dumbbell';
     if(value.includes('cable')||value.includes('rope'))return'cable';
-    if(value.includes('barbell')||value.includes('free weight')||value.includes('kettlebell'))return'free';
+    if(value.includes('barbell')||value.includes('free weight')||value.includes('kettlebell')||value.includes('ez bar'))return'free';
     if(value.includes('machine')||value.includes('plate loaded')||value.includes('smith'))return'machine';
     return'other';
   }
@@ -65,11 +83,16 @@
   function exerciseMatchesRegion(ex,region){
     const n=norm(ex?.name),movement=norm(ex?.movement),angle=norm(ex?.angle);
     switch(region){
+      case'Chest':return hasMuscle(ex,'Chest')||hasMuscle(ex,'Upper Chest');
+      case'Shoulders':return hasMuscle(ex,'Shoulders')||hasMuscle(ex,'Rear Delts')||hasMuscle(ex,'Front Delts')||hasMuscle(ex,'Side Delts');
+      case'Back':return ['Back','Lats','Upper Back','Traps','Lower Back'].some(m=>hasMuscle(ex,m));
+      case'Legs':return ['Legs','Quads','Hamstrings','Glutes','Adductors','Calves'].some(m=>hasMuscle(ex,m));
+      case'Core':return ['Core','Abs','Obliques'].some(m=>hasMuscle(ex,m));
       case'Upper Chest':return hasMuscle(ex,'Upper Chest')||(hasMuscle(ex,'Chest')&&(angle.includes('incline')||n.includes('incline')));
       case'Mid Chest':return hasMuscle(ex,'Chest')&&!/(incline|decline|dip)/.test(n+' '+angle);
       case'Lower Chest':return hasMuscle(ex,'Chest')&&(angle.includes('decline')||n.includes('decline')||n.includes('dip'));
-      case'Front Delts':return hasMuscle(ex,'Shoulders')&&(n.includes('front raise')||movement.includes('vertical press')||(/shoulder press/.test(n)&&!n.includes('rear')));
-      case'Side Delts':return hasMuscle(ex,'Shoulders')&&(n.includes('lateral')||n.includes('side raise')||n.includes('side lateral'));
+      case'Front Delts':return hasMuscle(ex,'Front Delts')||(hasMuscle(ex,'Shoulders')&&(n.includes('front raise')||movement.includes('vertical press')||(/shoulder press/.test(n)&&!n.includes('rear'))));
+      case'Side Delts':return hasMuscle(ex,'Side Delts')||(hasMuscle(ex,'Shoulders')&&(n.includes('lateral')||n.includes('side raise')||n.includes('side lateral')));
       case'Rear Delts':return hasMuscle(ex,'Rear Delts')||n.includes('rear delt')||n.includes('reverse pec')||n.includes('face pull');
       case'Biceps':return hasMuscle(ex,'Biceps');
       case'Biceps Long Head':return hasMuscle(ex,'Biceps Long Head')||(/incline|bayesian|behind.*body|drag curl/.test(n)&&hasMuscle(ex,'Biceps'));
@@ -85,11 +108,11 @@
       case'Wrist Extensors':return hasMuscle(ex,'Wrist Extensors')||n.includes('reverse wrist curl')||n.includes('wrist extension');
       case'Other Forearms':return hasMuscle(ex,'Forearms')&&/(carry|grip|hold|roller)/.test(n);
       case'Abs':return hasMuscle(ex,'Abs')||hasMuscle(ex,'Core')||n.includes('crunch')||n.includes('plank')||n.includes('leg raise');
-      case'Obliques':return n.includes('oblique')||movement.includes('rotation')||n.includes('rotary')||n.includes('wood chop');
+      case'Obliques':return hasMuscle(ex,'Obliques')||n.includes('oblique')||movement.includes('rotation')||n.includes('rotary')||n.includes('wood chop');
       case'Lats':return hasMuscle(ex,'Lats')||movement.includes('vertical pull')||n.includes('pulldown')||n.includes('pull up');
       case'Upper Back':return hasMuscle(ex,'Upper Back')||movement.includes('horizontal pull')||n.includes('row')||n.includes('face pull')||n.includes('reverse pec');
       case'Traps':return hasMuscle(ex,'Traps')||n.includes('shrug');
-      case'Lower Back':return n.includes('back extension')||n.includes('deadlift')||(hasMuscle(ex,'Back')&&movement.includes('hip dominant'));
+      case'Lower Back':return hasMuscle(ex,'Lower Back')||n.includes('back extension')||n.includes('deadlift')||(hasMuscle(ex,'Back')&&movement.includes('hip dominant'));
       case'Quads':return hasMuscle(ex,'Quads');
       case'Hamstrings':return hasMuscle(ex,'Hamstrings');
       case'Glutes':return hasMuscle(ex,'Glutes');
@@ -127,6 +150,15 @@
     const target=norm(region),title=norm(ex?.name),primary=norm(ex?.primaryMuscle);
     const first=norm(ex?.muscles?.[0]),second=norm(ex?.muscles?.[1]),parent=norm(PARENT_REGION[region]||region);
     if(primary===target||first===target||second===target)return true;
+    if(['Chest','Shoulders','Back','Legs','Core'].includes(region)){
+      const broad={
+        Chest:['Chest','Upper Chest'],Shoulders:['Shoulders','Rear Delts','Front Delts','Side Delts'],
+        Back:['Back','Lats','Upper Back','Traps','Lower Back'],
+        Legs:['Legs','Quads','Hamstrings','Glutes','Adductors','Calves'],
+        Core:['Core','Abs','Obliques']
+      }[region].map(norm);
+      return broad.includes(primary)||broad.includes(first);
+    }
     if(primary&&primary!==target&&primary!==parent)return false;
     if(first!==parent&&primary!==parent)return false;
     if(region==='Biceps Long Head')return /incline|bayesian|behind.*body|drag curl/.test(title);
@@ -176,7 +208,7 @@
   }
 
   if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
-    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,rankExploreExercises,exercisePrimaryFocus,addExerciseToPlan,focusChoices,resolveFocusMuscle};
+    globalThis.LastSetExploreTest={modelGender,equipmentBucket,exerciseMatchesRegion,filterExploreExercises,rankExploreExercises,exercisePrimaryFocus,addExerciseToPlan,focusChoices,resolveFocusMuscle,SIDE_REGIONS};
     return;
   }
 
@@ -206,6 +238,37 @@
     const available=side==='back'?['Shoulders','Back','Arms','Legs']:['Shoulders','Chest','Arms','Core','Legs'];
     return '<div class="ls-anatomy-fallback" role="group" aria-label="Choose muscle group">'+
       available.map(group=>'<button data-explore-group="'+group+'" type="button">'+group+'</button>').join('')+'</div>';
+  }
+
+  // Thumbnails are rendered from exactly the same approved high resolution body
+  // image and anatomical SVG paths as the full sized selectable atlas.
+  function muscleThumbnail(group,choice,parent,gender,side){
+    const source=globalThis.LastSetAtlasRegions;
+    const female=gender==='female';
+    const width=female?941:929,height=female?1672:1693;
+    const main=source?.[female?'femaleHiRes':'maleHiRes']?.[side];
+    const detailed=source?.[female?'femaleHiResDetail':'maleHiResDetail']?.[side];
+    const specialist=group==='Arms'&&Boolean(DETAIL_REGIONS[parent]);
+    const region=choice==='Normal'?(specialist?parent:group):choice;
+    const pool=specialist&&choice!=='Normal'?(detailed?.[parent]||[]):(main?.[group]||[]);
+    const paths=pool.filter(e=>region===group||e.region===region).filter(e=>!e.mirror);
+    if(!paths.length)return '<span class="ls-option-thumb ls-thumb-empty" aria-hidden="true"></span>';
+    const coords=paths.flatMap(e=>(e.d.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number));
+    const xx=[],yy=[];
+    for(let i=0;i<coords.length-1;i+=2){xx.push(coords[i]);yy.push(coords[i+1]);}
+    if(!xx.length)return '';
+    const minX=Math.min(...xx),maxX=Math.max(...xx),minY=Math.min(...yy),maxY=Math.max(...yy);
+    const centerX=(minX+maxX)/2,centerY=(minY+maxY)/2;
+    const boxW=Math.max(group==='Arms'?125:170,(maxX-minX)*1.65);
+    const boxH=Math.max(group==='Arms'?185:205,(maxY-minY)*1.5,boxW*1.05);
+    const x=Math.max(0,Math.min(width-boxW,centerX-boxW/2));
+    const y=Math.max(0,Math.min(height-boxH,centerY-boxH/2));
+    const view=[x,y,boxW,boxH].map(n=>Number(n.toFixed(1))).join(' ');
+    const marks=paths.map(e=>'<path d="'+esc(e.d)+'" fill="rgba(142,255,83,.46)" stroke="#c8ff8e" stroke-width="4"/>').join('');
+    return '<span class="ls-option-thumb ls-thumb-atlas" aria-hidden="true">'+
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+view+'" preserveAspectRatio="xMidYMid slice">'+
+      '<image href="/assets/anatomy-'+gender+'-'+side+'.webp" x="0" y="0" width="'+width+'" height="'+height+'"/>'+marks+
+      '</svg></span>';
   }
 
   function guide(ex){
@@ -250,8 +313,8 @@
     const gender=modelGender(db()?.profile);
     const group=GROUPS[state.exploreGroup];
     const specialist=state.exploreGroup==='Arms'&&Boolean(DETAIL_REGIONS[state.exploreRegion]);
-    const regions=focusChoices(state.exploreGroup,state.exploreRegion);
-    const chosenRegion=specialist?(state.exploreSubregion||''):state.exploreRegion;
+    const regions=focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide);
+    const chosenRegion=specialist?(state.exploreSubregion||'Normal'):(state.exploreRegion===state.exploreGroup?'Normal':state.exploreRegion);
     const targetMuscle=specialist
       ?resolveFocusMuscle(state.exploreRegion,state.exploreSubregion)
       :state.exploreRegion;
@@ -266,7 +329,7 @@
       '</section>'+
       (group?'<section class="card ls-explore-step ls-explore-sheet" role="region" aria-label="Muscle focus and exercises">'+
         '<div class="ls-sheet-head"><div><small>SELECT YOUR FOCUS</small><strong>'+esc(state.exploreRegion||state.exploreGroup)+'</strong><span>'+(specialist?'Choose a '+esc(state.exploreRegion.toLowerCase())+' emphasis. Exercises bias these regions rather than isolate them.':'Choose a specific muscle to see exercises')+'</span></div><button type="button" class="ls-sheet-close" data-explore-close aria-label="Close muscle selection">×</button></div>'+
-        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(specialist?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'"><span class="ls-option-thumb" data-thumb-region="'+esc(r)+'" data-thumb-parent="'+esc(state.exploreRegion)+'" data-thumb-gender="'+gender+'" aria-hidden="true"></span><span>'+esc(r)+'</span></button>').join('')+'</div>'+
+        '<div class="ls-chip-grid ls-muscle-options">'+regions.map(r=>'<button class="ls-explore-chip '+(chosenRegion===r?'active':'')+'" '+(specialist?'data-explore-subregion':'data-explore-region')+'="'+esc(r)+'" aria-pressed="'+(chosenRegion===r)+'">'+muscleThumbnail(state.exploreGroup,r,state.exploreRegion,gender,state.exploreSide)+'<span>'+esc(r)+'</span></button>').join('')+'</div>'+
         (state.exploreRegion?'<div class="ls-sheet-equipment"><strong>Equipment</strong><div class="ls-equipment-grid">'+EQUIPMENT.map(x=>'<button class="ls-explore-chip '+(state.exploreEquipment===x.id?'active':'')+'" data-explore-equipment="'+x.id+'">'+esc(x.label)+'</button>').join('')+'</div></div>':'')+
         (state.exploreRegion?'<div class="ls-explore-results">'+
           '<section class="ls-focus-exercises" data-focus-kind="primary"><div class="ls-result-head"><strong>Primary Focus</strong><span>'+ranked.primary.length+' exercises</span></div>'+
@@ -337,9 +400,14 @@
       const name=group.dataset.exploreGroup;
       state.exploreGroup=name;
       const photoRegion=event.target.closest?.('[data-anatomy-region]');
-      state.exploreRegion=photoRegion?.dataset.anatomyParent||photoRegion?.dataset.anatomyRegion||'';
+      const tapped=photoRegion?.dataset.anatomyParent||photoRegion?.dataset.anatomyRegion||'';
+      const allowed=SIDE_REGIONS[state.exploreSide]?.[name]||[];
+      // Never activate an invisible opposing-side muscle, even through stale events.
+      if(tapped && !allowed.includes(tapped) && !(name==='Arms'&&DETAIL_REGIONS[tapped]))return;
+      if(state.exploreSide==='front'&&tapped==='Triceps')return;
+      if(state.exploreSide==='back'&&tapped==='Biceps')return;
+      state.exploreRegion=tapped;
       state.exploreSubregion=photoRegion?.dataset.anatomySubregion||'';
-      if(state.exploreRegion==='Triceps')state.exploreSide='back';
       state.exploreEquipment='all';
       state.exploreExerciseId='';
       render();return;
@@ -353,16 +421,14 @@
     const region=event.target.closest?.('[data-explore-region]');
     if(region){
       event.preventDefault();
-      state.exploreRegion=region.dataset.exploreRegion;
+      const requested=region.dataset.exploreRegion;
+      if(!focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide).includes(requested))return;
+      state.exploreRegion=requested==='Normal'?state.exploreGroup:requested;
       state.exploreSubregion='';
-      const reverseSide=['Hamstrings','Glutes','Rear Delts','Lats','Upper Back','Traps','Lower Back'].includes(state.exploreRegion);
-      const forwardSide=['Quads','Adductors','Abs','Obliques','Upper Chest','Mid Chest','Lower Chest','Biceps','Front Delts','Side Delts'].includes(state.exploreRegion);
-      if(reverseSide||state.exploreRegion==='Triceps')state.exploreSide='back';
-      if(forwardSide)state.exploreSide='front';
       state.exploreExerciseId='';render();return;
     }
     const subregion=event.target.closest?.('[data-explore-subregion]');
-    if(subregion){event.preventDefault();state.exploreSubregion=subregion.dataset.exploreSubregion;state.exploreExerciseId='';render();return;}
+    if(subregion){event.preventDefault();if(!focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide).includes(subregion.dataset.exploreSubregion))return;state.exploreSubregion=subregion.dataset.exploreSubregion;state.exploreExerciseId='';render();return;}
     const equipment=event.target.closest?.('[data-explore-equipment]');
     if(equipment){event.preventDefault();state.exploreEquipment=equipment.dataset.exploreEquipment;state.exploreExerciseId='';render();return;}
     const exercise=event.target.closest?.('[data-explore-exercise]');
