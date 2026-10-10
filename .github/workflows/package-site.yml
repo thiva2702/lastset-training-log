@@ -14,45 +14,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Build tested Cloudflare static asset bundle
+        run: bash build-cloudflare.sh
       - name: Upload complete site
         uses: actions/upload-artifact@v4
         with:
           name: lastset-site
-          path: |
-            README.txt
-            V1_RELEASE_CHECKLIST.md
-            V1_BETA_RELEASE.md
-            V2_BACKLOG.md
-            index.html
-            app-v12.html
-            manifest.webmanifest
-            wrangler.jsonc
-            worker.js
-            build-cloudflare.sh
-            _headers
-            _redirects
-            service-worker.js
-            lastset-theme.css
-            lastset-premium.css
-            lastset-images.css
-            lastset-hotfix.css
-            lastset-atlas-regions.js
-            lastset-anatomy.js
-            lastset-anatomy.css
-            lastset-explore.js
-            lastset-explore.css
-            lastset-calendar.css
-            lastset-enhancements.js
-            lastset-premium.js
-            lastset-hotfix.js
-            lastset-smartlog-shorthand.js
-            lastset-calendar.js
-            lastset-workouts.js
-            lastset-integrity.js
-            lastset-profile-equipment.js
-            lastset-navigation.js
-            lastset-beta.js
-            icon-192.png
-            icon-512.png
-            assets/*.webp
+          path: dist/
           if-no-files-found: error
