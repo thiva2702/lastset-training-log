@@ -445,11 +445,45 @@ function safeStorageGet(){
   try { return window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null; }
   catch(e){ return null; }
 }
+// Keep the entire in-memory workout available for an emergency export
+// when Safari's local storage is full or unavailable.
+function reportStorageFailure(error){
+  try{ console.error('LastSet persistent save failed:', error?.name || 'StorageError'); }catch(_){}
+  if(typeof document==='undefined') return;
+  const mount=()=>{
+    if(!document.body || document.getElementById('ls-save-failure')) return;
+    const banner=document.createElement('section');
+    banner.id='ls-save-failure';
+    banner.setAttribute('role','alert');
+    banner.style.cssText='position:fixed!important;z-index:2147483647!important;inset:auto 12px calc(env(safe-area-inset-bottom,0px) + 10px) 12px;max-width:560px;margin:auto;padding:16px;border-radius:16px;border:2px solid #ff808e;background:#29131b;color:#fff;box-shadow:0 12px 36px #000a;font:14px/1.5 system-ui,sans-serif';
+    banner.innerHTML='<strong>Workout NOT saved to device</strong><p style="margin:6px 0 12px">Keep LastSet open. Your latest entries are still in memory but might disappear if you close or refresh. Export an emergency backup now.</p><button type="button" style="padding:11px;border-radius:10px;background:#fff;color:#251221;border:0;font-weight:700">Export emergency backup</button>';
+    banner.querySelector('button').addEventListener('click',()=>{
+      try{
+        const snapshot=typeof data!=='undefined'?data:memoryStore;
+        if(!snapshot) throw new Error('No data to export');
+        const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}));
+        const a=document.createElement('a');a.href=url;a.download='lastset-emergency-backup.json';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+      }catch(_){ window.alert('Emergency export unavailable. Keep LastSet open and contact support before refreshing.'); }
+    });
+    document.body.appendChild(banner);
+  };
+  if(document.body) mount();
+  else document.addEventListener('DOMContentLoaded',mount,{once:true});
+}
 function safeStorageSet(value){
   memoryStore = value;
   try {
-    if(window.localStorage) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch(e) {}
+    if(!window.localStorage) throw new Error('Device storage unavailable');
+    const encoded=JSON.stringify(value);
+    window.localStorage.setItem(STORAGE_KEY,encoded);
+    if(window.localStorage.getItem(STORAGE_KEY)!==encoded) throw new Error('Device save verification failed');
+    return true;
+  } catch(e) {
+    reportStorageFailure(e);
+    return false;
+  }
 }
 function safeStorageRemove(){
   memoryStore = null;
@@ -470,7 +504,10 @@ function loadData(){
   safeStorageSet(demo);
   return demo;
 }
-function saveData(value){ safeStorageSet(value); }
+function saveData(value){
+  if(!safeStorageSet(value)) throw new Error('LastSet could not persist this workout; export an emergency backup before closing.');
+  return true;
+}
 let data = loadData();
 if(!data.profile) data.profile={name:'',weightUnit:'kg'};
 if(typeof data.profile.name!=='string') data.profile.name='';
