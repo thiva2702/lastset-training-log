@@ -65,7 +65,7 @@ jobs:
             if curl --fail --silent --show-error --location --max-time 20 "$LASTSET_BASE_URL" > /tmp/lastset.html; then
               grep -q 'lastset-beta.js?v=' /tmp/lastset.html && html_ok=1 || true
               # Do not start browser tests against the previous Cloudflare release.
-              grep -q "lastset-release.*${GITHUB_SHA:0:28}" /tmp/lastset.html && release_ok=1 || true
+              grep -q "lastset-release.*${GITHUB_SHA:0:12}" /tmp/lastset.html && release_ok=1 || true
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-beta.js?v=1beta1" > /tmp/lastset-beta.js; then
               grep -q "semver: '1.0.0-beta.1'" /tmp/lastset-beta.js && grep -q "build: '0.14.1.1'" /tmp/lastset-beta.js && beta_ok=1 || true
