@@ -36,6 +36,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine expected release ID
+        shell: bash
+        run: |
+          # A workflow/test-only change has no new app code to deploy.
+          # Source changes must still wait for the exact matching Cloudflare build.
+          changed="$(git diff --name-only HEAD^ HEAD || true)"
+          if printf '%s\n' "$changed" | grep -Eq '^(index\.html|lastset-.*\.(js|css)|service-worker\.js|worker\.js|build-cloudflare\.sh|scripts/stamp-release\.mjs|assets/)'; then
+            echo "LASTSET_EXPECT_RELEASE=$GITHUB_SHA" >> "$GITHUB_ENV"
+          else
+            echo "LASTSET_EXPECT_RELEASE=" >> "$GITHUB_ENV"
+          fi
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -65,7 +79,11 @@ jobs:
             if curl --fail --silent --show-error --location --max-time 20 "$LASTSET_BASE_URL" > /tmp/lastset.html; then
               grep -q 'lastset-beta.js?v=' /tmp/lastset.html && html_ok=1 || true
               # Do not start browser tests against the previous Cloudflare release.
-              grep -q "lastset-release.*${GITHUB_SHA:0:12}" /tmp/lastset.html && release_ok=1 || true
+              if [ -n "$LASTSET_EXPECT_RELEASE" ]; then
+                grep -q "lastset-release.*${LASTSET_EXPECT_RELEASE:0:12}" /tmp/lastset.html && release_ok=1 || true
+              else
+                grep -Eq 'lastset-release.*content="[^"]+"' /tmp/lastset.html && release_ok=1 || true
+              fi
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-beta.js?v=1beta1" > /tmp/lastset-beta.js; then
               grep -q "semver: '1.0.0-beta.1'" /tmp/lastset-beta.js && grep -q "build: '0.14.1.1'" /tmp/lastset-beta.js && beta_ok=1 || true
@@ -104,8 +122,16 @@ jobs:
           echo "LastSet V1 Beta production deployment did not become ready in time"
           exit 1
 
+      - name: Verify production suite selection
+        run: |
+          npm run test:e2e:production -- --list | tee /tmp/lastset-production-tests.txt
+          if grep -q 'p0.trust.spec.js' /tmp/lastset-production-tests.txt; then
+            echo "P0 isolated tests must not run against production"
+            exit 1
+          fi
+
       - name: Run production browser tests
-        run: npm run test:e2e
+        run: npm run test:e2e:production
 
       - name: Upload Playwright report and failure evidence
         if: always()
