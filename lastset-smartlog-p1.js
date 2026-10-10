@@ -40,6 +40,14 @@ function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
     const w=toKg(countMatch[1],countMatch[2]==='s'?undefined:countMatch[2],defaultUnit);
     if(w!==null)return {sets:Array.from({length:Number(countMatch[3])},()=>({weightKg:w,reps:Number(countMatch[4]),setType:'working'})),warnings,recognized:true};
   }
+  // Explicit bodyweight set sequence followed by extra weight.
+  const weightedBodyweight=/\bbodyweight\s+((?:\d{1,3}\s*,?\s*)+)\s*then\s*\+(\d+(?:\.\d+)?)\s*(?:kg|lb)?\s*for\s*(\d{1,3})\b/i.exec(t);
+  if(type==='bodyweight'&&weightedBodyweight){
+    const reps=weightedBodyweight[1].match(/\d{1,3}/g)?.map(Number)||[];
+    const w=toKg(weightedBodyweight[2],undefined,defaultUnit);
+    if(w!==null&&reps.length&&reps.every(r=>r>0&&r<=500))
+      return {sets:[...reps.map(r=>({weightKg:0,reps:r,setType:'working'})),{weightKg:w,reps:Number(weightedBodyweight[3]),setType:'working'}],warnings,recognized:true};
+  }
   const anchor=new RegExp('(\\+?\\d+(?:\\.\\d+)?)\\s*('+weightUnit+')?\\s*(?:[x×]\\s*|\\bfor\\s+)(\\d{1,3})\\b','gi');
   const matches=[...t.matchAll(anchor)].filter(m=>Number(m[3])>=1&&Number(m[3])<=500);
   if(matches.length){
@@ -79,14 +87,7 @@ function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
     if(weightKg!==null&&reps.every(r=>r>=1&&r<=500))
       return {sets:reps.map(r=>({weightKg,reps:r,setType:'working'})),warnings,recognized:true};
   }
-  // Explicit bodyweight set sequence followed by extra weight.
-  const weightedBodyweight=/\bbodyweight\s+((?:\d{1,3}\s*,?\s*)+)\s*then\s*\+(\d+(?:\.\d+)?)\s*(?:kg|lb)?\s*for\s*(\d{1,3})\b/i.exec(t);
-  if(type==='bodyweight'&&weightedBodyweight){
-    const reps=weightedBodyweight[1].match(/\d{1,3}/g)?.map(Number)||[];
-    const w=toKg(weightedBodyweight[2],undefined,defaultUnit);
-    if(w!==null&&reps.length&&reps.every(r=>r>0&&r<=500))
-      return {sets:[...reps.map(r=>({weightKg:0,reps:r,setType:'working'})),{weightKg:w,reps:Number(weightedBodyweight[3]),setType:'working'}],warnings,recognized:true};
-  }
+
   return warnings.length?{sets:[],warnings,recognized:false}:null;
 }
 function validateReview(parsed){
