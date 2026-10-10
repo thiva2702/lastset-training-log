@@ -440,6 +440,7 @@ const state = {
 
 const STORAGE_KEY = 'lastset-data-v1';
 let memoryStore = null;
+let unreadableStoredData = null;
 
 function safeStorageGet(){
   try { return window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null; }
@@ -460,9 +461,11 @@ function reportStorageFailure(error){
     banner.querySelector('button').addEventListener('click',()=>{
       try{
         const snapshot=typeof data!=='undefined'?data:memoryStore;
-        if(!snapshot) throw new Error('No data to export');
-        const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}));
-        const a=document.createElement('a');a.href=url;a.download='lastset-emergency-backup.json';
+        const contents=unreadableStoredData!==null?unreadableStoredData:JSON.stringify(snapshot,null,2);
+        if(!contents) throw new Error('No data to export');
+        const mime=unreadableStoredData!==null?'text/plain':'application/json';
+        const url=URL.createObjectURL(new Blob([contents],{type:mime}));
+        const a=document.createElement('a');a.href=url;a.download=unreadableStoredData!==null?'lastset-damaged-storage.txt':'lastset-emergency-backup.json';
         document.body.appendChild(a);a.click();a.remove();
         setTimeout(()=>URL.revokeObjectURL(url),30000);
       }catch(_){ window.alert('Emergency export unavailable. Keep LastSet open and contact support before refreshing.'); }
@@ -475,10 +478,12 @@ function reportStorageFailure(error){
 function safeStorageSet(value){
   memoryStore = value;
   try {
+    if(unreadableStoredData!==null) throw new Error('Unreadable existing storage: refusing to overwrite');
     if(!window.localStorage) throw new Error('Device storage unavailable');
     const encoded=JSON.stringify(value);
     window.localStorage.setItem(STORAGE_KEY,encoded);
     if(window.localStorage.getItem(STORAGE_KEY)!==encoded) throw new Error('Device save verification failed');
+    if(typeof document!=='undefined') document.getElementById('ls-save-failure')?.remove();
     return true;
   } catch(e) {
     reportStorageFailure(e);
@@ -491,8 +496,19 @@ function safeStorageRemove(){
 }
 function loadData(){
   const raw = safeStorageGet();
-  if(raw){
-    try { return JSON.parse(raw); } catch(e) {}
+  if(raw!==null){
+    try {
+      const parsed=JSON.parse(raw);
+      if(!parsed || typeof parsed!=='object' || Array.isArray(parsed) ||
+        !parsed.sessions || typeof parsed.sessions!=='object' || Array.isArray(parsed.sessions)) throw new Error('Invalid stored workout structure');
+      return parsed;
+    }catch(e){
+      unreadableStoredData=raw;
+      reportStorageFailure(e);
+      // Never save this placeholder over the damaged original. Raw bytes
+      // remain available for emergency export and manual recovery.
+      return {sessions:{},aliases:{},machines:{},profile:{name:'',weightUnit:'kg'},templates:[],schemaVersion:11};
+    }
   }
   const demo = { sessions: {}, aliases: {}, machines: {}, profile: { name:'', weightUnit:'kg' } };
   const d = new Date();
@@ -2089,7 +2105,9 @@ function handlePhoto(e){
   const btn=prev.querySelector('[data-action="scan-demo"]'); btn.onclick=()=>{prev.querySelector('.ai-result').innerHTML=`<h3>Likely match: Chest Press</h3><p>Machine · Chest, Triceps, Shoulders</p><p><strong>Confidence:</strong> High</p><button class="primary" id="scan-log">Use this exercise</button>`; document.getElementById('scan-log').onclick=()=>{state.selectedExercise='chest-press';state.resistanceDraft={sets:[]};state.view='exercise-log';render();};};
 }
 function exportData(){
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lastset-training-data.json'; a.click(); URL.revokeObjectURL(a.href);
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='lastset-current-profile.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 function escapeHtml(s){ return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
