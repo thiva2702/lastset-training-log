@@ -33,7 +33,7 @@ function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
     .replace(/\s+/g,' ');
   const warnings=reviewWarnings(raw);
   const weightUnit='(?:kg|kgs?|kilos?|lb|lbs|pounds?)';
-  const counted=new RegExp('(?:^|\\s)(\\d+(?:\\.\\d+)?)\\s*('+weightUnit+'|s)?\\s+(\\d{1,2})\\s*[x×]\\s*(\\d{1,3})(?!\\d)','i');
+  const counted=new RegExp('(?:^|\\s)(\\d+(?:\\.\\d+)?)\\s*('+weightUnit+'|s)?\\s+(\\d{1,2})\\s*(?:[x×]|sets?\\s*(?:of)?)\\s*(\\d{1,3})(?!\\d)','i');
   // 30s / 20s mean per dumbbell, not seconds, only with a 3x10-like scheme.
   const countMatch=counted.exec(t);
   if(countMatch&&Number(countMatch[3])>=1&&Number(countMatch[3])<=20&&Number(countMatch[4])>=1&&Number(countMatch[4])<=500){
