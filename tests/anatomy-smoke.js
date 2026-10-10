@@ -4,18 +4,18 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.27.0');
+assert.equal(atlas.version,'0.28.0');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
   for(const side of ['front','back']){
     const html=atlas.render({side,gender,activeGroup:side==='front'?'Chest':'Back'});
-    assert(html.includes('viewBox="0 0 '+(gender==='male'?(side==='front'?346:356)+' 631':'941 1672')+'"'));
+    assert(html.includes('viewBox="0 0 '+(gender==='male'?'929 1693':'941 1672')+'"'));
     assert(html.includes('ls-anatomy-premium'));
     assert(html.includes('role="button" tabindex="0"'));
     assert(html.includes('aria-label="Explore '));
     assert(html.includes('ls-atlas-segment'));
-    if(gender==='male')assert(html.includes('/assets/anatomy-'+side+'.webp'));
+    if(gender==='male')assert(html.includes('/assets/anatomy-male-'+side+'.webp')&&html.includes('ls-male-photo'));
     if(gender==='female')assert(html.includes('/assets/anatomy-female-'+side+'.webp')&&html.includes('ls-female-photo'));
     if(gender==='female')assert(!html.includes('<g class="ls-atlas-body">'));
     if(gender==='female')assert(html.includes('width="941" height="1672"'),'New female image must preserve its original coordinate frame');
@@ -30,8 +30,10 @@ for(const gender of ['male','female']){
     assert(!/<rect[^>]+rx="13"/.test(html),'Old stickman arm shape should not remain');
   }
 }
-assert(atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
-assert(atlas.render({side:'back',gender:'male'}).includes('ls-central-back-target'));
+assert(!atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
+assert(atlas.render({side:'front',gender:'male'}).includes('data-anatomy-region="Mid Chest"'));
+assert(!atlas.render({side:'back',gender:'male'}).includes('ls-central-back-target'));
+assert(atlas.render({side:'back',gender:'male'}).includes('data-anatomy-region="Upper Back"'));
 for(const [side,regions] of Object.entries({front:['Biceps','Forearms','Upper Chest','Mid Chest','Lower Chest','Quads','Calves','Abs'],back:['Triceps','Forearms','Lats','Glutes','Hamstrings','Calves']})){
   const html=atlas.render({side,gender:'male'});
   for(const region of regions)assert(html.includes('data-anatomy-region="'+region+'"'),'No photographic tap region: '+side+' '+region);
@@ -50,9 +52,9 @@ for(const side of ['front','back']){
   const html=atlas.render({side,gender:'male'});
   assert(html.includes('ls-atlas-visual'),'Visible color overlay missing');
   assert(html.includes('ls-atlas-hit'),'Separate touch hit paths missing');
-  assert(html.includes('width="'+(side==='front'?346:356)+'" height="631"'),'Anatomy photo stretched away from source pixels');
+  assert(html.includes('width="929" height="1693"'),'Approved male artwork must retain native source coordinates');
   assert(!html.includes('preserveAspectRatio="none"'),'Photo should not be stretched');
-  assert(html.includes('translate('+(side==='front'?346:356)+' 0) scale(-1 1)'),'Mirrored mapping must use the real image width');
+  assert(html.includes('translate(929 0) scale(-1 1)'),'Mirrored male atlas must use the real image width');
 }
 
 for(const [side,parent,sub] of [['front','Biceps','Long Head'],['front','Biceps','Short Head'],['front','Biceps','Brachialis'],['back','Triceps','Lateral Head'],['back','Triceps','Medial Head']]){

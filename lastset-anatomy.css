@@ -384,3 +384,22 @@
 .ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Forearms"]{
  background-size:auto 380px!important;
 }
+
+/* Approved transparent male anatomy uses native 929 x 1693 mapping. */
+.ls-anatomy-premium.male .ls-male-photo { pointer-events:none!important; image-rendering:auto; }
+.ls-explore-screen .ls-anatomy-premium.male.ls-anatomy-front,
+.ls-explore-screen .ls-anatomy-premium.male.ls-anatomy-back { aspect-ratio:929 / 1693!important; }
+.ls-option-thumb[data-thumb-gender="male"]{
+ background-image:url('/assets/anatomy-male-front.webp?v=approved0280')!important;
+ background-size:auto 330px!important;
+}
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Hamstrings"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Glutes"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Rear Delts"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Lats"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Traps"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Upper Back"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-region="Lower Back"],
+.ls-option-thumb[data-thumb-gender="male"][data-thumb-parent="Triceps"]{
+ background-image:url('/assets/anatomy-male-back.webp?v=approved0280')!important;
+}

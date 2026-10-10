@@ -47,7 +47,7 @@ jobs:
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium webkit
       - name: Targeted anatomy and forearm tests
-        run: npx playwright test --grep "Premium anatomy atlas|Front and back 4K atlas assets|Approved female image renders|Forearm atlas tap|Brachialis lists Hammer Curl|Smart Log after onboarding|Biceps offers only|Triceps offers|Female muscle model|Female back anatomy|Muscle Explorer filters|Atlas uses source pixel" --project=mobile-chromium --project=mobile-webkit
+        run: npx playwright test --grep "Premium anatomy atlas|Approved male native-resolution anatomy|Front and back 4K atlas assets|Approved female image renders|Forearm atlas tap|Brachialis lists Hammer Curl|Smart Log after onboarding|Biceps offers only|Triceps offers|Female muscle model|Female back anatomy|Muscle Explorer filters|Atlas uses source pixel" --project=mobile-chromium --project=mobile-webkit
       - name: Verify WebKit offline cache readiness
         run: npx playwright test --grep "offline cache is installed" --project=mobile-webkit
       - name: Capture mobile front, back and selected anatomy

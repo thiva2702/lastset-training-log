@@ -278,6 +278,36 @@ test.describe('LastSet production v0.14.0', () => {
 
 
 
+
+  test('Approved male native-resolution anatomy renders and retains muscle drilldown', async ({page}) => {
+    await page.locator('[data-nav="explore"]').click();
+    const atlas=page.locator('.ls-anatomy-premium.male');
+    for(const side of ['front','back']){
+      await page.locator('[data-explore-side="'+side+'"]').click();
+      await expect(atlas).toHaveAttribute('viewBox','0 0 929 1693');
+      await expect(atlas.locator('.ls-male-photo')).toBeVisible();
+      const photo=await page.evaluate(async side=>{
+        const im=new Image();
+        im.src='/assets/anatomy-male-'+side+'.webp?v=approved0280';
+        await im.decode();
+        const cv=document.createElement('canvas');cv.width=40;cv.height=40;
+        const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,40,40);
+        return {width:im.naturalWidth,height:im.naturalHeight,alpha:ctx.getImageData(0,0,1,1).data[3]};
+      },side);
+      expect(photo).toEqual({width:929,height:1693,alpha:0});
+    }
+    await page.locator('[data-explore-side="front"]').click();
+    await atlas.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+    await page.locator('[data-explore-subregion="Brachialis"]').click();
+    await expect(atlas.locator('.ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-focus-kind="primary"] [data-explore-exercise="hammer-curl"]')).toBeVisible();
+    await page.locator('[data-explore-close]').click();
+    await page.locator('[data-explore-side="back"]').click();
+    await atlas.locator('.ls-atlas-hit[data-anatomy-region="Triceps"]').first().click();
+    await page.locator('[data-explore-subregion="Long Head"]').click();
+    await expect(atlas.locator('.ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+  });
+
   test('Approved female image renders at native resolution with registered muscle highlights', async ({page}) => {
     await page.evaluate(() => {
       const d=JSON.parse(localStorage.getItem('lastset-data-v1')||'{}');

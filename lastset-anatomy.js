@@ -1,7 +1,7 @@
 /* LastSet premium anatomy atlas. Original, interactive SVG artwork. */
 (() => {
   'use strict';
-  const VERSION='0.27.0';
+  const VERSION='0.28.0';
   const GROUP_LABELS={Chest:'Chest',Shoulders:'Shoulders',Arms:'Arms',Core:'Core',Back:'Back',Legs:'Legs'};
   const FRONT=globalThis.LastSetAtlasRegions?.front;
   const BACK=globalThis.LastSetAtlasRegions?.back;
@@ -46,12 +46,13 @@
     const activeRegion=String(options.activeRegion||'');
     const activeSubregion=String(options.activeSubregion||'');
     const photographic=gender==='male';
+    const malePhoto=photographic&&Boolean(globalThis.LastSetAtlasRegions?.maleHiRes?.[side]);
     const femalePhoto=gender==='female'&&Boolean(globalThis.LastSetAtlasRegions?.femaleHiRes?.[side]);
     const femaleMapped=gender==='female'?globalThis.LastSetAtlasRegions?.female?.[side]:null;
-    const imageWidth=femalePhoto?941:side==='front'?346:356;
-    const imageHeight=femalePhoto?1672:631;
-    const groups=photographic?globalThis.LastSetAtlasRegions?.photo?.[side]:(femalePhoto?globalThis.LastSetAtlasRegions.femaleHiRes[side]:femaleMapped)||(side==='back'?BACK:FRONT);
-    const detail=active==='Arms'?(photographic?globalThis.LastSetAtlasRegions?.photoDetail?.[side]?.[activeRegion]:(femalePhoto?globalThis.LastSetAtlasRegions.femaleHiResDetail?.[side]?.[activeRegion]:globalThis.LastSetAtlasRegions?.femaleDetail?.[side]?.[activeRegion])):null;
+    const imageWidth=malePhoto?929:femalePhoto?941:side==='front'?346:356;
+    const imageHeight=malePhoto?1693:femalePhoto?1672:631;
+    const groups=photographic?(malePhoto?globalThis.LastSetAtlasRegions.maleHiRes[side]:globalThis.LastSetAtlasRegions?.photo?.[side]):(femalePhoto?globalThis.LastSetAtlasRegions.femaleHiRes[side]:femaleMapped)||(side==='back'?BACK:FRONT);
+    const detail=active==='Arms'?(photographic?(malePhoto?globalThis.LastSetAtlasRegions.maleHiResDetail?.[side]?.[activeRegion]:globalThis.LastSetAtlasRegions?.photoDetail?.[side]?.[activeRegion]):(femalePhoto?globalThis.LastSetAtlasRegions.femaleHiResDetail?.[side]?.[activeRegion]:globalThis.LastSetAtlasRegions?.femaleDetail?.[side]?.[activeRegion])):null;
     const detailedSelection=Boolean(detail?.length&&activeSubregion);
     const defs='<defs>'+
       '<linearGradient id="ls-atlas-body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#544663"/><stop offset=".43" stop-color="#30253d"/><stop offset="1" stop-color="#191624"/></linearGradient>'+
@@ -80,7 +81,7 @@
     const shapeOrder=side==='front'?['Shoulders','Chest','Arms','Core','Legs']:['Shoulders','Back','Arms','Legs'];
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
-      const centerHit=femalePhoto?'':group==='Chest'?(photographic?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="165" y="153" width="16" height="30" fill="transparent"/>':'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="transparent"/>'):group==='Back'?(photographic?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="166" y="169" width="24" height="68" fill="transparent"/>':'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="transparent"/>'):'';
+      const centerHit=malePhoto||femalePhoto?'':group==='Chest'?(photographic?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="165" y="153" width="16" height="30" fill="transparent"/>':'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="transparent"/>'):group==='Back'?(photographic?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="166" y="169" width="24" height="68" fill="transparent"/>':'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="transparent"/>'):'';
       const muscleEntries=(photographic||femalePhoto||femaleMapped)&&group==='Arms'&&side==='front'
         ?[...groups[group]].sort((a,b)=>({Triceps:0,Forearms:1,Biceps:2}[a.region]??3)-({Triceps:0,Forearms:1,Biceps:2}[b.region]??3))
         :groups[group];
@@ -109,11 +110,11 @@
         '<title>'+escape(GROUP_LABELS[group])+'</title>'+centerHit+segments+specialist+'</g>';
     }).join('');
     const details='<g class="ls-atlas-etch" aria-hidden="true">'+LINE_ART[side].map(d=>'<path d="'+d+'"/>').join('')+'</g>';
-    const photo=photographic?'<image class="ls-realistic-anatomy" href="/assets/anatomy-'+side+'.webp?v=transparent0260" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':femalePhoto?'<image class="ls-realistic-anatomy ls-female-photo" href="/assets/anatomy-female-'+side+'.webp?v=approved0270" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':'';
+    const photo=malePhoto?'<image class="ls-realistic-anatomy ls-male-photo" href="/assets/anatomy-male-'+side+'.webp?v=approved0280" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':photographic?'<image class="ls-realistic-anatomy" href="/assets/anatomy-'+side+'.webp?v=transparent0260" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':femalePhoto?'<image class="ls-realistic-anatomy ls-female-photo" href="/assets/anatomy-female-'+side+'.webp?v=approved0270" x="0" y="0" width="'+imageWidth+'" height="'+imageHeight+'" preserveAspectRatio="xMidYMid meet"/>':'';
     const figure=photographic||femalePhoto?photo+shapes:base+shapes+details;
     const footer='';
     return '<svg class="ls-anatomy ls-anatomy-premium '+gender+' ls-anatomy-'+side+'" viewBox="0 0 '+(photographic||femalePhoto?imageWidth:300)+' '+(photographic||femalePhoto?imageHeight:596)+'" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="'+(gender==='female'?'Female':'Male')+' muscular anatomy, '+side+' view. Select a muscle group." preserveAspectRatio="xMidYMid meet">'+
-      '<title>'+escape(gender==='female'?'Female':'Male')+' anatomy, '+side+' view</title>'+defs+(femalePhoto?'':bg)+
+      '<title>'+escape(gender==='female'?'Female':'Male')+' anatomy, '+side+' view</title>'+defs+(malePhoto||femalePhoto?'':bg)+
       '<g class="ls-atlas-figure">'+figure+'</g>'+footer+'</svg>';
   }
   globalThis.LastSetAnatomy=Object.freeze({version:VERSION,render,frontGroups:Object.keys(FRONT),backGroups:Object.keys(BACK)});
