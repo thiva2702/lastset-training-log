@@ -95,6 +95,13 @@ test.describe('Phase 0 local-first data trust',()=>{
       await page.locator('[data-set-reps="0"]').fill('8');
       await page.locator('[data-action="save-exercise"]').click();
       const before=await stored(page);
+      // Production uses HTTPS and auto-registers. The isolated loopback
+      // origin is HTTP, so explicitly register the same service worker here.
+      await page.evaluate(async()=>{
+        const reg=await navigator.serviceWorker.register('/service-worker.js',{updateViaCache:'none'});
+        await navigator.serviceWorker.ready;
+        if(!reg.active) throw new Error('Test service worker did not activate');
+      });
       await page.waitForFunction(async()=>{
         if(!navigator.serviceWorker)return false;
         const keys=await caches.keys();
