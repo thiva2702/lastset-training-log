@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: lastset-p0-mobile-${{ github.ref }}
+  group: lastset-p0-mobile-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
