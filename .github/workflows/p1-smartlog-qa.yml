@@ -1,0 +1,66 @@
+name: LastSet P1 Smart Log mobile QA
+
+on:
+  push:
+    branches: [p1/smartlog-progressive-review-20261011, main]
+    paths:
+      - 'lastset-smartlog-p1.js'
+      - 'tests/p1-gym-language-smoke.js'
+      - 'tests/e2e/p1.smartlog.spec.js'
+      - 'worker.js'
+      - 'service-worker.js'
+      - 'build-cloudflare.sh'
+      - '.github/workflows/p1-smartlog-qa.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lastset-p1-smartlog-qa
+  cancel-in-progress: true
+
+jobs:
+  smartlog-mobile:
+    name: P1 living language and mobile logging
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: 'true'
+      LASTSET_BASE_URL: http://127.0.0.1:4173/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test gym language parser independently
+        run: node tests/p1-gym-language-smoke.js
+      - name: Install browser QA dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Build isolated release candidate
+        run: bash build-cloudflare.sh
+      - name: Start local LastSet server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist > /tmp/lastset-p1-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ | grep -q lastset-release; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/lastset-p1-server.log
+          exit 1
+      - name: Run mobile Smart Log journeys
+        run: npx playwright test tests/e2e/p1.smartlog.spec.js --project=mobile-chromium --project=mobile-webkit
+      - name: Upload mobile failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lastset-p1-smartlog-evidence
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
