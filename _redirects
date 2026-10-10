@@ -1,1 +1,2 @@
-/ /app-v12.html 200
+# Serve the LastSet app directly from index.html at /.
+# Do not redirect / or /index.html to app-v12: its bootstrap fetches index.html.
