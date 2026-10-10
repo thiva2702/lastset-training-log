@@ -43,6 +43,15 @@
     return changed;
   }
 
+  // Only remove the single seeded demonstration exercise from a genuinely
+  // unclaimed new profile. Do not erase a real lifter's matching workout.
+  function shouldCleanSeedDemo(value){
+    const profile=value?.profile||{};
+    const named=String(profile.name||profile.userLabel||'').trim();
+    const sessionCount=Object.values(value?.sessions||{}).reduce((total,items)=>total+(Array.isArray(items)?items.length:0),0);
+    return !named && sessionCount===1;
+  }
+
   function emptyUserData(name='', previousProfile={}, preserveProfile=false){
     return {
       sessions:{}, aliases:{}, machines:{},
@@ -112,11 +121,82 @@
     }).sort((a,b)=>b.lastDate.localeCompare(a.lastDate));
   }
 
+  // Backups are parsed before they can replace the active user's data.
+  // Keep older exports compatible, but reject damaged nested workout records.
   function validateBackup(value){
-    if(!value || typeof value!=='object' || Array.isArray(value)) return false;
-    if(!value.sessions || typeof value.sessions!=='object' || Array.isArray(value.sessions)) return false;
-    if(value.profile!=null && (typeof value.profile!=='object' || Array.isArray(value.profile))) return false;
+    const object=v=>!!v && typeof v==='object' && !Array.isArray(v);
+    const numeric=v=>v==null || (typeof v==='number' && Number.isFinite(v)) ||
+      (typeof v==='string' && v.trim()!=='' && Number.isFinite(Number(v)));
+    if(!object(value) || !object(value.sessions)) return false;
+    if(value.profile!=null && !object(value.profile)) return false;
+    if(value.templates!=null && (!Array.isArray(value.templates) || !value.templates.every(object))) return false;
+    if(value.favorites!=null && !Array.isArray(value.favorites)) return false;
+    if(value.imports!=null && !Array.isArray(value.imports)) return false;
+    if(value.plans!=null && !object(value.plans)) return false;
+    if(value.schemaVersion!=null && !numeric(value.schemaVersion)) return false;
+    for(const [date,sessions] of Object.entries(value.sessions)){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Array.isArray(sessions)) return false;
+      for(const session of sessions){
+        if(!object(session)) return false;
+        if(session.type!=null && typeof session.type!=='string') return false;
+        if(session.type==='resistance' && !Array.isArray(session.exercises)) return false;
+        if(session.exercises!=null){
+          if(!Array.isArray(session.exercises)) return false;
+          for(const exercise of session.exercises){
+            if(!object(exercise)) return false;
+            if(exercise.sets!=null){
+              if(!Array.isArray(exercise.sets)) return false;
+              for(const set of exercise.sets){
+                if(!object(set)) return false;
+                if(set.setType!=null && typeof set.setType!=='string') return false;
+                if(['weight','weightKg','reps','durationSeconds'].some(k=>set[k]!==undefined && !numeric(set[k]))) return false;
+              }
+            }
+          }
+        }
+      }
+    }
     return true;
+  }
+
+  const BACKUP_ARCHIVE_FORMAT='lastset-all-profiles-v1';
+  function profileArchive(reg,current){
+    if(!reg || !Array.isArray(reg.users)) throw new Error('Profile registry not available');
+    const active=reg.activeId;
+    const users=reg.users.map(u=>({
+      id:u.id,name:u.name||u.data?.profile?.name||'User',
+      data:clone(u.id===active?current:u.data)
+    }));
+    if(!users.length && validateBackup(current)){
+      users.push({id:current?.profile?.userId||'active-user',name:current?.profile?.name||'User',data:clone(current)});
+    }
+    if(!users.length || users.some(u=>!validateBackup(u.data))) throw new Error('Cannot back up an invalid user record');
+    return {format:BACKUP_ARCHIVE_FORMAT,version:1,exportedAt:new Date().toISOString(),activeId:active,users};
+  }
+  function parseProfileRestore(input){
+    if(validateBackup(input)) return [clone(input)];
+    if(!input || input.format!==BACKUP_ARCHIVE_FORMAT || input.version!==1 ||
+      !Array.isArray(input.users) || !input.users.length || input.users.length>100) return null;
+    if(input.users.some(u=>!u || typeof u!=='object' || !validateBackup(u.data))) return null;
+    return input.users.map(u=>clone(u.data));
+  }
+  // The import is an additive snapshot of the registry. It cannot change the
+  // active profile or erase existing user data, even for old backups.
+  function restoredRegistry(currentReg,restore,makeId){
+    if(!currentReg || !Array.isArray(currentReg.users) || !Array.isArray(restore) ||
+      !restore.length || restore.some(x=>!validateBackup(x))) throw new Error('Unsafe recovery data');
+    const result=clone(currentReg);
+    const currentIds=new Set(result.users.map(x=>x.id));
+    for(const item of restore){
+      let id;
+      do {id=makeId();} while(currentIds.has(id));
+      currentIds.add(id);
+      item.profile=item.profile||{};
+      item.profile.userId=id;
+      const name=String(item.profile.name||item.profile.userLabel||'Recovered User').trim()||'Recovered User';
+      result.users.push({id,name,data:clone(item),updatedAt:Date.now(),recovered:true});
+    }
+    return result;
   }
 
   function validateCardioNumbers(values){
@@ -133,7 +213,7 @@
     return '';
   }
 
-  const TEST_API={isLegacyDemoSession,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers};
+  const TEST_API={isLegacyDemoSession,shouldCleanSeedDemo,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers,profileArchive,parseProfileRestore,restoredRegistry};
   if(typeof globalThis!=='undefined' && globalThis.__LASTSET_TEST_ONLY__){
     globalThis.LastSetIntegrityTest=TEST_API;
     return;
@@ -155,24 +235,47 @@
     }catch(_){ return false; }
   }
 
+  let registryCorrupted=false;
   function readRegistry(){
     try{
       const raw=localStorage.getItem(USER_SPACES_KEY);
-      const parsed=raw?JSON.parse(raw):null;
+      if(raw===null) return {version:1,activeId:null,users:[]};
+      const parsed=JSON.parse(raw);
       if(parsed && Array.isArray(parsed.users)) return parsed;
-    }catch(_){ }
-    return {version:1,activeId:null,users:[]};
+      throw new Error('Stored user registry is invalid');
+    }catch(err){
+      registryCorrupted=true;
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      // Do not silently replace the damaged registry; block further writes.
+      return {version:1,activeId:null,users:[]};
+    }
   }
   function writeRegistry(reg){
-    try{ localStorage.setItem(USER_SPACES_KEY,JSON.stringify(reg)); return true; }
-    catch(_){ return false; }
+    try{
+      if(registryCorrupted) throw new Error('Unreadable user registry: refusing to overwrite');
+      const encoded=JSON.stringify(reg);
+      localStorage.setItem(USER_SPACES_KEY,encoded);
+      if(localStorage.getItem(USER_SPACES_KEY)!==encoded) throw new Error('Profile save verification failed');
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      return false;
+    }
   }
   function userId(){ return `user_${Date.now()}_${Math.random().toString(36).slice(2,8)}`; }
 
   let syncingRegistry=false;
   function ensureRegistry(){
     const reg=readRegistry();
+    if(registryCorrupted) throw new Error('User registry is unreadable; export your data before further changes');
     let changed=false;
+    // lastset-data-v1 is the active profile on this device. If a profile
+    // switch was interrupted between its two writes, this persisted user ID
+    // takes precedence over an earlier registry activeId.
+    const persistedId=data?.profile?.userId;
+    if(persistedId && reg.activeId!==persistedId && reg.users.some(u=>u.id===persistedId)){
+      reg.activeId=persistedId;changed=true;
+    }
     if(!reg.activeId || !reg.users.some(u=>u.id===reg.activeId)){
       const id=data?.profile?.userId || userId();
       data.profile=data.profile||{};
@@ -185,7 +288,7 @@
       changed=true;
       if(baseSaveData) baseSaveData(data);
     }
-    if(changed) writeRegistry(reg);
+    if(changed && !writeRegistry(reg)) throw new Error('Could not persist profile registry');
     return reg;
   }
 
@@ -199,28 +302,33 @@
       user.name=value?.profile?.name||user.name||'Current user';
       user.data=clone(value);
       user.updatedAt=Date.now();
-      writeRegistry(reg);
+      if(!writeRegistry(reg)) throw new Error('LastSet user history could not be saved');
     }finally{ syncingRegistry=false; }
   }
 
   if(baseLoadData){
     loadData=function(){
       const value=baseLoadData();
-      if(stripLegacyDemoSession(value) && baseSaveData) baseSaveData(value);
+      if(shouldCleanSeedDemo(value) && stripLegacyDemoSession(value) && baseSaveData) baseSaveData(value);
       return value;
     };
   }
 
-  if(typeof data!=='undefined' && stripLegacyDemoSession(data) && baseSaveData) baseSaveData(data);
+  if(typeof data!=='undefined' && shouldCleanSeedDemo(data) && stripLegacyDemoSession(data) && baseSaveData) baseSaveData(data);
 
   if(baseSaveData){
     saveData=function(value){
       baseSaveData(value);
       syncActiveSnapshot(value);
+      return true;
     };
   }
-  ensureRegistry();
-  syncActiveSnapshot(data);
+  try{
+    ensureRegistry();
+    syncActiveSnapshot(data);
+  }catch(err){
+    if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+  }
 
   function resetViewTo(date){
     state.selectedDate=date;
@@ -233,44 +341,68 @@
   }
 
   function switchToUser(id){
-    syncActiveSnapshot(data);
-    const reg=readRegistry();
-    const target=reg.users.find(u=>u.id===id);
-    if(!target || !validateBackup(target.data)) return;
-    reg.activeId=id;
-    writeRegistry(reg);
-    data=clone(target.data);
-    data.profile=data.profile||{}; data.profile.userId=id;
-    if(baseSaveData) baseSaveData(data);
-    resetViewTo(isoDate(new Date()));
-    render();
-    showToast(`Switched to ${data.profile.name||'user'}`);
+    try{
+      syncActiveSnapshot(data);
+      const reg=readRegistry();
+      if(registryCorrupted) throw new Error('Profile registry is unreadable');
+      const target=reg.users.find(u=>u.id===id);
+      if(!target || !validateBackup(target.data)) return false;
+      const next=clone(target.data);
+      next.profile=next.profile||{};next.profile.userId=id;
+      const previousActiveId=reg.activeId;
+      reg.activeId=id;
+      if(!writeRegistry(reg)) return false;
+      try{if(baseSaveData) baseSaveData(next);}
+      catch(err){
+        reg.activeId=previousActiveId;
+        writeRegistry(reg);
+        throw err;
+      }
+      data=next;
+      resetViewTo(isoDate(new Date()));
+      render();
+      showToast(`Switched to ${data.profile.name||'user'}`);
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      showToast('Could not switch users safely. Existing workout data is unchanged.');
+      return false;
+    }
   }
 
   function createNewUser(name,deleteCurrent){
-    if(!deleteCurrent) syncActiveSnapshot(data);
-    const reg=readRegistry();
-    const currentId=reg.activeId;
-    if(deleteCurrent) reg.users=reg.users.filter(u=>u.id!==currentId);
-    const id=userId();
-    const fresh=emptyUserData(name);
-    fresh.profile.userId=id;
-    reg.activeId=id;
-    reg.users.push({id,name:name||'New user',data:clone(fresh),updatedAt:Date.now()});
-    writeRegistry(reg);
-    data=fresh;
-    if(baseSaveData) baseSaveData(data);
-    resetViewTo(isoDate(new Date()));
-    render();
-    showToast('New user started fresh');
+    try{
+      syncActiveSnapshot(data);
+      const reg=readRegistry();
+      if(registryCorrupted) throw new Error('Profile registry is unreadable');
+      const original=clone(reg);
+      const currentId=reg.activeId;
+      if(deleteCurrent) reg.users=reg.users.filter(u=>u.id!==currentId);
+      const id=userId();
+      const fresh=emptyUserData(name);
+      fresh.profile.userId=id;
+      reg.activeId=id;
+      reg.users.push({id,name:name||'New user',data:clone(fresh),updatedAt:Date.now()});
+      if(!writeRegistry(reg)) return false;
+      try{if(baseSaveData)baseSaveData(fresh);}
+      catch(err){writeRegistry(original);throw err;}
+      data=fresh;
+      resetViewTo(isoDate(new Date()));
+      render();
+      showToast('New user started fresh');
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function')reportStorageFailure(err);
+      showToast('Could not create a new profile safely.');
+      return false;
+    }
   }
 
   function deleteInactiveUser(id){
     const reg=readRegistry();
     if(id===reg.activeId) return false;
     reg.users=reg.users.filter(u=>u.id!==id);
-    writeRegistry(reg);
-    return true;
+    return writeRegistry(reg);
   }
 
   function openUsersManager(){
@@ -288,11 +420,12 @@
     const close=()=>overlay.remove();
     overlay.querySelector('[data-users-close]').onclick=close;
     overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
-    overlay.querySelectorAll('[data-user-switch]').forEach(btn=>btn.onclick=()=>{close();switchToUser(btn.dataset.userSwitch);});
+    overlay.querySelectorAll('[data-user-switch]').forEach(btn=>btn.onclick=()=>{if(switchToUser(btn.dataset.userSwitch))close();});
     overlay.querySelectorAll('[data-user-delete]').forEach(btn=>btn.onclick=()=>{
       const u=reg.users.find(x=>x.id===btn.dataset.userDelete);
       if(!confirm(`Permanently delete ${u?.name||'this user'} and all stored training data?`)) return;
-      deleteInactiveUser(btn.dataset.userDelete); close(); openUsersManager();
+      if(deleteInactiveUser(btn.dataset.userDelete)){close();openUsersManager();}
+      else showToast('Could not delete profile. Please export a backup first.');
     });
     overlay.querySelector('[data-user-new]').onclick=()=>openNewUserDialog(close);
   }
@@ -313,11 +446,11 @@
     const close=()=>overlay.remove();
     overlay.querySelector('[data-new-close]').onclick=close;
     const name=()=>overlay.querySelector('#ls-new-user-name').value.trim();
-    overlay.querySelector('[data-new-keep]').onclick=()=>{ if(!name()){showToast('Enter the new user name');return;} close(); createNewUser(name(),false); };
+    overlay.querySelector('[data-new-keep]').onclick=()=>{ if(!name()){showToast('Enter the new user name');return;} if(createNewUser(name(),false))close(); };
     overlay.querySelector('[data-new-delete]').onclick=()=>{
       if(!name()){showToast('Enter the new user name');return;}
       if(!confirm(`Permanently delete ${current?.name||'the current user'} and all training data? This cannot be undone unless you exported a backup.`)) return;
-      close(); createNewUser(name(),true);
+      if(createNewUser(name(),true))close();
     };
   }
 
@@ -426,22 +559,52 @@
     };
   }
 
+  function downloadJsonBackup(payload,name){
+    const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+    const a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    // Immediate revocation can invalidate a download on iOS Safari.
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  function exportAllProfiles(){
+    try{
+      syncActiveSnapshot(data);
+      const raw=localStorage.getItem(USER_SPACES_KEY);
+      if(raw==null) throw new Error('Profile registry missing');
+      const reg=JSON.parse(raw);
+      const archive=profileArchive(reg,data);
+      downloadJsonBackup(archive,'lastset-all-profiles-backup.json');
+      showToast('All profiles backup prepared — keep the file outside LastSet');
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      showToast('Could not verify all profiles for backup. Export the current user instead.');
+    }
+  }
   function importBackupFile(file){
+    if(!file || file.size>30*1024*1024){showToast('Choose a backup smaller than 30 MB');return;}
     const reader=new FileReader();
+    reader.onerror=()=>showToast('Could not read the selected backup');
     reader.onload=()=>{
       try{
         const parsed=JSON.parse(String(reader.result||''));
-        if(!validateBackup(parsed)) throw new Error('Invalid LastSet backup');
-        if(!confirm('Replace the current user’s training data with this backup? Other stored users will not be changed.')) return;
-        data=parsed;
-        data.profile=data.profile||{};
-        const reg=ensureRegistry(); data.profile.userId=reg.activeId;
-        if(typeof migrateV10==='function')migrateV10();
-        if(typeof migrateV11==='function')migrateV11();
-        stripLegacyDemoSession(data);
-        saveData(data);
-        resetViewTo(isoDate(new Date())); render(); showToast('Backup imported');
-      }catch(err){ showToast('That file is not a valid LastSet backup'); }
+        const restore=parseProfileRestore(parsed);
+        if(!restore) throw new Error('Invalid LastSet backup');
+        // A file restore must NEVER overwrite current or newer workouts.
+        const quantity=restore.length;
+        if(!confirm('Recover '+quantity+' profile(s) as NEW profiles on this device? Existing workouts and profiles will not be replaced. You can switch to recovered profiles afterwards.')) return;
+        syncActiveSnapshot(data);
+        const raw=localStorage.getItem(USER_SPACES_KEY);
+        if(raw==null) throw new Error('Profile registry missing');
+        const reg=JSON.parse(raw);
+        if(!reg || !Array.isArray(reg.users)) throw new Error('Corrupt profile registry');
+        const next=restoredRegistry(reg,restore,userId);
+        if(!writeRegistry(next)) throw new Error('Device storage could not save recovered profiles');
+        render();
+        showToast(quantity+' profile(s) recovered. Open Manage users to switch.');
+      }catch(err){
+        console.warn('LastSet backup recovery failed:',err?.message||'Error');
+        showToast('Backup not restored. Existing training data was not changed.');
+      }
     };
     reader.readAsText(file);
   }
@@ -487,14 +650,16 @@
     if(!main.querySelector('[data-integrity-users]')){
       const reg=readRegistry(); const current=reg.users.find(u=>u.id===reg.activeId);
       const card=document.createElement('section'); card.className='ls-integrity-card'; card.dataset.integrityUsers='1';
-      card.innerHTML=`<div class="ls-integrity-kicker">User data</div><strong>${escapeHtml(current?.name||data.profile?.name||'Current user')}</strong><p>Switch users without mixing training history. Starting a new user can keep this data stored, or delete it only after a separate confirmation.</p><div class="ls-integrity-actions"><button class="secondary" type="button" data-manage-users>Manage users</button><button class="secondary" type="button" data-import-backup>Import backup</button></div><div style="font-size:10px;margin-top:9px" class="${storageAvailable()?'ls-storage-ok':'ls-storage-bad'}">${storageAvailable()?'● Device storage healthy':'● Device storage unavailable — export a backup before continuing'}</div><input type="file" accept="application/json,.json" data-backup-input hidden>`;
+      card.innerHTML=`<div class="ls-integrity-kicker">User data</div><strong>${escapeHtml(current?.name||data.profile?.name||'Current user')}</strong><p>Switch users without mixing training history. Starting a new user can keep this data stored, or delete it only after a separate confirmation.</p><div class="ls-integrity-actions"><button class="secondary" type="button" data-manage-users>Manage users</button><button class="secondary" type="button" data-import-backup>Restore backup</button><button class="secondary" type="button" data-export-all>Export all profiles</button></div><div style="font-size:10px;margin-top:9px" class="${storageAvailable()?'ls-storage-ok':'ls-storage-bad'}">${storageAvailable()?'● Device storage healthy':'● Device storage unavailable — export a backup before continuing'}</div><input type="file" accept="application/json,.json" data-backup-input hidden>`;
       const saved=main.querySelector('[data-saved-workouts-entry="profile"]');
       if(saved)saved.insertAdjacentElement('afterend',card); else main.appendChild(card);
       card.querySelector('[data-manage-users]').onclick=openUsersManager;
+      card.querySelector('[data-export-all]').onclick=exportAllProfiles;
       const fileInput=card.querySelector('[data-backup-input]');
       card.querySelector('[data-import-backup]').onclick=()=>fileInput.click();
       fileInput.onchange=()=>{const f=fileInput.files?.[0];if(f)importBackupFile(f);fileInput.value='';};
     }
+    const exportCurrent=main.querySelector('[data-action="export-data"]');if(exportCurrent)exportCurrent.textContent='Export current profile only';
     const reset=document.querySelector('[data-action="clear-data"]'); if(reset)reset.textContent="Reset current user's training data";
     const version=[...document.querySelectorAll('.muted')].find(el=>/LastSet v0\.12/i.test(el.textContent||''));
     if(version)version.textContent=`LastSet v${VERSION} Trust + Data Integrity`;

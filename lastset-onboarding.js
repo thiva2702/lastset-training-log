@@ -17,15 +17,31 @@ function meaningfulName(value){
 function profileComplete(profile){
   return !!profile && profile.onboardingComplete===true && meaningfulName(profile.name||profile.userLabel) && ['kg','lb'].includes(profile.weightUnit||'kg');
 }
+let registryUnsafe=false;
 function readRegistry(storage){
   try{
     const raw=(storage||localStorage).getItem(REGISTRY_KEY);
-    const parsed=raw?JSON.parse(raw):null;
-    return parsed&&Array.isArray(parsed.users)?parsed:{version:1,activeId:null,users:[]};
-  }catch(_){return {version:1,activeId:null,users:[]};}
+    if(raw===null)return {version:1,activeId:null,users:[]};
+    const parsed=JSON.parse(raw);
+    if(parsed&&Array.isArray(parsed.users))return parsed;
+    throw new Error('Damaged user registry');
+  }catch(err){
+    registryUnsafe=true;
+    if(typeof reportStorageFailure==='function')reportStorageFailure(err);
+    return {version:1,activeId:null,users:[]};
+  }
 }
 function writeRegistry(reg,storage){
-  try{(storage||localStorage).setItem(REGISTRY_KEY,JSON.stringify(reg));return true;}catch(_){return false;}
+  try{
+    if(registryUnsafe)throw new Error('Refusing to overwrite unreadable user registry');
+    const target=storage||localStorage,serialized=JSON.stringify(reg);
+    target.setItem(REGISTRY_KEY,serialized);
+    if(target.getItem(REGISTRY_KEY)!==serialized)throw new Error('Profile save verification failed');
+    return true;
+  }catch(err){
+    if(typeof reportStorageFailure==='function')reportStorageFailure(err);
+    return false;
+  }
 }
 function migrateExisting(target,storage){
   const store=storage||localStorage;
@@ -183,7 +199,8 @@ function saveInitialProfile(){
   const d=db();if(!d)return;
   d.profile=Object.assign({},d.profile||{},v);
   if(draftAvatar)d.profile.avatarDataUrl=draftAvatar;
-  saveData(d);
+  try{saveData(d);}
+  catch(err){showToast('Profile was NOT saved. Export an emergency backup before refreshing.');return;}
   draftAvatar='';
   render();
   completionOverlay(v.name);
@@ -199,9 +216,18 @@ function chooseExistingUser(){
   overlay.querySelector('[data-existing-close]').onclick=()=>overlay.remove();
   overlay.querySelectorAll('[data-existing-user]').forEach(btn=>btn.onclick=()=>{
     const target=reg.users.find(u=>u.id===btn.dataset.existingUser);if(!target)return;
-    reg.activeId=target.id;writeRegistry(reg);
-    data=clone(target.data);data.profile=data.profile||{};data.profile.userId=target.id;
-    if(typeof safeStorageSet==='function')safeStorageSet(data);else localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    const previousActive=reg.activeId;
+    const next=clone(target.data);next.profile=next.profile||{};next.profile.userId=target.id;
+    reg.activeId=target.id;
+    if(!writeRegistry(reg)){showToast('Cannot switch profiles while storage is unavailable');return;}
+    let saved=false;
+    try{saved=typeof safeStorageSet==='function'?safeStorageSet(next):(localStorage.setItem(STORAGE_KEY,JSON.stringify(next)),true);}catch(_){}
+    if(!saved){
+      reg.activeId=previousActive;writeRegistry(reg);
+      showToast('Profile switch failed. Existing history was not replaced.');
+      return;
+    }
+    data=next;
     overlay.remove();
     state.selectedDate=isoDate(new Date());state.month=new Date();state.month=new Date(state.month.getFullYear(),state.month.getMonth(),1);state.tab='today';state.view='day';
     render();
@@ -247,11 +273,20 @@ function newUserModal(){
   overlay.querySelector('[data-v14-create-user]').onclick=()=>{
     const v=valuesFrom('ls-new-profile');
     if(!meaningfulName(v.name)){showToast('Enter the new user name');return;}
-    if(typeof saveData==='function')saveData(data);
-    const reg=currentReg(),id=makeId(),record=newUserRecord(Object.assign({},v,draftAvatar?{avatarDataUrl:draftAvatar}:{}),id);
-    reg.activeId=id;reg.users.push(record);writeRegistry(reg);
-    data=clone(record.data);
-    if(typeof safeStorageSet==='function')safeStorageSet(data);else localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    try{if(typeof saveData==='function')saveData(data);}
+    catch(_){showToast('Previous profile could not be saved. New profile was not created.');return;}
+    const reg=currentReg(),previousReg=clone(reg),id=makeId(),record=newUserRecord(Object.assign({},v,draftAvatar?{avatarDataUrl:draftAvatar}:{}),id);
+    reg.activeId=id;reg.users.push(record);
+    if(!writeRegistry(reg)){showToast('Could not save new profile');return;}
+    const next=clone(record.data);
+    let saved=false;
+    try{saved=typeof safeStorageSet==='function'?safeStorageSet(next):(localStorage.setItem(STORAGE_KEY,JSON.stringify(next)),true);}catch(_){}
+    if(!saved){
+      writeRegistry(previousReg);
+      showToast('New profile was NOT saved. Previous profile is preserved.');
+      return;
+    }
+    data=next;
     close();
     state.selectedDate=isoDate(new Date());state.month=new Date();state.month=new Date(state.month.getFullYear(),state.month.getMonth(),1);state.tab='today';state.view='day';
     render();completionOverlay(v.name);

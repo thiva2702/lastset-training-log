@@ -440,16 +440,72 @@ const state = {
 
 const STORAGE_KEY = 'lastset-data-v1';
 let memoryStore = null;
+let unreadableStoredData = null;
 
 function safeStorageGet(){
   try { return window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null; }
   catch(e){ return null; }
 }
+// Keep the entire in-memory workout available for an emergency export
+// when Safari's local storage is full or unavailable.
+function reportStorageFailure(error){
+  try{ console.error('LastSet persistent save failed:', error?.name || 'StorageError'); }catch(_){}
+  if(typeof document==='undefined') return;
+  const mount=()=>{
+    if(!document.body || document.getElementById('ls-save-failure')) return;
+    const banner=document.createElement('section');
+    banner.id='ls-save-failure';
+    banner.setAttribute('role','alert');
+    banner.style.cssText='position:fixed!important;z-index:2147483647!important;inset:auto 12px calc(env(safe-area-inset-bottom,0px) + 10px) 12px;max-width:560px;margin:auto;padding:16px;border-radius:16px;border:2px solid #ff808e;background:#29131b;color:#fff;box-shadow:0 12px 36px #000a;font:14px/1.5 system-ui,sans-serif';
+    banner.innerHTML='<strong>Workout NOT saved to device</strong><p style="margin:6px 0 12px">Keep LastSet open. Your latest entries are still in memory but might disappear if you close or refresh. Export an emergency backup now.</p><button type="button" style="padding:11px;border-radius:10px;background:#fff;color:#251221;border:0;font-weight:700">Export emergency backup</button>';
+    banner.querySelector('button').addEventListener('click',()=>{
+      try{
+        const snapshot=typeof data!=='undefined'?data:memoryStore;
+        if(!snapshot && unreadableStoredData===null) throw new Error('No data to export');
+        let damagedRegistry=null;
+        try{
+          const raw=window.localStorage?.getItem('lastset-user-spaces-v1');
+          if(raw!==null && raw!==undefined){
+            try{
+              const parsed=JSON.parse(raw);
+              if(!parsed || !Array.isArray(parsed.users)) damagedRegistry=raw;
+            }catch(_){damagedRegistry=raw;}
+          }
+        }catch(_){}
+        const damaged=unreadableStoredData!==null||damagedRegistry!==null;
+        const contents=damaged?JSON.stringify({
+          format:'lastset-emergency-recovery-v1',
+          exportedAt:new Date().toISOString(),
+          note:'Raw damaged records require review before recovery; do not import directly.',
+          activeSnapshot:snapshot,
+          rawActiveStorage:unreadableStoredData,
+          rawProfileRegistry:damagedRegistry
+        },null,2):JSON.stringify(snapshot,null,2);
+        const url=URL.createObjectURL(new Blob([contents],{type:'application/json'}));
+        const a=document.createElement('a');a.href=url;a.download=damaged?'lastset-emergency-raw-recovery.json':'lastset-emergency-backup.json';
+        document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+      }catch(_){ window.alert('Emergency export unavailable. Keep LastSet open and contact support before refreshing.'); }
+    });
+    document.body.appendChild(banner);
+  };
+  if(document.body) mount();
+  else document.addEventListener('DOMContentLoaded',mount,{once:true});
+}
 function safeStorageSet(value){
   memoryStore = value;
   try {
-    if(window.localStorage) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch(e) {}
+    if(unreadableStoredData!==null) throw new Error('Unreadable existing storage: refusing to overwrite');
+    if(!window.localStorage) throw new Error('Device storage unavailable');
+    const encoded=JSON.stringify(value);
+    window.localStorage.setItem(STORAGE_KEY,encoded);
+    if(window.localStorage.getItem(STORAGE_KEY)!==encoded) throw new Error('Device save verification failed');
+    if(typeof document!=='undefined') document.getElementById('ls-save-failure')?.remove();
+    return true;
+  } catch(e) {
+    reportStorageFailure(e);
+    return false;
+  }
 }
 function safeStorageRemove(){
   memoryStore = null;
@@ -457,8 +513,19 @@ function safeStorageRemove(){
 }
 function loadData(){
   const raw = safeStorageGet();
-  if(raw){
-    try { return JSON.parse(raw); } catch(e) {}
+  if(raw!==null){
+    try {
+      const parsed=JSON.parse(raw);
+      if(!parsed || typeof parsed!=='object' || Array.isArray(parsed) ||
+        !parsed.sessions || typeof parsed.sessions!=='object' || Array.isArray(parsed.sessions)) throw new Error('Invalid stored workout structure');
+      return parsed;
+    }catch(e){
+      unreadableStoredData=raw;
+      reportStorageFailure(e);
+      // Never save this placeholder over the damaged original. Raw bytes
+      // remain available for emergency export and manual recovery.
+      return {sessions:{},aliases:{},machines:{},profile:{name:'',weightUnit:'kg'},templates:[],schemaVersion:11};
+    }
   }
   const demo = { sessions: {}, aliases: {}, machines: {}, profile: { name:'', weightUnit:'kg' } };
   const d = new Date();
@@ -470,7 +537,10 @@ function loadData(){
   safeStorageSet(demo);
   return demo;
 }
-function saveData(value){ safeStorageSet(value); }
+function saveData(value){
+  if(!safeStorageSet(value)) throw new Error('LastSet could not persist this workout; export an emergency backup before closing.');
+  return true;
+}
 let data = loadData();
 if(!data.profile) data.profile={name:'',weightUnit:'kg'};
 if(typeof data.profile.name!=='string') data.profile.name='';
@@ -2052,7 +2122,9 @@ function handlePhoto(e){
   const btn=prev.querySelector('[data-action="scan-demo"]'); btn.onclick=()=>{prev.querySelector('.ai-result').innerHTML=`<h3>Likely match: Chest Press</h3><p>Machine · Chest, Triceps, Shoulders</p><p><strong>Confidence:</strong> High</p><button class="primary" id="scan-log">Use this exercise</button>`; document.getElementById('scan-log').onclick=()=>{state.selectedExercise='chest-press';state.resistanceDraft={sets:[]};state.view='exercise-log';render();};};
 }
 function exportData(){
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lastset-training-data.json'; a.click(); URL.revokeObjectURL(a.href);
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='lastset-current-profile.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 function escapeHtml(s){ return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
