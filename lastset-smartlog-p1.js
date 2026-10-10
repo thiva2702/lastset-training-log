@@ -135,6 +135,7 @@ parseSmartWorkout=function(text){
       const item=result.items[index];
       const parsed=parseProgressivePhrase(segment,item.loadType,unit);
       if(!parsed)continue;
+      item.p1Diag={loadType:item.loadType,recognized:parsed.recognized,setCount:parsed.sets.length,setSnapshot:JSON.parse(JSON.stringify(parsed.sets))};
       if(parsed.sets.length)item.sets=parsed.sets;
       item.p1Review=true;
       item.p1Source=segment.trim();
