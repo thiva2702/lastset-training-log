@@ -82,8 +82,11 @@
     const shapes=shapeOrder.map(group=>{
       const isActive=active===group;
       const centerHit=malePhoto?(group==='Chest'?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="446" y="383" width="36" height="62" fill="transparent"/>':group==='Back'?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="447" y="391" width="34" height="102" fill="transparent"/>':''):femalePhoto?'':group==='Chest'?(photographic?'<rect class="ls-central-chest-target" data-anatomy-region="Mid Chest" x="165" y="153" width="16" height="30" fill="transparent"/>':'<rect class="ls-central-chest-target" x="138" y="139" width="24" height="42" fill="transparent"/>'):group==='Back'?(photographic?'<rect class="ls-central-back-target" data-anatomy-region="Upper Back" x="166" y="169" width="24" height="68" fill="transparent"/>':'<rect class="ls-central-back-target" x="137" y="151" width="26" height="104" fill="transparent"/>'):'';
+      // Paint the narrow front Triceps target above Biceps on the new male
+      // artwork so it cannot be swallowed by the much larger Biceps hit area.
+      const armOrder=malePhoto?{Biceps:0,Forearms:1,Triceps:2}:{Triceps:0,Forearms:1,Biceps:2};
       const muscleEntries=(photographic||femalePhoto||femaleMapped)&&group==='Arms'&&side==='front'
-        ?[...groups[group]].sort((a,b)=>({Triceps:0,Forearms:1,Biceps:2}[a.region]??3)-({Triceps:0,Forearms:1,Biceps:2}[b.region]??3))
+        ?[...groups[group]].sort((a,b)=>(armOrder[a.region]??3)-(armOrder[b.region]??3))
         :groups[group];
       const segments=muscleEntries.map((entry,index)=>{
         const region=typeof entry==='string'?'':String(entry.region||'');

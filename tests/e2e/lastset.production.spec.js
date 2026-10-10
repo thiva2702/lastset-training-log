@@ -215,12 +215,12 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.locator('.ls-anatomy-premium.male')).toBeVisible();
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Chest"]')).toHaveCount(1);
     await expect(page.locator('.ls-anatomy-premium .ls-atlas-segment').first()).toBeVisible();
-    await page.locator('.ls-anatomy-premium [data-explore-group="Chest"]').click();
+    await page.locator('.ls-anatomy-premium .ls-atlas-hit[data-anatomy-region="Mid Chest"]').first().click();
     await expect(page.locator('[data-explore-region="Upper Chest"]')).toBeVisible();
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Chest"]')).toHaveAttribute('aria-pressed','true');
     await page.locator('[data-explore-side="back"]').click();
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveCount(1);
-    await page.locator('.ls-anatomy-premium [data-explore-group="Back"]').click();
+    await page.locator('.ls-anatomy-premium .ls-atlas-hit[data-anatomy-region="Lats"]').first().click();
     await expect(page.locator('[data-explore-region="Lats"]')).toBeVisible();
     await expect(page.locator('.ls-anatomy-premium [data-explore-group="Back"]')).toHaveAttribute('aria-pressed','true');
   });
@@ -451,7 +451,7 @@ test.describe('LastSet production v0.14.0', () => {
     await expect(page.getByRole('heading', { name: 'Muscle Explorer' })).toBeVisible();
     await expect(page.locator('.ls-anatomy.male')).toBeVisible();
 
-    await page.locator('[data-explore-group="Chest"]').first().click();
+    await page.locator('.ls-anatomy-premium .ls-atlas-hit[data-anatomy-region="Mid Chest"]').first().click();
     await page.locator('[data-explore-region="Upper Chest"]').click();
     await page.locator('[data-explore-equipment="dumbbell"]').click();
 
