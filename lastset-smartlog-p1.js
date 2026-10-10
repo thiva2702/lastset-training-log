@@ -24,9 +24,12 @@ function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
   if(type==='timed'||type==='assisted')return null;
   const raw=safe(text);
   if(!raw.trim())return null;
+  const WORD_NUMBERS={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twelve:12,fifteen:15};
   const t=raw.toLowerCase()
-    .replace(/a couple of sixes/g,'6 and 6')
-    .replace(/\ba (five|six|seven|eight|nine|ten)\b/g,(_,w)=>({five:5,six:6,seven:7,eight:8,nine:9,ten:10})[w])
+    .replace(/\ba couple of sixes\b/g,'6 and 6')
+    .replace(/\bput\s+(\d+(?:\.\d+)?)\s+on\s+and\s+got\s+/g,'$1 for ')
+    .replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|twelve|fifteen)\b/g,w=>WORD_NUMBERS[w])
+    .replace(/\ba\s+(\d+)\b/g,'$1')
     .replace(/\s+/g,' ');
   const warnings=reviewWarnings(raw);
   const weightUnit='(?:kg|kgs?|kilos?|lb|lbs|pounds?)';
