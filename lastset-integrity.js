@@ -505,22 +505,52 @@
     };
   }
 
+  function downloadJsonBackup(payload,name){
+    const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+    const a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    // Immediate revocation can invalidate a download on iOS Safari.
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  function exportAllProfiles(){
+    try{
+      syncActiveSnapshot(data);
+      const raw=localStorage.getItem(USER_SPACES_KEY);
+      if(raw==null) throw new Error('Profile registry missing');
+      const reg=JSON.parse(raw);
+      const archive=profileArchive(reg,data);
+      downloadJsonBackup(archive,'lastset-all-profiles-backup.json');
+      showToast('All profiles backup prepared — keep the file outside LastSet');
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      showToast('Could not verify all profiles for backup. Export the current user instead.');
+    }
+  }
   function importBackupFile(file){
+    if(!file || file.size>30*1024*1024){showToast('Choose a backup smaller than 30 MB');return;}
     const reader=new FileReader();
+    reader.onerror=()=>showToast('Could not read the selected backup');
     reader.onload=()=>{
       try{
         const parsed=JSON.parse(String(reader.result||''));
-        if(!validateBackup(parsed)) throw new Error('Invalid LastSet backup');
-        if(!confirm('Replace the current user’s training data with this backup? Other stored users will not be changed.')) return;
-        data=parsed;
-        data.profile=data.profile||{};
-        const reg=ensureRegistry(); data.profile.userId=reg.activeId;
-        if(typeof migrateV10==='function')migrateV10();
-        if(typeof migrateV11==='function')migrateV11();
-        stripLegacyDemoSession(data);
-        saveData(data);
-        resetViewTo(isoDate(new Date())); render(); showToast('Backup imported');
-      }catch(err){ showToast('That file is not a valid LastSet backup'); }
+        const restore=parseProfileRestore(parsed);
+        if(!restore) throw new Error('Invalid LastSet backup');
+        // A file restore must NEVER overwrite current or newer workouts.
+        const quantity=restore.length;
+        if(!confirm('Recover '+quantity+' profile(s) as NEW profiles on this device? Existing workouts and profiles will not be replaced. You can switch to recovered profiles afterwards.')) return;
+        syncActiveSnapshot(data);
+        const raw=localStorage.getItem(USER_SPACES_KEY);
+        if(raw==null) throw new Error('Profile registry missing');
+        const reg=JSON.parse(raw);
+        if(!reg || !Array.isArray(reg.users)) throw new Error('Corrupt profile registry');
+        const next=restoredRegistry(reg,restore,userId);
+        if(!writeRegistry(next)) throw new Error('Device storage could not save recovered profiles');
+        render();
+        showToast(quantity+' profile(s) recovered. Open Manage users to switch.');
+      }catch(err){
+        console.warn('LastSet backup recovery failed:',err?.message||'Error');
+        showToast('Backup not restored. Existing training data was not changed.');
+      }
     };
     reader.readAsText(file);
   }
@@ -566,10 +596,11 @@
     if(!main.querySelector('[data-integrity-users]')){
       const reg=readRegistry(); const current=reg.users.find(u=>u.id===reg.activeId);
       const card=document.createElement('section'); card.className='ls-integrity-card'; card.dataset.integrityUsers='1';
-      card.innerHTML=`<div class="ls-integrity-kicker">User data</div><strong>${escapeHtml(current?.name||data.profile?.name||'Current user')}</strong><p>Switch users without mixing training history. Starting a new user can keep this data stored, or delete it only after a separate confirmation.</p><div class="ls-integrity-actions"><button class="secondary" type="button" data-manage-users>Manage users</button><button class="secondary" type="button" data-import-backup>Import backup</button></div><div style="font-size:10px;margin-top:9px" class="${storageAvailable()?'ls-storage-ok':'ls-storage-bad'}">${storageAvailable()?'● Device storage healthy':'● Device storage unavailable — export a backup before continuing'}</div><input type="file" accept="application/json,.json" data-backup-input hidden>`;
+      card.innerHTML=`<div class="ls-integrity-kicker">User data</div><strong>${escapeHtml(current?.name||data.profile?.name||'Current user')}</strong><p>Switch users without mixing training history. Starting a new user can keep this data stored, or delete it only after a separate confirmation.</p><div class="ls-integrity-actions"><button class="secondary" type="button" data-manage-users>Manage users</button><button class="secondary" type="button" data-import-backup>Restore backup</button><button class="secondary" type="button" data-export-all>Export all profiles</button></div><div style="font-size:10px;margin-top:9px" class="${storageAvailable()?'ls-storage-ok':'ls-storage-bad'}">${storageAvailable()?'● Device storage healthy':'● Device storage unavailable — export a backup before continuing'}</div><input type="file" accept="application/json,.json" data-backup-input hidden>`;
       const saved=main.querySelector('[data-saved-workouts-entry="profile"]');
       if(saved)saved.insertAdjacentElement('afterend',card); else main.appendChild(card);
       card.querySelector('[data-manage-users]').onclick=openUsersManager;
+      card.querySelector('[data-export-all]').onclick=exportAllProfiles;
       const fileInput=card.querySelector('[data-backup-input]');
       card.querySelector('[data-import-backup]').onclick=()=>fileInput.click();
       fileInput.onchange=()=>{const f=fileInput.files?.[0];if(f)importBackupFile(f);fileInput.value='';};
