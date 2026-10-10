@@ -206,7 +206,7 @@ async function networkFirstAsset(request){
     // Online JS and CSS must not use a previous version just because paths match.
     const response=await fetch(request,{cache:'no-store'});
     if(!response||!response.ok)throw new Error('Asset not available');
-    await cache.put(request,response.clone());
+    try{await cache.put(request,response.clone());}catch(_){/* Storage full must not override fresh network response. */}
     return response;
   }catch(_){
     return await cache.match(request)||

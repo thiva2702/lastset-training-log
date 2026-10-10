@@ -22,3 +22,37 @@ assert(fs.existsSync('lastset-diagnostics.js'));
 assert(fs.existsSync('lastset-diagnostics.css'));
 assert(sw.includes('if(/\\.(?:js|css|json)$/i.test(path))return networkFirstAsset(request);'),'JS and CSS must use network-first path');
 console.log('LastSet versioning smoke tests passed');
+
+// Test the service worker's actual network-first path, not just its source text.
+(async()=>{
+  const vm=require('node:vm');
+  const handlers={};
+  let offline=false;
+  const oldResponse=new Response('OLD version');
+  const cached={
+    put:async()=>{},
+    match:async(req,opts)=>opts?.ignoreSearch?oldResponse:null
+  };
+  const ctx={
+    self:{
+      location:{href:'https://lastset.example/service-worker.js',origin:'https://lastset.example'},
+      addEventListener:(event,fn)=>{handlers[event]=fn;},
+      skipWaiting:()=>{}
+    },
+    caches:{open:async()=>cached,keys:async()=>[],match:async()=>oldResponse},
+    fetch:async()=>{
+      if(offline)throw new Error('Offline');
+      return new Response('NEW version');
+    },
+    URL,Response,Request,console
+  };
+  vm.createContext(ctx);
+  vm.runInContext(sw,ctx);
+  let response=await vm.runInContext("networkFirstAsset(new Request('https://lastset.example/lastset-explore.js?v=releaseA'))",ctx);
+  assert.equal(await response.text(),'NEW version','Online asset returned a stale cached script');
+  offline=true;
+  response=await vm.runInContext("networkFirstAsset(new Request('https://lastset.example/lastset-explore.js?v=releaseA'))",ctx);
+  assert.equal(await response.text(),'OLD version','Offline JavaScript fallback is unavailable');
+  console.log('LastSet code network-first and offline-fallback behavior passed');
+})().catch(error=>{console.error(error);process.exitCode=1;});
+
