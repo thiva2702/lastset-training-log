@@ -351,3 +351,36 @@
 .ls-option-thumb[data-thumb-region="Lower Back"]{
   background-image:url('/assets/anatomy-back.webp?v=transparent0260')!important;
 }
+
+/* Approved native female atlas, original image coordinates and precise muscle maps */
+.ls-anatomy-premium.female .ls-female-photo{
+ pointer-events:none!important;
+ image-rendering:auto;
+}
+.ls-anatomy-premium.female .ls-specialist-muscle .ls-atlas-hit{
+ pointer-events:visibleFill!important;
+ stroke-width:2!important;
+}
+.ls-explore-screen .ls-anatomy-premium.female.ls-anatomy-front{aspect-ratio:941 / 1672!important}
+.ls-explore-screen .ls-anatomy-premium.female.ls-anatomy-back{aspect-ratio:941 / 1672!important}
+.ls-option-thumb[data-thumb-gender="female"]{
+ background-image:url('/assets/anatomy-female-front.webp?v=approved0270')!important;
+ background-size:auto 300px!important;
+ background-position:34% 34%;
+}
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Hamstrings"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Glutes"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Rear Delts"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Lats"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Traps"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Upper Back"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Lower Back"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-parent="Triceps"]{
+ background-image:url('/assets/anatomy-female-back.webp?v=approved0270')!important;
+}
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-parent="Biceps"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Biceps"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Triceps"],
+.ls-option-thumb[data-thumb-gender="female"][data-thumb-region="Forearms"]{
+ background-size:auto 380px!important;
+}

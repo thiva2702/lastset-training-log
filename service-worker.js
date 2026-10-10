@@ -1,4 +1,4 @@
-const CACHE = 'lastset-v1-beta1-02601';
+const CACHE = 'lastset-v1-beta1-02700';
 const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',
@@ -42,6 +42,8 @@ const ASSETS = [
   './lastset-explore.js',
   './assets/anatomy-front.webp',
   './assets/anatomy-back.webp',
+  './assets/anatomy-female-front.webp',
+  './assets/anatomy-female-back.webp',
   './assets/hero.webp',
   './assets/equipment.webp',
   './assets/home-hero-thiva.webp',

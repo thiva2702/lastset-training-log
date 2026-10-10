@@ -277,6 +277,37 @@ test.describe('LastSet production v0.14.0', () => {
   });
 
 
+
+  test('Approved female image renders at native resolution with registered muscle highlights', async ({page}) => {
+    await page.evaluate(() => {
+      const d=JSON.parse(localStorage.getItem('lastset-data-v1')||'{}');
+      d.profile=d.profile||{};d.profile.gender='Female';
+      localStorage.setItem('lastset-data-v1',JSON.stringify(d));
+    });
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('[data-nav="explore"]').click();
+    const model=page.locator('.ls-anatomy-premium.female');
+    for(const side of ['front','back']){
+      await page.locator('[data-explore-side="'+side+'"]').click();
+      await expect(model).toHaveAttribute('viewBox','0 0 941 1672');
+      const photo=page.locator('.ls-female-photo');
+      await expect(photo).toBeVisible();
+      const result=await page.evaluate(async side=>{
+        const im=new Image();im.src='/assets/anatomy-female-'+side+'.webp?v=approved0270';await im.decode();
+        const can=document.createElement('canvas');can.width=40;can.height=40;
+        const ctx=can.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,40,40);
+        return {width:im.naturalWidth,height:im.naturalHeight,corner:ctx.getImageData(0,0,1,1).data[3]};
+      },side);
+      expect(result).toEqual({width:941,height:1672,corner:0});
+      await expect(model.locator('.ls-atlas-visual').first()).toBeVisible();
+    }
+    await page.locator('[data-explore-side="front"]').click();
+    await model.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
+    await page.locator('[data-explore-subregion="Long Head"]').click();
+    await expect(model.locator('.ls-specialist-visual.ls-region-selected')).toHaveCount(2);
+    await expect(page.locator('[data-focus-kind="primary"] [data-explore-exercise="incline-biceps-curl"]')).toBeVisible();
+  });
+
   test('Female muscle model selects Biceps Long Head and shows primary versus supplementary exercises', async ({ page }) => {
     await page.evaluate(() => {
       const raw=localStorage.getItem('lastset-data-v1');
