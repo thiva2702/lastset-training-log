@@ -28,6 +28,31 @@ export function stampHtml(html,id){
   );
 }
 
+// Deploy fully enhanced HTML as an asset, not as an expensive per-request Worker rewrite.
+// Source of truth for ordering remains worker.js so legacy and static routing match.
+export function injectBuildAssets(html,workerSource){
+  function tags(name){
+    const found=workerSource.match(new RegExp('const '+name+' = (\\[[\\s\\S]*?\\]);'));
+    if(!found)throw new Error('Worker asset list missing: '+name);
+    return JSON.parse(found[1]);
+  }
+  let output=String(html);
+  for(const [url,version] of tags('STYLE_TAGS')){
+    const name=url.split('/').pop();
+    if(!output.includes(name)){
+      output=output.replace('</head>','<link rel="stylesheet" href="'+url+'?v='+version+'">\n</head>');
+    }
+  }
+  for(const [url,version] of tags('SCRIPT_TAGS')){
+    const name=url.split('/').pop();
+    if(!output.includes(name)){
+      output=output.replace('</body>','<script src="'+url+'?v='+version+'"></script>\n</body>');
+    }
+  }
+  output=output.replace('<meta name="theme-color" content="#0b1220" />','<meta name="theme-color" content="#090713" />');
+  return output;
+}
+
 export function stampBuild(dir,id){
   const dist=path.resolve(dir);
   fs.writeFileSync(path.join(dist,'lastset-build.json'),JSON.stringify({
@@ -35,7 +60,9 @@ export function stampBuild(dir,id){
   })+'\n');
   for(const name of ['index.html','app-v12.html']){
     const file=path.join(dist,name);
-    let html=stampHtml(fs.readFileSync(file,'utf8'),id);
+    const raw=fs.readFileSync(file,'utf8');
+    const enhanced=name==='index.html'?injectBuildAssets(raw,fs.readFileSync('worker.js','utf8')):raw;
+    let html=stampHtml(enhanced,id);
     if(!html.includes('name="lastset-release"')){
       html=html.replace('</head>','<meta name="lastset-release" content="'+id+'">\n</head>');
     }

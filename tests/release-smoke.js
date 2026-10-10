@@ -25,6 +25,16 @@ assert(stamp.includes("LASTSET_RELEASE_ID")&&stamp.includes('GITHUB_SHA'),'Build
 assert(fs.existsSync('lastset-diagnostics.js'));
 assert(fs.existsSync('lastset-diagnostics.css'));
 assert(sw.includes('if(/\\.(?:js|css|json)$/i.test(path))return networkFirstAsset(request);'),'JS and CSS must use network-first path');
+
+// Production must serve all known assets without invoking the request-metered Worker.
+const wrangler=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));
+assert.equal(wrangler.assets.run_worker_first,false,'Static assets must bypass the Worker quota');
+assert.equal(wrangler.assets.not_found_handling,'single-page-application');
+assert.equal(wrangler.assets.html_handling,'auto-trailing-slash');
+assert(stamp.includes('injectBuildAssets'),'Built HTML must contain all functional app layers');
+const assetMap=fs.readFileSync('worker.js','utf8');
+assert(assetMap.includes('lastset-mobility.js'));
+
 console.log('LastSet versioning smoke tests passed');
 
 // Test the service worker's actual network-first path, not just its source text.

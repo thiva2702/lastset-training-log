@@ -211,6 +211,11 @@ jobs:
           test -s dist/lastset-diagnostics.js
           test -s dist/lastset-mobility.js
           test -s dist/lastset-mobility.css
+          grep -q 'lastset-mobility.js?v=' dist/index.html
+          grep -q 'lastset-explore.js?v=' dist/index.html
+          grep -q 'lastset-core-reliability.js?v=' dist/index.html
+          grep -q 'lastset-offline.js?v=' dist/index.html
+          grep -q 'lastset-anatomy.js?v=' dist/index.html
           test -s dist/lastset-diagnostics.css
           test -s dist/lastset-build.json
           grep -q 'lastset-release' dist/index.html
