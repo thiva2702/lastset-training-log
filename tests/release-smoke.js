@@ -31,6 +31,9 @@ const wrangler=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));
 assert.equal(wrangler.assets.run_worker_first,false,'Static assets must bypass the Worker quota');
 assert.equal(wrangler.assets.not_found_handling,'single-page-application');
 assert.equal(wrangler.assets.html_handling,'auto-trailing-slash');
+const redirects=fs.readFileSync('_redirects','utf8');
+assert(!/^\s*\/(?:index\.html)?\s+\/app-v12(?:\.html)?\s/m.test(redirects),'Root or index.html must never redirect to the bootstrap loader');
+
 assert(stamp.includes('injectBuildAssets'),'Built HTML must contain all functional app layers');
 const assetMap=fs.readFileSync('worker.js','utf8');
 assert(assetMap.includes('lastset-mobility.js'));
