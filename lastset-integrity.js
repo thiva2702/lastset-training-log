@@ -150,6 +150,46 @@
     return true;
   }
 
+  const BACKUP_ARCHIVE_FORMAT='lastset-all-profiles-v1';
+  function profileArchive(reg,current){
+    if(!reg || !Array.isArray(reg.users)) throw new Error('Profile registry not available');
+    const active=reg.activeId;
+    const users=reg.users.map(u=>({
+      id:u.id,name:u.name||u.data?.profile?.name||'User',
+      data:clone(u.id===active?current:u.data)
+    }));
+    if(!users.length && validateBackup(current)){
+      users.push({id:current?.profile?.userId||'active-user',name:current?.profile?.name||'User',data:clone(current)});
+    }
+    if(!users.length || users.some(u=>!validateBackup(u.data))) throw new Error('Cannot back up an invalid user record');
+    return {format:BACKUP_ARCHIVE_FORMAT,version:1,exportedAt:new Date().toISOString(),activeId:active,users};
+  }
+  function parseProfileRestore(input){
+    if(validateBackup(input)) return [clone(input)];
+    if(!input || input.format!==BACKUP_ARCHIVE_FORMAT || input.version!==1 ||
+      !Array.isArray(input.users) || !input.users.length || input.users.length>100) return null;
+    if(input.users.some(u=>!u || typeof u!=='object' || !validateBackup(u.data))) return null;
+    return input.users.map(u=>clone(u.data));
+  }
+  // The import is an additive snapshot of the registry. It cannot change the
+  // active profile or erase existing user data, even for old backups.
+  function restoredRegistry(currentReg,restore,makeId){
+    if(!currentReg || !Array.isArray(currentReg.users) || !Array.isArray(restore) ||
+      !restore.length || restore.some(x=>!validateBackup(x))) throw new Error('Unsafe recovery data');
+    const result=clone(currentReg);
+    const currentIds=new Set(result.users.map(x=>x.id));
+    for(const item of restore){
+      let id;
+      do {id=makeId();} while(currentIds.has(id));
+      currentIds.add(id);
+      item.profile=item.profile||{};
+      item.profile.userId=id;
+      const name=String(item.profile.name||item.profile.userLabel||'Recovered User').trim()||'Recovered User';
+      result.users.push({id,name,data:clone(item),updatedAt:Date.now(),recovered:true});
+    }
+    return result;
+  }
+
   function validateCardioNumbers(values){
     const checks=[
       ['Duration',values.duration,0,1440],['Distance',values.distance,0,1000],['Average speed',values.avgSpeed,0,120],
@@ -164,7 +204,7 @@
     return '';
   }
 
-  const TEST_API={isLegacyDemoSession,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers};
+  const TEST_API={isLegacyDemoSession,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers,profileArchive,parseProfileRestore,restoredRegistry};
   if(typeof globalThis!=='undefined' && globalThis.__LASTSET_TEST_ONLY__){
     globalThis.LastSetIntegrityTest=TEST_API;
     return;
