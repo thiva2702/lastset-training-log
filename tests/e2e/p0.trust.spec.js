@@ -103,7 +103,14 @@ test.describe('Phase 0 local-first data trust',()=>{
       },null,{timeout:30000});
       await page.reload({waitUntil:'domcontentloaded'});
       await expect(page.locator('.bottom-nav')).toBeVisible();
-      await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30000});
+      const swStatus=await page.evaluate(async()=>{
+        const reg=await navigator.serviceWorker?.getRegistration();
+        return {origin:location.origin,controller:navigator.serviceWorker?.controller?.scriptURL||null,
+          scope:reg?.scope||null,active:reg?.active?.state||null,
+          waiting:reg?.waiting?.state||null,installing:reg?.installing?.state||null};
+      });
+      console.log('P0 service-worker preflight:',JSON.stringify(swStatus));
+      await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:12000});
       await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});
       stopped=true;
       await page.reload({waitUntil:'domcontentloaded',timeout:20000});
