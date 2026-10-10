@@ -43,6 +43,15 @@
     return changed;
   }
 
+  // Only remove the single seeded demonstration exercise from a genuinely
+  // unclaimed new profile. Do not erase a real lifter's matching workout.
+  function shouldCleanSeedDemo(value){
+    const profile=value?.profile||{};
+    const named=String(profile.name||profile.userLabel||'').trim();
+    const sessionCount=Object.values(value?.sessions||{}).reduce((total,items)=>total+(Array.isArray(items)?items.length:0),0);
+    return !named && sessionCount===1;
+  }
+
   function emptyUserData(name='', previousProfile={}, preserveProfile=false){
     return {
       sessions:{}, aliases:{}, machines:{},
@@ -204,7 +213,7 @@
     return '';
   }
 
-  const TEST_API={isLegacyDemoSession,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers,profileArchive,parseProfileRestore,restoredRegistry};
+  const TEST_API={isLegacyDemoSession,shouldCleanSeedDemo,stripLegacyDemoSession,emptyUserData,targetDateForTemplate,buildProgressRows,validateBackup,validateCardioNumbers,profileArchive,parseProfileRestore,restoredRegistry};
   if(typeof globalThis!=='undefined' && globalThis.__LASTSET_TEST_ONLY__){
     globalThis.LastSetIntegrityTest=TEST_API;
     return;
@@ -300,12 +309,12 @@
   if(baseLoadData){
     loadData=function(){
       const value=baseLoadData();
-      if(stripLegacyDemoSession(value) && baseSaveData) baseSaveData(value);
+      if(shouldCleanSeedDemo(value) && stripLegacyDemoSession(value) && baseSaveData) baseSaveData(value);
       return value;
     };
   }
 
-  if(typeof data!=='undefined' && stripLegacyDemoSession(data) && baseSaveData) baseSaveData(data);
+  if(typeof data!=='undefined' && shouldCleanSeedDemo(data) && stripLegacyDemoSession(data) && baseSaveData) baseSaveData(data);
 
   if(baseSaveData){
     saveData=function(value){
