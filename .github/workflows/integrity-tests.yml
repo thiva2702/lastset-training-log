@@ -23,6 +23,7 @@ jobs:
           node --check lastset-navigation.js
           node --check lastset-smartlog-shorthand.js
           node --check lastset-core-reliability.js
+          node --check lastset-smartlog-p1.js
           node --check lastset-memory.js
           node --check lastset-intelligence.js
           node --check lastset-beta.js
