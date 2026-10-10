@@ -64,6 +64,31 @@ test.describe('Phase 0 local-first data trust',()=>{
     expect((await stored(page,USERS)).users.length).toBe(reg.users.length);
     expect((await stored(page)).sessions).toEqual(before.sessions);
   });
+  test('offline reload keeps confirmed training records intact',async({page,context})=>{
+    await fresh(page);
+    await page.locator('[data-day-action="resistance"]').first().click();
+    await page.locator('[data-exercise="chest-press"]').click();
+    await page.locator('[data-set-weight="0"]').fill('80');
+    await page.locator('[data-set-reps="0"]').fill('8');
+    await page.locator('[data-action="save-exercise"]').click();
+    const before=await stored(page);
+    await page.waitForFunction(async()=>{
+      if(!navigator.serviceWorker)return false;
+      const keys=await caches.keys();
+      if(!keys.some(key=>key.startsWith('lastset-v1-beta1')))return false;
+      return !!(await caches.match(new URL('/index.html',location.origin).href));
+    },null,{timeout:30000});
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(page.locator('.bottom-nav')).toBeVisible();
+    await context.setOffline(true);
+    try{
+      await page.reload({waitUntil:'domcontentloaded',timeout:20000});
+      await expect(page.locator('.bottom-nav')).toBeVisible({timeout:10000});
+      expect((await stored(page)).sessions).toEqual(before.sessions);
+    }finally{
+      await context.setOffline(false);
+    }
+  });
   test('quota failure shows emergency backup and does not claim the workout saved',async({page})=>{
     await fresh(page);
     const before=await stored(page);
