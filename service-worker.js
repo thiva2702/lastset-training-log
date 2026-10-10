@@ -1,4 +1,5 @@
-const CACHE = 'lastset-v1-beta1-0290';
+const RELEASE_ID = '__LASTSET_BUILD_ID__';
+const CACHE = 'lastset-v1-beta1-0300-' + RELEASE_ID;
 const OFFLINE_SHELL = new URL('./__lastset_offline_shell__', self.location.href).toString();
 const ASSETS = [
   './',
@@ -15,6 +16,8 @@ const ASSETS = [
   './lastset-onboarding.css',
   './lastset-offline.css',
   './lastset-explore.css',
+  './lastset-diagnostics.css',
+  './lastset-build.json',
   './lastset-anatomy.css',
   './lastset-images.css',
   './lastset-hotfix.css',
@@ -41,6 +44,7 @@ const ASSETS = [
   './lastset-atlas-regions.js',
   './lastset-anatomy.js',
   './lastset-explore.js',
+  './lastset-diagnostics.js',
   './assets/anatomy-front.webp',
   './assets/anatomy-back.webp',
   './assets/anatomy-female-front.webp',
@@ -86,8 +90,27 @@ self.addEventListener('message', event => {
   event.waitUntil(primeOfflineCache());
 });
 
+function stampExternalAssets(html,version){
+  return html.replace(/<(script|link)\b[^>]*>/gi,tag=>
+    tag.replace(/\b(src|href)=(["'])([^"']+)\2/gi,(match,key,quote,raw)=>{
+      if(/^(https?:)?\/\//i.test(raw)||raw.startsWith('data:'))return match;
+      const found=raw.match(/^([^?#]+\.(?:js|css))(\?[^#]*)?(#.*)?$/i);
+      if(!found)return match;
+      const params=new URLSearchParams((found[2]||'').slice(1));
+      params.delete('v');params.set('v',version);
+      return key+'='+quote+found[1]+'?'+params.toString()+(found[3]||'')+quote;
+    })
+  );
+}
+
 function enhanceHtml(text) {
   let html = text;
+  if(!html.includes('lastset-diagnostics.js')){
+    html=html.replace('</head>','<link rel="stylesheet" href="/lastset-diagnostics.css?v='+RELEASE_ID+'">\n<script src="/lastset-diagnostics.js?v='+RELEASE_ID+'"></script>\n</head>');
+  }
+  if(!html.includes('name="lastset-release"')){
+    html=html.replace('</head>','<meta name="lastset-release" content="'+RELEASE_ID+'">\n</head>');
+  }
   const styles = [
     ['./lastset-theme.css','0138'],
     ['./lastset-premium.css','0138'],
@@ -100,6 +123,7 @@ function enhanceHtml(text) {
     ['./lastset-onboarding.css','0140'],
     ['./lastset-offline.css','0141'],
     ['./lastset-explore.css','0290'],
+    ['./lastset-diagnostics.css','0300'],
     ['./lastset-anatomy.css','0211']
   ];
   const scripts = [
@@ -137,7 +161,7 @@ function enhanceHtml(text) {
   }
 
   html = html.replace('<meta name="theme-color" content="#0b1220" />','<meta name="theme-color" content="#090713" />');
-  return html;
+  return stampExternalAssets(html,RELEASE_ID);
 }
 
 async function navigationResponse(request){
@@ -176,30 +200,40 @@ async function navigationResponse(request){
   }
 }
 
-async function staticResponse(request,event){
-  const cached=await caches.match(request,{ignoreSearch:true});
-  if(cached){
-    event.waitUntil(
-      fetch(request)
-        .then(async response=>{
-          if(!response||!response.ok)return;
-          const cache=await caches.open(CACHE);
-          await cache.put(request,response.clone());
-        })
-        .catch(()=>{})
-    );
-    return cached;
-  }
-
+async function networkFirstAsset(request){
+  const cache=await caches.open(CACHE);
   try{
-    const response=await fetch(request);
-    if(response&&response.ok){
-      const cache=await caches.open(CACHE);
-      await cache.put(request,response.clone());
-    }
+    // Online JS and CSS must not use a previous version just because paths match.
+    const response=await fetch(request,{cache:'no-store'});
+    if(!response||!response.ok)throw new Error('Asset not available');
+    await cache.put(request,response.clone());
     return response;
   }catch(_){
-    return caches.match(request,{ignoreSearch:true}).then(hit=>hit||Response.error());
+    return await cache.match(request)||
+      await cache.match(request,{ignoreSearch:true})||
+      await caches.match(request,{ignoreSearch:true})||
+      Response.error();
+  }
+}
+
+async function staticResponse(request,event){
+  const path=new URL(request.url).pathname;
+  if(/\.(?:js|css|json)$/i.test(path))return networkFirstAsset(request);
+
+  const cache=await caches.open(CACHE);
+  const cached=await cache.match(request,{ignoreSearch:true});
+  if(cached){
+    event.waitUntil(fetch(request).then(async response=>{
+      if(response?.ok)await cache.put(request,response.clone());
+    }).catch(()=>{}));
+    return cached;
+  }
+  try{
+    const response=await fetch(request);
+    if(response?.ok)await cache.put(request,response.clone());
+    return response;
+  }catch(_){
+    return await caches.match(request,{ignoreSearch:true})||Response.error();
   }
 }
 

@@ -29,3 +29,12 @@
 
 /assets/calendar-hero-thiva.webp
   Cache-Control: no-store, max-age=0
+
+/lastset-diagnostics.js
+  Cache-Control: no-store, max-age=0
+
+/lastset-diagnostics.css
+  Cache-Control: no-store, max-age=0
+
+/lastset-build.json
+  Cache-Control: no-store, max-age=0

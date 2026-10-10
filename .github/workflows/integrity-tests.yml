@@ -36,6 +36,10 @@ jobs:
           node --check tests/anatomy-smoke.js
           node --check lastset-muscle-library.js
           node --check lastset-explore.js
+          node --check lastset-diagnostics.js
+          node --check scripts/stamp-release.mjs
+          node --check tests/diagnostics-smoke.js
+          node --check tests/release-smoke.js
           node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
           node --check worker.js
@@ -70,6 +74,10 @@ jobs:
         run: node tests/explore-smoke.js
       - name: Muscle Explorer catalogue and side restrictions
         run: node tests/muscle-explorer-coverage.js
+      - name: Debug console smoke tests
+        run: node tests/diagnostics-smoke.js
+      - name: Release versioning smoke tests
+        run: node tests/release-smoke.js
       - name: Premium anatomy smoke tests
         run: node tests/anatomy-smoke.js
       - name: Verify production bundle inputs
@@ -97,6 +105,9 @@ jobs:
           test -s lastset-anatomy.css
           test -s lastset-muscle-library.js
           test -s lastset-explore.js
+          test -s lastset-diagnostics.js
+          test -s lastset-diagnostics.css
+          test -s scripts/stamp-release.mjs
           test -s lastset-explore.css
           test -s assets/lastset-mark.svg
           test -s apple-touch-icon.png
@@ -191,6 +202,11 @@ jobs:
           test -s dist/assets/anatomy-back.webp
           test -s dist/lastset-muscle-library.js
           test -s dist/lastset-explore.js
+          test -s dist/lastset-diagnostics.js
+          test -s dist/lastset-diagnostics.css
+          test -s dist/lastset-build.json
+          grep -q 'lastset-release' dist/index.html
+          grep -q 'RELEASE_ID' dist/service-worker.js
           test -s dist/lastset-explore.css
           test -s dist/assets/lastset-mark.svg
           test -s dist/apple-touch-icon.png

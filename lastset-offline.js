@@ -4,6 +4,9 @@
   const VERSION='0.14.1';
   let wasOffline=false;
   let reconnectTimer=null;
+  let activeRegistration=null;
+  let lastUpdateCheck=0;
+  const controlledAtLaunch=typeof navigator!=='undefined'&&Boolean(navigator.serviceWorker?.controller);
 
   function isOffline(){
     return typeof navigator!=='undefined' ? navigator.onLine===false : false;
@@ -72,10 +75,34 @@
     decorateSmartLog();
   }
 
+  function offerUpdate(){
+    if(document.querySelector('[data-ls-update-ready]'))return;
+    const banner=document.createElement('aside');
+    banner.className='ls-update-ready';
+    banner.setAttribute('data-ls-update-ready','');
+    banner.setAttribute('role','status');
+    banner.innerHTML='<span><strong>LastSet update ready</strong><small>Save any unfinished entry, then refresh for the latest version.</small></span>'+
+      '<button type="button" data-ls-update-reload>Refresh app</button>'+
+      '<button type="button" data-ls-update-dismiss aria-label="Dismiss update notice">✕</button>';
+    document.body.appendChild(banner);
+    banner.querySelector('[data-ls-update-reload]').addEventListener('click',()=>location.reload());
+    banner.querySelector('[data-ls-update-dismiss]').addEventListener('click',()=>banner.remove());
+    globalThis.LastSetDiagnostics?.note('New service worker activated; update available');
+  }
+
+  function checkForUpdate(){
+    if(!activeRegistration||navigator.onLine===false||Date.now()-lastUpdateCheck<60000)return;
+    lastUpdateCheck=Date.now();
+    activeRegistration.update().catch(error=>console.warn('LastSet update check failed',error));
+  }
+
   async function prepareOffline(){
     if(!('serviceWorker'in navigator)||location.protocol!=='https:')return false;
     try{
-      const reg=await navigator.serviceWorker.register('./service-worker.js');
+      const reg=await navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'});
+      activeRegistration=reg;
+      if(reg.waiting&&controlledAtLaunch)offerUpdate();
+      checkForUpdate();
       const ready=await navigator.serviceWorker.ready;
       const worker=ready.active||reg.active||reg.waiting;
       if(worker)worker.postMessage({type:'LASTSET_WARM_OFFLINE'});
@@ -86,14 +113,27 @@
     }catch(_){return false;}
   }
 
+  if('serviceWorker'in navigator){
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(controlledAtLaunch)offerUpdate();
+    });
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')checkForUpdate();
+  });
+
   window.addEventListener('offline',()=>{
     wasOffline=true;
+    globalThis.LastSetDiagnostics?.note('Network offline');
     decorate();
     if(typeof render==='function')render();
   });
   window.addEventListener('online',()=>{
+    checkForUpdate();
     const hadOffline=wasOffline;
     wasOffline=false;
+    globalThis.LastSetDiagnostics?.note('Network online');
     decorate();
     if(typeof render==='function')render();
     if(hadOffline&&typeof showToast==='function'){

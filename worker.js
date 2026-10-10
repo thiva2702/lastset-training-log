@@ -1,3 +1,4 @@
+const RELEASE_FALLBACK = 'diagnostics-20261010-1';
 const APP_PATHS = new Set(["/", "/index.html", "/app-v12", "/app-v12.html"]);
 
 const STYLE_TAGS = [
@@ -12,6 +13,7 @@ const STYLE_TAGS = [
   ["/lastset-onboarding.css","0140"],
   ["/lastset-offline.css","0141"],
   ["/lastset-explore.css","0290"],
+  ["/lastset-diagnostics.css","0300"],
   ["/lastset-anatomy.css","0280"]
 ];
 
@@ -40,8 +42,37 @@ const SCRIPT_TAGS = [
   ["/lastset-explore.js","0290"]
 ];
 
-function injectPremiumLayer(html) {
+async function getReleaseId(env){
+  try{
+    const response=await env.ASSETS.fetch('https://lastset.local/lastset-build.json');
+    if(response.ok){
+      const meta=await response.json();
+      if(/^[A-Za-z0-9_-]{5,32}$/.test(meta.id))return meta.id;
+    }
+  }catch(_){}
+  return RELEASE_FALLBACK;
+}
+
+// Replace ALL local JS/CSS versions after optional feature layers have been injected.
+// Query parameters change only between builds, not with every page refresh.
+function stampExternalAssets(html,version){
+  return html.replace(/<(script|link)\b[^>]*>/gi,tag=>
+    tag.replace(/\b(src|href)=(["'])([^"']+)\2/gi,(match,key,quote,raw)=>{
+      if(/^(https?:)?\/\//i.test(raw)||raw.startsWith('data:'))return match;
+      const found=raw.match(/^([^?#]+\.(?:js|css))(\?[^#]*)?(#.*)?$/i);
+      if(!found)return match;
+      const params=new URLSearchParams((found[2]||'').slice(1));
+      params.delete('v');params.set('v',version);
+      return key+'='+quote+found[1]+'?'+params.toString()+(found[3]||'')+quote;
+    })
+  );
+}
+
+function injectPremiumLayer(html,version) {
   let output = html;
+  if(!output.includes('lastset-diagnostics.js')){
+    output=output.replace('</head>','<link rel="stylesheet" href="/lastset-diagnostics.css?v='+version+'">\n<script src="/lastset-diagnostics.js?v='+version+'"></script>\n</head>');
+  }
 
   for (const [path, version] of STYLE_TAGS) {
     const name = path.split("/").pop();
@@ -62,12 +93,19 @@ function injectPremiumLayer(html) {
     '<meta name="theme-color" content="#090713" />'
   );
 
-  return output;
+  const releaseTag='<meta name="lastset-release" content="'+version+'">';
+  if(!output.includes('name="lastset-release"'))output=output.replace('</head>',releaseTag+'\n</head>');
+  return stampExternalAssets(output,version);
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if(request.method==='GET'&&url.pathname==='/lastset-build.json'){
+      const release=await getReleaseId(env);
+      return new Response(JSON.stringify({id:release,schema:1}),{headers:{'content-type':'application/json','cache-control':'no-store, max-age=0'}});
+    }
 
     if (request.method === "GET" && APP_PATHS.has(url.pathname)) {
       const assetUrl = new URL(request.url);
@@ -83,7 +121,7 @@ export default {
 
       if (!assetResponse.ok) return assetResponse;
 
-      const html = injectPremiumLayer(await assetResponse.text());
+      const html = injectPremiumLayer(await assetResponse.text(),await getReleaseId(env));
       const headers = new Headers(assetResponse.headers);
       headers.set("content-type", "text/html; charset=utf-8");
       headers.set("cache-control", "no-store, max-age=0");
@@ -91,6 +129,13 @@ export default {
       return new Response(html, { status: 200, headers });
     }
 
-    return env.ASSETS.fetch(request);
+    const response=await env.ASSETS.fetch(request);
+    if(request.method==='GET'&&/\.(?:js|css)$/i.test(url.pathname)&&response.ok){
+      const headers=new Headers(response.headers);
+      headers.set('cache-control','no-store, max-age=0');
+      if(url.pathname==='/service-worker.js')headers.set('service-worker-allowed','/');
+      return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+    }
+    return response;
   }
 };

@@ -17,6 +17,8 @@ cp lastset-v0140.css dist/
 cp lastset-onboarding.css dist/
 cp lastset-offline.css dist/
 cp lastset-explore.css dist/
+cp lastset-diagnostics.css dist/
+cp lastset-diagnostics.js dist/
 cp lastset-anatomy.css dist/
 cp lastset-images.css dist/
 cp lastset-hotfix.css dist/
@@ -53,5 +55,6 @@ if ! node -e "require.resolve('sharp')" >/dev/null 2>&1; then
 fi
 node scripts/restore-anatomy-detail.mjs
 cp assets/*.svg dist/assets/
+node scripts/stamp-release.mjs dist
 
 echo "Cloudflare bundle ready in dist"

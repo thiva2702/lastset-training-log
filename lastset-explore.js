@@ -408,6 +408,7 @@
       if(state.exploreSide==='back'&&tapped==='Biceps')return;
       state.exploreRegion=tapped;
       state.exploreSubregion=photoRegion?.dataset.anatomySubregion||'';
+      globalThis.LastSetDiagnostics?.note('Muscle Explorer: '+state.exploreSide+' / '+name+' / '+tapped);
       state.exploreEquipment='all';
       state.exploreExerciseId='';
       render();return;
@@ -425,12 +426,13 @@
       if(!focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide).includes(requested))return;
       state.exploreRegion=requested==='Normal'?state.exploreGroup:requested;
       state.exploreSubregion='';
+      globalThis.LastSetDiagnostics?.note('Muscle focus: '+requested);
       state.exploreExerciseId='';render();return;
     }
     const subregion=event.target.closest?.('[data-explore-subregion]');
-    if(subregion){event.preventDefault();if(!focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide).includes(subregion.dataset.exploreSubregion))return;state.exploreSubregion=subregion.dataset.exploreSubregion;state.exploreExerciseId='';render();return;}
+    if(subregion){event.preventDefault();if(!focusChoices(state.exploreGroup,state.exploreRegion,state.exploreSide).includes(subregion.dataset.exploreSubregion))return;state.exploreSubregion=subregion.dataset.exploreSubregion;globalThis.LastSetDiagnostics?.note('Muscle detail: '+state.exploreSubregion);state.exploreExerciseId='';render();return;}
     const equipment=event.target.closest?.('[data-explore-equipment]');
-    if(equipment){event.preventDefault();state.exploreEquipment=equipment.dataset.exploreEquipment;state.exploreExerciseId='';render();return;}
+    if(equipment){event.preventDefault();state.exploreEquipment=equipment.dataset.exploreEquipment;globalThis.LastSetDiagnostics?.note('Equipment filter: '+state.exploreEquipment);state.exploreExerciseId='';render();return;}
     const exercise=event.target.closest?.('[data-explore-exercise]');
     if(exercise){event.preventDefault();state.exploreExerciseId=state.exploreExerciseId===exercise.dataset.exploreExercise?'':exercise.dataset.exploreExercise;render();return;}
     const addToday=event.target.closest?.('[data-explore-today]');

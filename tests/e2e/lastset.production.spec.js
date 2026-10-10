@@ -740,6 +740,47 @@ test.describe('LastSet production v0.14.0', () => {
     expect(data.imports || []).toHaveLength(0);
   });
 
+  test('Hidden debug console captures errors, redacts secrets and preserves workouts', async ({page}) => {
+    const panel=page.locator('#ls-diagnostics-panel');
+    await expect(panel).toBeHidden();
+    const previous=await storedData(page);
+    await page.evaluate(()=>{
+      console.error('LASTSET_QA_ERROR Bearer abcDEF1234 test.private@example.com');
+      for(let i=0;i<3;i++){
+        document.dispatchEvent(new PointerEvent('pointerup',{
+          bubbles:true,pointerType:'touch',clientX:innerWidth-10,clientY:35
+        }));
+      }
+    });
+    await expect(panel).toBeVisible();
+    const text=await panel.locator('[data-ls-diagnostics-logs]').innerText();
+    expect(text).toContain('LASTSET_QA_ERROR');
+    expect(text).not.toContain('abcDEF1234');
+    expect(text).not.toContain('test.private@example.com');
+    await panel.locator('[data-ls-diagnostics-copy]').click();
+    await expect(panel.locator('[data-ls-diagnostics-status]')).not.toBeEmpty();
+    await panel.locator('[data-ls-diagnostics-close]').click();
+    await expect(panel).toBeHidden();
+    expect(await storedData(page)).toEqual(previous);
+  });
+
+  test('Release version is consistent across JavaScript, CSS and manifest',async ({page})=>{
+    const id=await page.locator('meta[name="lastset-release"]').getAttribute('content');
+    expect(id).toMatch(/^[A-Za-z0-9_-]{5,32}$/);
+    const loaded=await page.evaluate(()=>{
+      const urls=[...document.querySelectorAll('script[src],link[rel="stylesheet"][href]')]
+        .map(el=>el.src||el.href)
+        .filter(Boolean)
+        .filter(href=>/\.(js|css)(?:\?|$)/i.test(href));
+      return urls.map(href=>({href,version:new URL(href).searchParams.get('v')}));
+    });
+    expect(loaded.length).toBeGreaterThan(6);
+    expect(loaded.every(item=>item.version===id)).toBeTruthy();
+    const response=await page.request.get('/lastset-build.json');
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).id).toBe(id);
+  });
+
   test('LastSet Memory recalls a previous exercise only when explicitly requested', async ({ page }) => {
     await page.evaluate((key) => {
       const raw=localStorage.getItem(key);

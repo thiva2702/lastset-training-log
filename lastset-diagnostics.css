@@ -1,0 +1,33 @@
+/* Hidden until explicitly opened by three top-right taps. */
+.ls-diagnostics-panel[hidden]{display:none!important}
+.ls-diagnostics-panel{
+  position:fixed!important;z-index:2147483647!important;
+  top:calc(env(safe-area-inset-top,0px) + 14px);
+  right:12px;left:12px;max-width:560px;margin-left:auto;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 28px);
+  display:flex;flex-direction:column;gap:10px;
+  padding:16px;border:1px solid #6a557d;border-radius:17px;
+  background:#15101d;color:#f6efff;
+  box-shadow:0 20px 60px rgba(0,0,0,.8);
+  font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.ls-diag-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ls-diag-top strong{font-weight:750;font-size:15px}
+.ls-diagnostics-panel button{touch-action:manipulation;min-height:42px;border-radius:9px;border:1px solid #67488b;color:#f6efff;background:#32263e;padding:8px 12px}
+.ls-diagnostics-panel button:focus-visible{outline:2px solid #b982ff;outline-offset:2px}
+.ls-diag-top button{min-width:44px}
+.ls-diag-hint,.ls-diag-status{margin:0;color:#bfb1cb;font-size:11px}
+.ls-diag-lines{
+  width:100%;height:min(52dvh,440px);min-height:130px;overflow:auto;
+  border:1px solid #3b3047;border-radius:9px;
+  background:#080a0e;padding:11px;color:#d9e4ef;
+  font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text;
+}
+.ls-diag-actions{display:flex;gap:9px}
+.ls-diag-actions button:first-child{flex:1;background:#503174}
+@media(max-width:380px){.ls-diagnostics-panel{right:8px;left:8px;padding:12px}}
+
+/* Update prompt never interrupts an unsaved workout or reloads automatically. */
+.ls-update-ready{position:fixed;left:10px;right:10px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:2147483000;max-width:540px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:13px;background:#24162f;color:#fff;border:1px solid #8052a0;box-shadow:0 8px 28px rgba(0,0,0,.65);font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.ls-update-ready span{flex:1;min-width:0}.ls-update-ready strong,.ls-update-ready small{display:block}.ls-update-ready small{color:#d3bddf;margin-top:3px}.ls-update-ready button{border:1px solid #895fb0;border-radius:8px;min-height:40px;color:#fff;background:#553475;padding:7px 10px;white-space:nowrap}.ls-update-ready [data-ls-update-dismiss]{background:transparent;min-width:36px;padding:4px}
