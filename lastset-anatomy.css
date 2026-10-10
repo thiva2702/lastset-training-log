@@ -337,3 +337,17 @@
 .ls-explore-screen .ls-anatomy-card{
   background:linear-gradient(162deg,rgba(38,24,55,.96),rgba(19,13,32,.97) 55%,rgba(29,17,46,.96))!important;
 }
+
+/* Transparent anatomy thumbnails share the newest uncached artwork, too. */
+.ls-option-thumb{
+  background-image:url('/assets/anatomy-front.webp?v=transparent0260')!important;
+}
+.ls-option-thumb[data-thumb-region="Hamstrings"],
+.ls-option-thumb[data-thumb-region="Glutes"],
+.ls-option-thumb[data-thumb-region="Rear Delts"],
+.ls-option-thumb[data-thumb-region="Lats"],
+.ls-option-thumb[data-thumb-region="Traps"],
+.ls-option-thumb[data-thumb-region="Upper Back"],
+.ls-option-thumb[data-thumb-region="Lower Back"]{
+  background-image:url('/assets/anatomy-back.webp?v=transparent0260')!important;
+}

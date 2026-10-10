@@ -35,7 +35,7 @@ const SCRIPT_TAGS = [
   ["/lastset-onboarding.js","0140"],
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0240"],
-  ["/lastset-anatomy.js","0250"],
+  ["/lastset-anatomy.js","0260"],
   ["/lastset-explore.js","0251"]
 ];
 

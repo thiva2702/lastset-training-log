@@ -347,7 +347,7 @@ test.describe('LastSet production v0.14.0', () => {
     for (const side of ['front','back']) {
       const size=await page.evaluate(async (side)=>{
         const im=new Image();
-        im.src='/assets/anatomy-'+side+'.webp?v=4k0250';
+        im.src='/assets/anatomy-'+side+'.webp?v=transparent0260';
         await im.decode();
         
         const canvas=document.createElement('canvas');canvas.width=60;canvas.height=60;
