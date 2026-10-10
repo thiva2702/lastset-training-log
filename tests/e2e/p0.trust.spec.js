@@ -1,7 +1,8 @@
 const {test,expect}=require('@playwright/test');
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const KEY='lastset-data-v1',USERS='lastset-user-spaces-v1';
-async function fresh(page){
-  await page.goto('/',{waitUntil:'domcontentloaded'});
+async function fresh(page,url='/'){
+  await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.evaluate(()=>{localStorage.clear();sessionStorage.clear();});
   await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#ls-onboard-name')).toBeVisible();
@@ -64,32 +65,52 @@ test.describe('Phase 0 local-first data trust',()=>{
     expect((await stored(page,USERS)).users.length).toBe(reg.users.length);
     expect((await stored(page)).sessions).toEqual(before.sessions);
   });
-  test('offline reload keeps confirmed training records intact',async({page,context})=>{
-    await fresh(page);
-    await page.locator('[data-day-action="resistance"]').first().click();
-    await page.locator('[data-exercise="chest-press"]').click();
-    await page.locator('[data-set-weight="0"]').fill('80');
-    await page.locator('[data-set-reps="0"]').fill('8');
-    await page.locator('[data-action="save-exercise"]').click();
-    const before=await stored(page);
-    await page.waitForFunction(async()=>{
-      if(!navigator.serviceWorker)return false;
-      const keys=await caches.keys();
-      if(!keys.some(key=>key.startsWith('lastset-v1-beta1')))return false;
-      return !!(await caches.match(new URL('/index.html',location.origin).href));
-    },null,{timeout:30000});
-    await page.reload({waitUntil:'domcontentloaded'});
-    await expect(page.locator('.bottom-nav')).toBeVisible();
-    // Cache presence is insufficient. A page without an active controller
-    // cannot intercept offline navigations, even when the assets are cached.
-    await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30000});
-    await context.setOffline(true);
+  test('offline reload keeps confirmed training records intact',async({page})=>{
+    // WebKit's Playwright context.setOffline can reject a service-worker
+    // response even if it contains literal cached HTML (Playwright #42775).
+    // Use a dedicated origin instead. Stopping it exercises a genuine failed
+    // network fetch and the service worker's cached fallback on both engines.
+    const root=path.resolve('dist');
+    const server=http.createServer((req,res)=>{
+      try{
+        const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+        const full=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+        if(!full.startsWith(root+path.sep)) {res.writeHead(403).end();return;}
+        fs.readFile(full,(err,bytes)=>{
+          if(err){res.writeHead(404).end();return;}
+          const ext=path.extname(full).toLowerCase();
+          const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.webmanifest':'application/manifest+json'};
+          res.writeHead(200,{'content-type':types[ext]||'application/octet-stream'});
+          res.end(bytes);
+        });
+      }catch(_){res.writeHead(400).end();}
+    });
+    await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+    let stopped=false;
     try{
+      await fresh(page,'http://127.0.0.1:'+server.address().port+'/');
+      await page.locator('[data-day-action="resistance"]').first().click();
+      await page.locator('[data-exercise="chest-press"]').click();
+      await page.locator('[data-set-weight="0"]').fill('80');
+      await page.locator('[data-set-reps="0"]').fill('8');
+      await page.locator('[data-action="save-exercise"]').click();
+      const before=await stored(page);
+      await page.waitForFunction(async()=>{
+        if(!navigator.serviceWorker)return false;
+        const keys=await caches.keys();
+        if(!keys.some(key=>key.startsWith('lastset-v1-beta1')))return false;
+        return !!(await caches.match(new URL('/index.html',location.origin).href));
+      },null,{timeout:30000});
+      await page.reload({waitUntil:'domcontentloaded'});
+      await expect(page.locator('.bottom-nav')).toBeVisible();
+      await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30000});
+      await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});
+      stopped=true;
       await page.reload({waitUntil:'domcontentloaded',timeout:20000});
       await expect(page.locator('.bottom-nav')).toBeVisible({timeout:10000});
       expect((await stored(page)).sessions).toEqual(before.sessions);
     }finally{
-      await context.setOffline(false);
+      if(!stopped)await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});
     }
   });
   test('quota failure shows emergency backup and does not claim the workout saved',async({page})=>{
