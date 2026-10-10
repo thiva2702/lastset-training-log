@@ -145,6 +145,9 @@
   }
 
   function installSmartLogBoundaryFix(){
+    // P1 runs after the original boundary correction. Do not wrap the new
+    // parser during rendering or revert its progressive sets to old results.
+    if(document.documentElement.dataset.lastsetSmartLogP1) return;
     if(typeof parseSmartWorkout!=='function' || parseSmartWorkout.__lastsetBoundaryFixV0124) return;
     const baseParseSmartWorkout=parseSmartWorkout;
 
