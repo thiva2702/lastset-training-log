@@ -17,7 +17,8 @@ for(const gender of ['male','female']){
     assert(html.includes('ls-atlas-segment'));
     if(gender==='male')assert(html.includes('/assets/anatomy-'+side+'.webp'));
     if(gender==='female')assert(html.includes('/assets/anatomy-female-'+side+'.webp')&&html.includes('ls-female-photo'));
-    if(gender==='female')assert(!html.includes('ls-atlas-body'));
+    if(gender==='female')assert(!html.includes('<g class="ls-atlas-body">'));
+    if(gender==='female')assert(html.includes('width="941" height="1672"'),'New female image must preserve its original coordinate frame');
     assert(html.includes('ls-atlas-figure'));
     assert(!html.includes('NaN'));
     assert.equal((html.match(/<svg/g)||[]).length,1);
