@@ -21,7 +21,12 @@ function reviewWarnings(text){
 }
 function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
   const type=safe(loadType).toLowerCase();
-  if(type==='timed'||type==='assisted')return null;
+  if(type==='timed')return null;
+  if(type==='assisted'){
+    const warnings=reviewWarnings(text);
+    if(/\bbodyweight\b/i.test(safe(text)))warnings.push('Assistance and bodyweight are different loading modes. Review or split these sets.');
+    return warnings.length?{sets:[],warnings:unique(warnings),recognized:false}:null;
+  }
   const raw=safe(text);
   if(!raw.trim())return null;
   const WORD_NUMBERS={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twelve:12,fifteen:15};
