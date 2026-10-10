@@ -226,16 +226,24 @@
     }catch(_){ return false; }
   }
 
+  let registryCorrupted=false;
   function readRegistry(){
     try{
       const raw=localStorage.getItem(USER_SPACES_KEY);
-      const parsed=raw?JSON.parse(raw):null;
+      if(raw===null) return {version:1,activeId:null,users:[]};
+      const parsed=JSON.parse(raw);
       if(parsed && Array.isArray(parsed.users)) return parsed;
-    }catch(_){ }
-    return {version:1,activeId:null,users:[]};
+      throw new Error('Stored user registry is invalid');
+    }catch(err){
+      registryCorrupted=true;
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      // Do not silently replace the damaged registry; block further writes.
+      return {version:1,activeId:null,users:[]};
+    }
   }
   function writeRegistry(reg){
     try{
+      if(registryCorrupted) throw new Error('Unreadable user registry: refusing to overwrite');
       const encoded=JSON.stringify(reg);
       localStorage.setItem(USER_SPACES_KEY,encoded);
       if(localStorage.getItem(USER_SPACES_KEY)!==encoded) throw new Error('Profile save verification failed');
@@ -250,7 +258,15 @@
   let syncingRegistry=false;
   function ensureRegistry(){
     const reg=readRegistry();
+    if(registryCorrupted) throw new Error('User registry is unreadable; export your data before further changes');
     let changed=false;
+    // lastset-data-v1 is the active profile on this device. If a profile
+    // switch was interrupted between its two writes, this persisted user ID
+    // takes precedence over an earlier registry activeId.
+    const persistedId=data?.profile?.userId;
+    if(persistedId && reg.activeId!==persistedId && reg.users.some(u=>u.id===persistedId)){
+      reg.activeId=persistedId;changed=true;
+    }
     if(!reg.activeId || !reg.users.some(u=>u.id===reg.activeId)){
       const id=data?.profile?.userId || userId();
       data.profile=data.profile||{};
@@ -263,7 +279,7 @@
       changed=true;
       if(baseSaveData) baseSaveData(data);
     }
-    if(changed) writeRegistry(reg);
+    if(changed && !writeRegistry(reg)) throw new Error('Could not persist profile registry');
     return reg;
   }
 
@@ -298,8 +314,12 @@
       return true;
     };
   }
-  ensureRegistry();
-  syncActiveSnapshot(data);
+  try{
+    ensureRegistry();
+    syncActiveSnapshot(data);
+  }catch(err){
+    if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+  }
 
   function resetViewTo(date){
     state.selectedDate=date;
