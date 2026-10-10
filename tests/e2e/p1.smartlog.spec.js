@@ -27,7 +27,7 @@ test.describe('P1 progressive Smart Log end-to-end',()=>{
     await start(page);
     await parse(page,'Bench press 80kg for 8, then 85kg for 6 and 5');
     console.log('P1 parsed debug:',JSON.stringify(await page.evaluate(()=>({
-      p1Loaded:document.documentElement.dataset.lastsetSmartLogP1,
+      p1Loaded:document.documentElement.dataset.lastsetSmartLogP1,returnSnapshot:state.aiParsed?.p1ReturnSnapshot,
       items:state.aiParsed?.items?.map(it=>({name:it.name,id:it.exerciseId,p1Source:it.p1Source,sets:it.sets,warnings:it.p1Warnings,diag:it.p1Diag,loadType:it.loadType})),
       mentions:findExerciseMentions('Bench press 80kg for 8, then 85kg for 6 and 5').map(m=>({name:m.exercise?.name,start:m.start,end:m.end,alias:m.alias}))
     }))));
