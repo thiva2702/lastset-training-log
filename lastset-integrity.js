@@ -195,8 +195,15 @@
     return {version:1,activeId:null,users:[]};
   }
   function writeRegistry(reg){
-    try{ localStorage.setItem(USER_SPACES_KEY,JSON.stringify(reg)); return true; }
-    catch(_){ return false; }
+    try{
+      const encoded=JSON.stringify(reg);
+      localStorage.setItem(USER_SPACES_KEY,encoded);
+      if(localStorage.getItem(USER_SPACES_KEY)!==encoded) throw new Error('Profile save verification failed');
+      return true;
+    }catch(err){
+      if(typeof reportStorageFailure==='function') reportStorageFailure(err);
+      return false;
+    }
   }
   function userId(){ return `user_${Date.now()}_${Math.random().toString(36).slice(2,8)}`; }
 
@@ -230,7 +237,7 @@
       user.name=value?.profile?.name||user.name||'Current user';
       user.data=clone(value);
       user.updatedAt=Date.now();
-      writeRegistry(reg);
+      if(!writeRegistry(reg)) throw new Error('LastSet user history could not be saved');
     }finally{ syncingRegistry=false; }
   }
 
@@ -248,6 +255,7 @@
     saveData=function(value){
       baseSaveData(value);
       syncActiveSnapshot(value);
+      return true;
     };
   }
   ensureRegistry();
