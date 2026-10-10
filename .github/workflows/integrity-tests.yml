@@ -44,6 +44,7 @@ jobs:
           node --check tests/p0-data-trust-smoke.js
           node --check tests/p0-storage-save-smoke.js
           node --check tests/p0-registry-save-smoke.js
+          node --check tests/p0-restore-smoke.js
           node --check tests/release-smoke.js
           node --check tests/e2e/lastset.production.spec.js
           node --check service-worker.js
@@ -57,6 +58,8 @@ jobs:
         run: node tests/p0-storage-save-smoke.js
       - name: Phase 0 profile registry failure tests
         run: node tests/p0-registry-save-smoke.js
+      - name: Phase 0 backup recovery tests
+        run: node tests/p0-restore-smoke.js
       - name: Profile and equipment smoke tests
         run: node tests/profile-equipment-smoke.js
       - name: Navigation smoke tests
