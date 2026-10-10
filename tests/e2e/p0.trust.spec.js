@@ -80,6 +80,9 @@ test.describe('Phase 0 local-first data trust',()=>{
     },null,{timeout:30000});
     await page.reload({waitUntil:'domcontentloaded'});
     await expect(page.locator('.bottom-nav')).toBeVisible();
+    // Cache presence is insufficient. A page without an active controller
+    // cannot intercept offline navigations, even when the assets are cached.
+    await page.waitForFunction(()=>Boolean(navigator.serviceWorker?.controller),null,{timeout:30000});
     await context.setOffline(true);
     try{
       await page.reload({waitUntil:'domcontentloaded',timeout:20000});
