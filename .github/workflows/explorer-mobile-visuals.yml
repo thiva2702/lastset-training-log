@@ -7,6 +7,8 @@ on:
       - '.github/workflows/explorer-mobile-visuals.yml'
       - 'lastset-anatomy.js'
       - 'lastset-anatomy.css'
+      - 'scripts/anatomy-cutouts.mjs'
+      - 'scripts/restore-anatomy-detail.mjs'
       - 'lastset-explore.js'
       - 'lastset-explore.css'
       - 'lastset-atlas-regions.js'
@@ -85,6 +87,16 @@ jobs:
                 assert(facts.viewBox==='0 0 '+(side==='front'?346:356)+' 631','Photo and overlay coordinates do not match source image: '+JSON.stringify(facts));
                 const asset=await page.request.get(new URL(facts.image,process.env.LASTSET_BASE_URL).toString());
                 assert(asset.ok(),'Anatomy image did not load: '+side);
+                const alpha=await page.evaluate(async side=>{
+                  const image=new Image();
+                  image.src='/assets/anatomy-'+side+'.webp?v=transparent0260';
+                  await image.decode();
+                  const c=document.createElement('canvas');c.width=60;c.height=60;
+                  const ctx=c.getContext('2d',{willReadFrequently:true});
+                  ctx.drawImage(image,0,0,60,60);
+                  return {edge:ctx.getImageData(0,0,1,1).data[3],body:ctx.getImageData(30,22,1,1).data[3]};
+                },side);
+                assert(alpha.edge===0&&alpha.body>190,'Transparent anatomy alpha mask failed: '+JSON.stringify(alpha));
                 await page.screenshot({path:'test-results/lastset-'+side+'-iphone.png'});
                 console.log(side+' '+JSON.stringify(facts));
               }

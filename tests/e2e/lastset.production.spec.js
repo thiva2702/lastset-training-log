@@ -349,11 +349,21 @@ test.describe('LastSet production v0.14.0', () => {
         const im=new Image();
         im.src='/assets/anatomy-'+side+'.webp?v=4k0250';
         await im.decode();
-        return {width:im.naturalWidth,height:im.naturalHeight};
+        
+        const canvas=document.createElement('canvas');canvas.width=60;canvas.height=60;
+        const ctx=canvas.getContext('2d',{willReadFrequently:true});
+        ctx.drawImage(im,0,0,60,60);
+        return {
+          width:im.naturalWidth,height:im.naturalHeight,
+          cornerAlpha:ctx.getImageData(0,0,1,1).data[3],
+          bodyAlpha:ctx.getImageData(30,22,1,1).data[3]
+        };
       },side);
       expect(size.height).toBe(4096);
       expect(size.width).toBeGreaterThan(2100);
       expect(size.width).toBeLessThan(2450);
+      expect(size.cornerAlpha).toBe(0);
+      expect(size.bodyAlpha).toBeGreaterThan(190);
     }
   });
 

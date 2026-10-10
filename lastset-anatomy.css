@@ -319,3 +319,21 @@
 .ls-anatomy-premium.female .ls-specialist-muscle .ls-specialist-visual.ls-region-selected{
   fill:rgba(134,255,75,.94)!important;stroke:#efffc7!important;stroke-width:2.4!important;
 }
+
+/* LastSet floating anatomy. Transparent artwork shares the native SVG with hit zones.
+   No additional image masking or scaling is applied, so muscle alignment is unchanged. */
+.ls-explore-screen .ls-anatomy-stage,
+.ls-explore-screen.ls-explore-has-selection .ls-anatomy-stage{
+  background:
+    radial-gradient(ellipse 47% 55% at 50% 43%,rgba(124,73,171,.18),transparent 87%),
+    linear-gradient(180deg,rgba(32,19,48,.34),rgba(24,15,39,.13))!important;
+  border-radius:22px!important;
+}
+.ls-anatomy-premium.male .ls-realistic-anatomy{
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+  filter:saturate(1.07) contrast(1.035)!important;
+}
+.ls-explore-screen .ls-anatomy-card{
+  background:linear-gradient(162deg,rgba(38,24,55,.96),rgba(19,13,32,.97) 55%,rgba(29,17,46,.96))!important;
+}
