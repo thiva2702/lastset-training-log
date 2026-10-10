@@ -4,7 +4,7 @@ require('../lastset-atlas-regions.js');
 require('../lastset-anatomy.js');
 const atlas=global.LastSetAnatomy;
 assert(atlas,'Atlas renderer missing');
-assert.equal(atlas.version,'0.28.1');
+assert.equal(atlas.version,'0.28.2');
 assert.deepEqual(atlas.frontGroups.sort(),['Arms','Chest','Core','Legs','Shoulders'].sort());
 assert.deepEqual(atlas.backGroups.sort(),['Arms','Back','Legs','Shoulders'].sort());
 for(const gender of ['male','female']){
