@@ -14,6 +14,7 @@ const STYLE_TAGS = [
   ["/lastset-offline.css","0141"],
   ["/lastset-explore.css","0290"],
   ["/lastset-diagnostics.css","0300"],
+  ["/lastset-mobility.css","0300"],
   ["/lastset-anatomy.css","0280"]
 ];
 
@@ -39,7 +40,8 @@ const SCRIPT_TAGS = [
   ["/lastset-offline.js","0141"],
   ["/lastset-atlas-regions.js","0282"],
   ["/lastset-anatomy.js","0282"],
-  ["/lastset-explore.js","0290"]
+  ["/lastset-explore.js","0290"],
+  ["/lastset-mobility.js","0300"]
 ];
 
 async function getReleaseId(env){

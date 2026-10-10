@@ -140,6 +140,83 @@ async function runSmartLog(page, text, expectedType) {
 }
 
 test.describe('LastSet production v0.14.0', () => {
+  test('Mobility is a visible primary category, while Machine Scan remains hidden',async ({page})=>{
+    await goToday(page);
+    const actions=page.locator('[data-day-action]');
+    const names=await actions.allTextContents();
+    expect(names.some(s=>s.includes('Mobility & Recovery'))).toBeTruthy();
+    expect(names.some(s=>s.includes('Scan Machine'))).toBeFalsy();
+    expect(await page.locator('[data-day-action="scan"]').count()).toBe(0);
+    await page.locator('[data-day-action="mobility"]').click();
+    await expect(page.locator('[data-mobility-activity="Yoga"]')).toBeVisible();
+    await expect(page.locator('[data-mobility-activity="Pilates"]')).toBeVisible();
+    await expect(page.locator('[data-mobility-activity="Stretching"]')).toBeVisible();
+    await expect(page.locator('[data-mobility-activity="Mobility Drills"]')).toBeVisible();
+    await expect(page.locator('[data-mobility-activity="Foam Rolling"]')).toBeVisible();
+  });
+
+  test('Yoga saves, edits and tracks as mobility without changing cardio totals',async ({page})=>{
+    await goToday(page);
+    const today=await todayIso(page);
+    await page.locator('[data-day-action="mobility"]').click();
+    await page.locator('[data-mobility-activity="Yoga"]').click();
+    await page.locator('#mobility-style').selectOption('Vinyasa');
+    await page.locator('#mobility-duration').fill('45');
+    await page.locator('#mobility-intensity').selectOption('Moderate');
+    await page.locator('#mobility-notes').fill('Felt more flexible');
+    await page.locator('[data-action="save-mobility"]').click();
+    await expect(page.locator('.ls-mobility-session')).toContainText('Vinyasa');
+    let d=await storedData(page);
+    const entries=d.sessions?.[today]||[];
+    expect(entries.filter(x=>x.type==='mobility')).toHaveLength(1);
+    expect(entries.filter(x=>x.type==='cardio')).toHaveLength(0);
+    expect(entries.find(x=>x.type==='mobility').duration).toBe(45);
+    await page.locator('[data-edit-mobility]').click();
+    await expect(page.locator('#mobility-duration')).toHaveValue('45');
+    await page.locator('#mobility-duration').fill('50');
+    await page.locator('[data-action="save-mobility"]').click();
+    d=await storedData(page);
+    expect(d.sessions[today].filter(x=>x.type==='mobility')).toHaveLength(1);
+    expect(d.sessions[today].find(x=>x.type==='mobility').duration).toBe(50);
+    await page.locator('[data-nav="calendar"]').click();
+    await expect(page.locator('.ls-mobility-stat')).toContainText('1');
+    await page.locator('[data-nav="progress"]').click();
+    await expect(page.locator('.ls-mobility-progress-card')).toContainText('50');
+  });
+
+  test('Mobility sessions prevent an accidental Rest Day and keep existing training intact',async ({page})=>{
+    await goToday(page);
+    const before=await storedData(page);
+    await page.locator('[data-day-action="mobility"]').click();
+    await page.locator('[data-mobility-activity="Stretching"]').click();
+    await page.locator('#mobility-duration').fill('20');
+    await page.locator('[data-action="save-mobility"]').click();
+    await page.locator('[data-day-action="rest"]').click();
+    await expect(page.locator('.toast')).toContainText('Training is already logged');
+    const d=await storedData(page);
+    expect(Object.values(d.sessions||{}).flat().some(x=>x.type==='rest')).toBeFalsy();
+    expect(d.profile).toEqual(before.profile);
+    expect(d.sessions).toBeTruthy();
+  });
+
+  test('Smart Log identifies yoga and asks for missing session duration',async ({page})=>{
+    await goToday(page);
+    await page.locator('[data-day-action="describe"]').click();
+    await page.locator('#ai-text').fill('Did Vinyasa yoga this morning');
+    await page.locator('[data-action="parse-ai"]').click();
+    await expect(page.locator('.ls-mobility-preview')).toBeVisible();
+    await expect(page.locator('#ai-correction')).toBeVisible();
+    await page.locator('#ai-correction').fill('45 minutes');
+    await page.locator('[data-action="smart-reply"]').click();
+    await expect(page.locator('[data-action="confirm-ai-workout"]')).toBeVisible();
+    await page.locator('[data-action="confirm-ai-workout"]').click();
+    await expect(page.locator('.ls-mobility-session')).toContainText('45 min');
+    const d=await storedData(page);
+    expect(Object.values(d.sessions||{}).flat().filter(x=>x.type==='mobility')).toHaveLength(1);
+    expect(Object.values(d.sessions||{}).flat().filter(x=>x.type==='cardio')).toHaveLength(0);
+  });
+
+
   test.beforeEach(async ({ page }) => {
     await cleanStart(page);
   });

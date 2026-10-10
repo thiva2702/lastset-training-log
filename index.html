@@ -11,6 +11,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="/lastset-diagnostics.css?v=0300" />
+  <link rel="stylesheet" href="/lastset-mobility.css?v=0300" />
   <script src="/lastset-diagnostics.js?v=0300"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=0139" />
 
@@ -319,7 +320,7 @@ details.exercise-settings > div { padding:0 12px 12px; }
       <div class="action-list">
         <button class="action blue"><span class="emoji">🏋️</span><span class="text"><strong>Resistance Training</strong><span>Log weights, reps and sets</span></span></button>
         <button class="action green"><span class="emoji">🏃</span><span class="text"><strong>Cardio Training</strong><span>Log running, cycling and more</span></span></button>
-        <button class="action purple"><span class="emoji">📷</span><span class="text"><strong>Scan Machine</strong><span>Take a photo of the machine</span></span></button>
+        <button class="action purple"><span class="emoji">🧘</span><span class="text"><strong>Mobility &amp; Recovery</strong><span>Yoga, Pilates and stretching</span></span></button>
         <button class="action blue"><span class="emoji">🎙️</span><span class="text"><strong>Smart Log</strong><span>Speak or type what you did</span></span></button>
       </div>
 
@@ -512,7 +513,7 @@ function screen(){
     case 'cardio-list': return cardioListScreen();
     case 'cardio-log': return cardioLogScreen();
     case 'describe': return describeScreen();
-    case 'scan': return scanScreen();
+    case 'scan': return dayScreen();
     case 'progress': return progressScreen();
     case 'profile': return profileScreen();
     default: return calendarScreen();
@@ -563,7 +564,8 @@ function dayScreen(){
     <div class="action-list">
       ${action('blue','🏋️',resistance?'Continue Resistance':'Resistance Training',resistance?`${resistance.exercises.length} exercise${resistance.exercises.length===1?'':'s'} logged today`:'Log weights, reps and sets','resistance')}
       ${action('green','🏃','Cardio Training','Log running, cycling and more','cardio')}
-      ${action('purple','📷','Scan Machine','Take a photo of the machine','scan')}
+      ${action('purple','🧘','Mobility & Recovery','Yoga, Pilates, stretching and mobility','mobility')}
+      
       ${action('blue','🎙️','Smart Log','Type or speak what you did','describe')}
       ${action('orange','🛏️','Rest Day','Mark today as a rest day','rest')}
     </div>
@@ -801,11 +803,11 @@ function saveProfile(){
 function dayAction(act){
   if(act==='resistance'){state.editingExercise=null;state.selectedExercise=null;state.resistanceDraft={sets:[]};state.view='exercise-list';}
   else if(act==='cardio'){state.editingCardioId=null;state.cardioDraft={};state.view='cardio-list';}
-  else if(act==='scan'){state.view='scan';}
+  else if(act==='scan'){showToast('Machine Scan is coming later');return;}
   else if(act==='describe'){state.aiDraft='';state.aiParsed=null;state.aiError='';state.aiSource='';state.aiCorrection='';state.smartConversation=[];state.view='describe';}
   else if(act==='rest'){
     const ss=sessionsFor(state.selectedDate);
-    if(ss.some(s=>s.type==='resistance'||s.type==='cardio')){showToast('Training is already logged for this day');return;}
+    if(ss.some(s=>s.type==='resistance'||s.type==='cardio'||s.type==='mobility')){showToast('Training is already logged for this day');return;}
     if(ss.some(s=>s.type==='rest')){showToast('Rest day is already saved');return;}
     addSession(state.selectedDate,{id:cryptoId(),type:'rest',createdAt:Date.now()}); showToast('Rest day saved'); return;
   }
@@ -2336,7 +2338,8 @@ function dayScreen(){
     <div class="action-list">
       ${action('blue','🏋️',resistance?'Continue Resistance':'Resistance Training',resistance?`${resistance.exercises.length} exercise${resistance.exercises.length===1?'':'s'} logged today`:'Log weights, reps and sets','resistance')}
       ${action('green','🏃','Cardio Training','Log running, cycling and more','cardio')}
-      ${action('purple','📷','Scan Machine','Take a photo of the machine','scan')}
+      ${action('purple','🧘','Mobility & Recovery','Yoga, Pilates, stretching and mobility','mobility')}
+      
       ${action('blue','🎙️','Smart Log','Type or speak what you did','describe')}
       ${action('orange','🛏️','Rest Day','Mark today as a rest day','rest')}
     </div>
@@ -2635,7 +2638,7 @@ function saveProfile(){
 
 function screen(){
   switch(state.view){
-    case 'calendar':return calendarScreen();case 'day':return dayScreen();case 'exercise-list':return exerciseListScreen();case 'exercise-log':return exerciseLogScreen();case 'cardio-list':return cardioListScreen();case 'cardio-log':return cardioLogScreen();case 'describe':return describeScreen();case 'scan':return scanScreen();case 'progress':return progressScreen();case 'profile':return profileScreen();case 'templates':return templatesScreen();case 'assessment':return assessmentScreen();default:return calendarScreen();
+    case 'calendar':return calendarScreen();case 'day':return dayScreen();case 'exercise-list':return exerciseListScreen();case 'exercise-log':return exerciseLogScreen();case 'cardio-list':return cardioListScreen();case 'cardio-log':return cardioLogScreen();case 'describe':return describeScreen();case 'scan':return dayScreen();case 'progress':return progressScreen();case 'profile':return profileScreen();case 'templates':return templatesScreen();case 'assessment':return assessmentScreen();default:return calendarScreen();
   }
 }
 

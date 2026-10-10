@@ -19,6 +19,8 @@ cp lastset-offline.css dist/
 cp lastset-explore.css dist/
 cp lastset-diagnostics.css dist/
 cp lastset-diagnostics.js dist/
+cp lastset-mobility.js dist/
+cp lastset-mobility.css dist/
 cp lastset-anatomy.css dist/
 cp lastset-images.css dist/
 cp lastset-hotfix.css dist/

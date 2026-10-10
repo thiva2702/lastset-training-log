@@ -38,3 +38,9 @@
 
 /lastset-build.json
   Cache-Control: no-store, max-age=0
+
+/lastset-mobility.js
+  Cache-Control: no-store, max-age=0
+
+/lastset-mobility.css
+  Cache-Control: no-store, max-age=0

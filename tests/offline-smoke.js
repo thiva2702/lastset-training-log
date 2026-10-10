@@ -22,6 +22,8 @@ assert.ok(sw.includes("'./lastset-anatomy.js'"),'Anatomy JS must be precached');
 assert.ok(sw.includes("'./lastset-anatomy.css'"),'Anatomy CSS must be precached');
 assert.ok(sw.includes("'./lastset-explore.js'"),'Explore JS must be precached');
 assert.ok(sw.includes("'./lastset-offline.js'"),'Offline JS must be precached');
+assert.ok(sw.includes("'./lastset-mobility.js'"),'Mobility JS must be precached');
+assert.ok(sw.includes("'./lastset-mobility.css'"),'Mobility CSS must be precached');
 assert.ok(!boot.includes('unregister()'),'Bootstrap must not unregister the service worker');
 assert.ok(!boot.includes('caches.delete('),'Bootstrap must not delete offline caches');
 console.log('LastSet offline smoke tests passed');

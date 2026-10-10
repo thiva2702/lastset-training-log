@@ -37,6 +37,8 @@ jobs:
           node --check lastset-muscle-library.js
           node --check lastset-explore.js
           node --check lastset-diagnostics.js
+          node --check lastset-mobility.js
+          node --check tests/mobility-smoke.js
           node --check scripts/stamp-release.mjs
           node --check tests/diagnostics-smoke.js
           node --check tests/release-smoke.js
@@ -74,6 +76,8 @@ jobs:
         run: node tests/explore-smoke.js
       - name: Muscle Explorer catalogue and side restrictions
         run: node tests/muscle-explorer-coverage.js
+      - name: Mobility and hidden machine scan smoke tests
+        run: node tests/mobility-smoke.js
       - name: Debug console smoke tests
         run: node tests/diagnostics-smoke.js
       - name: Release versioning smoke tests
@@ -106,6 +110,8 @@ jobs:
           test -s lastset-muscle-library.js
           test -s lastset-explore.js
           test -s lastset-diagnostics.js
+          test -s lastset-mobility.js
+          test -s lastset-mobility.css
           test -s lastset-diagnostics.css
           test -s scripts/stamp-release.mjs
           test -s lastset-explore.css
@@ -203,6 +209,8 @@ jobs:
           test -s dist/lastset-muscle-library.js
           test -s dist/lastset-explore.js
           test -s dist/lastset-diagnostics.js
+          test -s dist/lastset-mobility.js
+          test -s dist/lastset-mobility.css
           test -s dist/lastset-diagnostics.css
           test -s dist/lastset-build.json
           grep -q 'lastset-release' dist/index.html

@@ -15,6 +15,10 @@ assert(sw.includes("networkFirstAsset"),'JS/CSS should use network-first caching
 assert(sw.includes("'./lastset-diagnostics.js'"),'Diagnostics JS must be included offline');
 assert(sw.includes("'./lastset-diagnostics.css'"),'Diagnostics CSS must be included offline');
 assert(boot.includes('lastset-diagnostics.js'),'Diagnostics must load before inline application');
+assert(worker.includes('lastset-mobility.js'),'Mobility extension must be injected');
+assert(worker.includes('lastset-mobility.css'),'Mobility styling must be injected');
+assert(build.includes('lastset-mobility.js'),'Mobility bundle must be included');
+assert(sw.includes("'./lastset-mobility.js'"),'Mobility must be offline available');
 assert(boot.indexOf('lastset-diagnostics.js')<boot.indexOf('const EXERCISES = ['),'Diagnostics loaded too late');
 assert(build.includes('scripts/stamp-release.mjs'),'Bundle must tag release identity');
 assert(stamp.includes("LASTSET_RELEASE_ID")&&stamp.includes('GITHUB_SHA'),'Build version should follow commit');

@@ -17,6 +17,7 @@ const ASSETS = [
   './lastset-offline.css',
   './lastset-explore.css',
   './lastset-diagnostics.css',
+  './lastset-mobility.css',
   './lastset-build.json',
   './lastset-anatomy.css',
   './lastset-images.css',
@@ -45,6 +46,7 @@ const ASSETS = [
   './lastset-anatomy.js',
   './lastset-explore.js',
   './lastset-diagnostics.js',
+  './lastset-mobility.js',
   './assets/anatomy-front.webp',
   './assets/anatomy-back.webp',
   './assets/anatomy-female-front.webp',
@@ -124,6 +126,7 @@ function enhanceHtml(text) {
     ['./lastset-offline.css','0141'],
     ['./lastset-explore.css','0290'],
     ['./lastset-diagnostics.css','0300'],
+    ['./lastset-mobility.css','0300'],
     ['./lastset-anatomy.css','0211']
   ];
   const scripts = [
@@ -148,7 +151,8 @@ function enhanceHtml(text) {
     ['./lastset-offline.js','0141'],
     ['./lastset-atlas-regions.js','0210'],
     ['./lastset-anatomy.js','0210'],
-    ['./lastset-explore.js','0290']
+    ['./lastset-explore.js','0290'],
+    ['./lastset-mobility.js','0300']
   ];
 
   for(const [path,version] of styles){
