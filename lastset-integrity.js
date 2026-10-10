@@ -112,10 +112,41 @@
     }).sort((a,b)=>b.lastDate.localeCompare(a.lastDate));
   }
 
+  // Backups are parsed before they can replace the active user's data.
+  // Keep older exports compatible, but reject damaged nested workout records.
   function validateBackup(value){
-    if(!value || typeof value!=='object' || Array.isArray(value)) return false;
-    if(!value.sessions || typeof value.sessions!=='object' || Array.isArray(value.sessions)) return false;
-    if(value.profile!=null && (typeof value.profile!=='object' || Array.isArray(value.profile))) return false;
+    const object=v=>!!v && typeof v==='object' && !Array.isArray(v);
+    const numeric=v=>v==null || (typeof v==='number' && Number.isFinite(v)) ||
+      (typeof v==='string' && v.trim()!=='' && Number.isFinite(Number(v)));
+    if(!object(value) || !object(value.sessions)) return false;
+    if(value.profile!=null && !object(value.profile)) return false;
+    if(value.templates!=null && (!Array.isArray(value.templates) || !value.templates.every(object))) return false;
+    if(value.favorites!=null && !Array.isArray(value.favorites)) return false;
+    if(value.imports!=null && !Array.isArray(value.imports)) return false;
+    if(value.plans!=null && !object(value.plans)) return false;
+    if(value.schemaVersion!=null && !numeric(value.schemaVersion)) return false;
+    for(const [date,sessions] of Object.entries(value.sessions)){
+      if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || !Array.isArray(sessions)) return false;
+      for(const session of sessions){
+        if(!object(session)) return false;
+        if(session.type!=null && typeof session.type!=='string') return false;
+        if(session.type==='resistance' && !Array.isArray(session.exercises)) return false;
+        if(session.exercises!=null){
+          if(!Array.isArray(session.exercises)) return false;
+          for(const exercise of session.exercises){
+            if(!object(exercise)) return false;
+            if(exercise.sets!=null){
+              if(!Array.isArray(exercise.sets)) return false;
+              for(const set of exercise.sets){
+                if(!object(set)) return false;
+                if(set.setType!=null && typeof set.setType!=='string') return false;
+                if(['weight','weightKg','reps','durationSeconds'].some(k=>set[k]!==undefined && !numeric(set[k]))) return false;
+              }
+            }
+          }
+        }
+      }
+    }
     return true;
   }
 
