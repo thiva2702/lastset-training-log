@@ -135,9 +135,7 @@ parseSmartWorkout=function(text){
       const item=result.items[index];
       const parsed=parseProgressivePhrase(segment,item.loadType,unit);
       if(!parsed)continue;
-      item.p1Diag={loadType:item.loadType,recognized:parsed.recognized,setCount:parsed.sets.length,setSnapshot:JSON.parse(JSON.stringify(parsed.sets))};
       if(parsed.sets.length)item.sets=parsed.sets;
-      item.p1Diag.afterAssignment=JSON.parse(JSON.stringify(item.sets));
       item.p1Review=true;
       item.p1Source=segment.trim();
       item.p1Warnings=parsed.warnings;
@@ -145,7 +143,6 @@ parseSmartWorkout=function(text){
       item.notes=[item.notes,'Original Smart Log: '+item.p1Source].filter(Boolean).join(' · ');
     }
   }catch(err){console.warn('Smart Log P1 review could not normalize the phrase',err);}
-  result.p1ReturnSnapshot=result.items.map(it=>JSON.parse(JSON.stringify(it.sets||[])));
   return result;
 };
 const escape=s=>typeof escapeHtml==='function'?escapeHtml(s):safe(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
