@@ -59,9 +59,13 @@ jobs:
             offline_ok=0
             explore_ok=0
             anatomy_ok=0
+            mobility_ok=0
+            release_ok=0
             diagnostics_ok=0
             if curl --fail --silent --show-error --location --max-time 20 "$LASTSET_BASE_URL" > /tmp/lastset.html; then
               grep -q 'lastset-beta.js?v=' /tmp/lastset.html && html_ok=1 || true
+              # Do not start browser tests against the previous Cloudflare release.
+              grep -q "lastset-release.*${GITHUB_SHA:0:28}" /tmp/lastset.html && release_ok=1 || true
             fi
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-beta.js?v=1beta1" > /tmp/lastset-beta.js; then
               grep -q "semver: '1.0.0-beta.1'" /tmp/lastset-beta.js && grep -q "build: '0.14.1.1'" /tmp/lastset-beta.js && beta_ok=1 || true
@@ -87,7 +91,10 @@ jobs:
             if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-diagnostics.js" > /tmp/lastset-diagnostics.js; then
               grep -q "LastSetDiagnostics" /tmp/lastset-diagnostics.js && diagnostics_ok=1 || true
             fi
-            if [ "$diagnostics_ok" -eq 1 ] && [ "$html_ok" -eq 1 ] && [ "$beta_ok" -eq 1 ] && [ "$smartlog_ok" -eq 1 ] && [ "$memory_ok" -eq 1 ] && [ "$voice_ok" -eq 1 ] && [ "$offline_ok" -eq 1 ] && [ "$explore_ok" -eq 1 ] && [ "$anatomy_ok" -eq 1 ]; then
+            if curl --fail --silent --show-error --location --max-time 20 "${LASTSET_BASE_URL}lastset-mobility.js?v=${GITHUB_SHA:0:28}" > /tmp/lastset-mobility.js; then
+              grep -q 'LastSetMobility' /tmp/lastset-mobility.js && mobility_ok=1 || true
+            fi
+            if [ "$release_ok" -eq 1 ] && [ "$mobility_ok" -eq 1 ] && [ "$diagnostics_ok" -eq 1 ] && [ "$html_ok" -eq 1 ] && [ "$beta_ok" -eq 1 ] && [ "$smartlog_ok" -eq 1 ] && [ "$memory_ok" -eq 1 ] && [ "$voice_ok" -eq 1 ] && [ "$offline_ok" -eq 1 ] && [ "$explore_ok" -eq 1 ] && [ "$anatomy_ok" -eq 1 ]; then
               echo "LastSet V1 Beta production deployment is ready"
               exit 0
             fi
