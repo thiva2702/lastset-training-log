@@ -24,6 +24,7 @@ jobs:
           node --check lastset-smartlog-shorthand.js
           node --check lastset-core-reliability.js
           node --check lastset-smartlog-p1.js
+          node --check tests/p1-gym-language-smoke.js
           node --check lastset-memory.js
           node --check lastset-intelligence.js
           node --check lastset-beta.js
@@ -69,6 +70,8 @@ jobs:
         run: node tests/smartlog-shorthand-smoke.js
       - name: Core reliability smoke tests
         run: node tests/core-reliability-smoke.js
+      - name: P1 living gym-language regression
+        run: node tests/p1-gym-language-smoke.js
       - name: Memory smoke tests
         run: node tests/memory-smoke.js
       - name: Intelligence smoke tests
@@ -104,6 +107,7 @@ jobs:
           test -s lastset-navigation.js
           test -s lastset-smartlog-shorthand.js
           test -s lastset-core-reliability.js
+          test -s lastset-smartlog-p1.js
           test -s lastset-memory.js
           test -s lastset-intelligence.js
           test -s lastset-beta.js
@@ -141,6 +145,7 @@ jobs:
           grep -q 'lastset-navigation.js' worker.js
           grep -q 'lastset-smartlog-shorthand.js' worker.js
           grep -q 'lastset-core-reliability.js' worker.js
+          grep -q 'lastset-smartlog-p1.js' worker.js
           grep -q 'lastset-memory.js' worker.js
           grep -q 'lastset-intelligence.js' worker.js
           grep -q 'lastset-beta.js' worker.js
@@ -160,6 +165,7 @@ jobs:
           grep -q 'lastset-explore.css' worker.js
           grep -q 'lastset-smartlog-shorthand.js' service-worker.js
           grep -q 'lastset-core-reliability.js' service-worker.js
+          grep -q 'lastset-smartlog-p1.js' service-worker.js
           grep -q 'lastset-memory.js' service-worker.js
           grep -q 'lastset-intelligence.js' service-worker.js
           grep -q 'lastset-beta.js' service-worker.js
@@ -180,6 +186,7 @@ jobs:
           grep -q 'assets/lastset-mark.svg' service-worker.js
           grep -q 'lastset-smartlog-shorthand.js' build-cloudflare.sh
           grep -q 'lastset-core-reliability.js' build-cloudflare.sh
+          grep -q 'lastset-smartlog-p1.js' build-cloudflare.sh
           grep -q 'lastset-memory.js' build-cloudflare.sh
           grep -q 'lastset-intelligence.js' build-cloudflare.sh
           grep -q 'lastset-beta.js' build-cloudflare.sh
@@ -201,6 +208,7 @@ jobs:
           bash build-cloudflare.sh
           test -s dist/lastset-smartlog-shorthand.js
           test -s dist/lastset-core-reliability.js
+          test -s dist/lastset-smartlog-p1.js
           test -s dist/lastset-memory.js
           test -s dist/lastset-intelligence.js
           test -s dist/lastset-beta.js
