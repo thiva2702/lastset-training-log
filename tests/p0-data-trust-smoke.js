@@ -6,6 +6,10 @@ global.__LASTSET_TEST_ONLY__=true;
 vm.runInThisContext(fs.readFileSync('lastset-integrity.js','utf8'),{filename:'lastset-integrity.js'});
 const {validateBackup}=global.LastSetIntegrityTest;
 assert.equal(typeof validateBackup,'function');
+const seedData={sessions:{'2026-10-06':[{type:'resistance'}]},profile:{name:'',weightUnit:'kg'}};
+assert.strictEqual(global.LastSetIntegrityTest.shouldCleanSeedDemo(seedData),true);
+assert.strictEqual(global.LastSetIntegrityTest.shouldCleanSeedDemo({...seedData,profile:{name:'Actual Gym User'}}),false,'legitimate named profile is not demo');
+assert.strictEqual(global.LastSetIntegrityTest.shouldCleanSeedDemo({...seedData,sessions:{'2026-10-06':[{},{}]}}),false,'profiles with multiple sessions cannot be treated as a demo');
 
 const original={
   sessions:{
