@@ -30,9 +30,9 @@ for(const gender of ['male','female']){
     assert(!/<rect[^>]+rx="13"/.test(html),'Old stickman arm shape should not remain');
   }
 }
-assert(!atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
+assert(atlas.render({side:'front',gender:'male'}).includes('ls-central-chest-target'));
 assert(atlas.render({side:'front',gender:'male'}).includes('data-anatomy-region="Mid Chest"'));
-assert(!atlas.render({side:'back',gender:'male'}).includes('ls-central-back-target'));
+assert(atlas.render({side:'back',gender:'male'}).includes('ls-central-back-target'));
 assert(atlas.render({side:'back',gender:'male'}).includes('data-anatomy-region="Upper Back"'));
 for(const [side,regions] of Object.entries({front:['Biceps','Forearms','Upper Chest','Mid Chest','Lower Chest','Quads','Calves','Abs'],back:['Triceps','Forearms','Lats','Glutes','Hamstrings','Calves']})){
   const html=atlas.render({side,gender:'male'});

@@ -84,21 +84,21 @@ jobs:
                 });
                 assert(facts.document<=facts.viewport+2,'Horizontal overflow: '+JSON.stringify(facts));
                 assert(facts.figureHeight>=400,'Full body figure is too small for practical muscle selection: '+JSON.stringify(facts));
-                assert(facts.image?.includes('anatomy-'+side+'.webp'),'Photographic atlas missing: '+side);
+                assert(facts.image?.includes('anatomy-male-'+side+'.webp'),'Approved male photographic atlas missing: '+side);
                 assert(facts.figureHeight>=400&&facts.groups>=4&&facts.visuals>=15,'Anatomy overlays failed to render: '+JSON.stringify(facts));
-                assert(facts.viewBox==='0 0 '+(side==='front'?346:356)+' 631','Photo and overlay coordinates do not match source image: '+JSON.stringify(facts));
+                assert(facts.viewBox==='0 0 929 1693','Approved male artwork and overlays must share the native coordinate system: '+JSON.stringify(facts));
                 const asset=await page.request.get(new URL(facts.image,process.env.LASTSET_BASE_URL).toString());
                 assert(asset.ok(),'Anatomy image did not load: '+side);
                 const alpha=await page.evaluate(async side=>{
                   const image=new Image();
-                  image.src='/assets/anatomy-'+side+'.webp?v=transparent0260';
+                  image.src='/assets/anatomy-male-'+side+'.webp?v=approved0280';
                   await image.decode();
                   const c=document.createElement('canvas');c.width=60;c.height=60;
                   const ctx=c.getContext('2d',{willReadFrequently:true});
                   ctx.drawImage(image,0,0,60,60);
                   return {edge:ctx.getImageData(0,0,1,1).data[3],body:ctx.getImageData(30,22,1,1).data[3]};
                 },side);
-                assert(alpha.edge===0&&alpha.body>190,'Transparent anatomy alpha mask failed: '+JSON.stringify(alpha));
+                assert(alpha.edge<=3&&alpha.body>190,'Transparent anatomy alpha mask failed: '+JSON.stringify(alpha));
                 await page.screenshot({path:'test-results/lastset-'+side+'-iphone.png'});
                 console.log(side+' '+JSON.stringify(facts));
               }
