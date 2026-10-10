@@ -32,9 +32,9 @@ assert.strictEqual(safeStorageSet({...workout,test:'unsaved'}),false,'missing re
 store.setItem=original;
 assert.strictEqual(saveData(workout),true,'save recovers once storage works again');
 const damaged='{"sessions": [truncated';
-storage.setItem('lastset-data-v1',damaged);
+store.setItem('lastset-data-v1',damaged);
 vm.runInContext('this.damagedLoad=loadData();',ctx);
-assert.equal(storage.getItem('lastset-data-v1'),damaged,'damaged original bytes must never be overwritten on startup');
+assert.equal(store.getItem('lastset-data-v1'),damaged,'damaged original bytes must never be overwritten on startup');
 assert.strictEqual(safeStorageSet(workout),false,'writes must stay blocked while stored JSON is unreadable');
-assert.equal(storage.getItem('lastset-data-v1'),damaged,'failed writes retain damaged raw recovery material');
+assert.equal(store.getItem('lastset-data-v1'),damaged,'failed writes retain damaged raw recovery material');
 console.log('LastSet P0 storage failure and read-back tests passed');
