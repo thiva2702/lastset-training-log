@@ -3,7 +3,7 @@ const assert=require('assert');
 const fs=require('fs');
 const vm=require('vm');
 const source=fs.readFileSync('lastset-integrity.js','utf8');
-const start=source.indexOf('  function readRegistry(){');
+const start=source.indexOf('  let registryCorrupted=false;');
 const end=source.indexOf('  if(baseLoadData){',start);
 assert(start>0&&end>start,'Unable to locate active profile persistence implementation');
 const records=new Map();
