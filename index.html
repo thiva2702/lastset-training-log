@@ -461,11 +461,28 @@ function reportStorageFailure(error){
     banner.querySelector('button').addEventListener('click',()=>{
       try{
         const snapshot=typeof data!=='undefined'?data:memoryStore;
-        const contents=unreadableStoredData!==null?unreadableStoredData:JSON.stringify(snapshot,null,2);
-        if(!contents) throw new Error('No data to export');
-        const mime=unreadableStoredData!==null?'text/plain':'application/json';
-        const url=URL.createObjectURL(new Blob([contents],{type:mime}));
-        const a=document.createElement('a');a.href=url;a.download=unreadableStoredData!==null?'lastset-damaged-storage.txt':'lastset-emergency-backup.json';
+        if(!snapshot && unreadableStoredData===null) throw new Error('No data to export');
+        let damagedRegistry=null;
+        try{
+          const raw=window.localStorage?.getItem('lastset-user-spaces-v1');
+          if(raw!==null && raw!==undefined){
+            try{
+              const parsed=JSON.parse(raw);
+              if(!parsed || !Array.isArray(parsed.users)) damagedRegistry=raw;
+            }catch(_){damagedRegistry=raw;}
+          }
+        }catch(_){}
+        const damaged=unreadableStoredData!==null||damagedRegistry!==null;
+        const contents=damaged?JSON.stringify({
+          format:'lastset-emergency-recovery-v1',
+          exportedAt:new Date().toISOString(),
+          note:'Raw damaged records require review before recovery; do not import directly.',
+          activeSnapshot:snapshot,
+          rawActiveStorage:unreadableStoredData,
+          rawProfileRegistry:damagedRegistry
+        },null,2):JSON.stringify(snapshot,null,2);
+        const url=URL.createObjectURL(new Blob([contents],{type:'application/json'}));
+        const a=document.createElement('a');a.href=url;a.download=damaged?'lastset-emergency-raw-recovery.json':'lastset-emergency-backup.json';
         document.body.appendChild(a);a.click();a.remove();
         setTimeout(()=>URL.revokeObjectURL(url),30000);
       }catch(_){ window.alert('Emergency export unavailable. Keep LastSet open and contact support before refreshing.'); }
