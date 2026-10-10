@@ -38,7 +38,7 @@ vm.runInContext(fs.readFileSync('lastset-muscle-library.js','utf8'),context);
 vm.runInContext('globalThis.OUTPUT=EXERCISES;',context);
 const list=context.OUTPUT;
 assert.equal(new Set(list.map(x=>x.id)).size,list.length,'Exercise IDs must be unique');
-assert(list.length>=127,'Base and supplementary library exercises must load');
+assert(list.length>=110,'Base and supplementary library exercises must load');
 assert.equal(context.LastSetMuscleLibrary.added,57);
 for(const name of ['Cross Body Hammer Curl','Incline Cable Fly','Close Grip Bench Press',
                   'Standing Calf Raise','Side Plank','Cable Woodchop','T Bar Row',

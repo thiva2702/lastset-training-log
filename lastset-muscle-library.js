@@ -71,7 +71,7 @@
     if(known.has(id))continue;
     EXERCISES.push({id,name,equipment,muscles:[...muscles],primaryMuscle:muscles[0],
       secondaryMuscles:muscles.slice(1),filterMuscles:[...muscles],aliases:[...aliases],
-      movement:'Accessory',loadType:'external'});
+      movement:'Accessory',loadType:equipment==='Bodyweight'?'bodyweight':'external'});
     known.add(id);added++;
   }
 
