@@ -1,0 +1,214 @@
+(() => {
+'use strict';
+const VERSION='0.15.0-p1';
+const safe=v=>String(v??'');
+const number=v=>Number.isFinite(Number(v))?Number(v):null;
+const toKg=(w,unit,defaultUnit='kg')=>{
+  const n=Number(w);
+  if(!Number.isFinite(n)||n<0||n>2200)return null;
+  return /^(?:lb|lbs|pound|pounds)$/i.test(unit||defaultUnit)?Math.round(n*0.453592*10)/10:n;
+};
+const unique=arr=>[...new Set(arr)];
+function reviewWarnings(text){
+  const t=safe(text).toLowerCase(),warn=[];
+  if(/\b(?:amrap|to failure|until failure|to max|bodyweight max)\b/.test(t))warn.push('Enter completed reps for AMRAP or failure sets; these are not known in advance.');
+  if(/\bdrop(?:set|\s+set)?\s+(?:last|final)\s+set\b/.test(t))warn.push('Last-set dropset is missing its drop weight and reps. Add the drop as a set.');
+  if(/(?:@\s*\d+(?:\.\d+)?|\brpe\s*\d+|\brir\s*\d+)/i.test(t))warn.push('RPE/RIR was mentioned; the original wording is kept in notes, not structured effort history.');
+  if(/\b(?:light|heavy)\b/i.test(t)&&!/\b(?:kg|lb|kilos|pounds?)\b/i.test(t))warn.push('The load was described qualitatively. Enter the actual weight.');
+  if(/\b(?:another|more)\s+(?:\d+|two|three|four|five)\s+sets?\b/i.test(t))warn.push('Additional sets mentioned without complete loads/reps. Add each set below.');
+  if(/\bsuperset\b|\bthree rounds?\b/.test(t))warn.push('Superset/round grouping is not structured yet. Review the individual sets.');
+  return unique(warn);
+}
+function parseProgressivePhrase(text,loadType='external',defaultUnit='kg'){
+  const type=safe(loadType).toLowerCase();
+  if(type==='timed'||type==='assisted')return null;
+  const raw=safe(text);
+  if(!raw.trim())return null;
+  const t=raw.toLowerCase()
+    .replace(/a couple of sixes/g,'6 and 6')
+    .replace(/\ba (five|six|seven|eight|nine|ten)\b/g,(_,w)=>({five:5,six:6,seven:7,eight:8,nine:9,ten:10})[w])
+    .replace(/\s+/g,' ');
+  const warnings=reviewWarnings(raw);
+  const weightUnit='(?:kg|kgs?|kilos?|lb|lbs|pounds?)';
+  const counted=new RegExp('(?:^|\\s)(\\d+(?:\\.\\d+)?)\\s*('+weightUnit+'|s)?\\s+(\\d{1,2})\\s*[x×]\\s*(\\d{1,3})(?!\\d)','i');
+  // 30s / 20s mean per dumbbell, not seconds, only with a 3x10-like scheme.
+  const countMatch=counted.exec(t);
+  if(countMatch&&Number(countMatch[3])>=1&&Number(countMatch[3])<=20&&Number(countMatch[4])>=1&&Number(countMatch[4])<=500){
+    const w=toKg(countMatch[1],countMatch[2]==='s'?undefined:countMatch[2],defaultUnit);
+    if(w!==null)return {sets:Array.from({length:Number(countMatch[3])},()=>({weightKg:w,reps:Number(countMatch[4]),setType:'working'})),warnings,recognized:true};
+  }
+  const anchor=new RegExp('(\\+?\\d+(?:\\.\\d+)?)\\s*('+weightUnit+')?\\s*(?:[x×]\\s*|\\bfor\\s+)(\\d{1,3})\\b','gi');
+  const matches=[...t.matchAll(anchor)].filter(m=>Number(m[3])>=1&&Number(m[3])<=500);
+  if(matches.length){
+    const sets=[];
+    for(let i=0;i<matches.length;i++){
+      const m=matches[i],idx=m.index;
+      const w=toKg(m[1],m[2],defaultUnit);
+      if(w===null)return null;
+      const prefix=t.slice(0,idx),working=prefix.lastIndexOf('working'),warm=Math.max(prefix.lastIndexOf('warm up'),prefix.lastIndexOf('warmup'));
+      const setType=warm>working?'warmup':'working';
+      sets.push({weightKg:w,reps:Number(m[3]),setType});
+      // Repetitions following "and" or commas reuse this load. The next
+      // explicit weight anchor terminates this region, avoiding carry-over.
+      let tail=t.slice(idx+m[0].length,i+1<matches.length?matches[i+1].index:t.length);
+      tail=tail.replace(/^\s*(?:reps?|repetitions?)\b/i,'');
+      const extras=/^\s*(?:,|and|&)\s*(\d{1,3})\b/i;
+      for(let j=0;j<20;j++){
+        const e=extras.exec(tail);
+        if(!e||Number(e[1])<1||Number(e[1])>500)break;
+        sets.push({weightKg:w,reps:Number(e[1]),setType});
+        tail=tail.slice(e[0].length);
+      }
+    }
+    const amrap=/\b(?:then|and)\s+(\d+(?:\.\d+)?)\s*(?:kg|lb)?\s*(?:amrap|to failure)\b/i.exec(t);
+    if(amrap){
+      const w=toKg(amrap[1],undefined,defaultUnit);
+      if(w!==null)sets.push({weightKg:w,reps:null,setType:'working'});
+    }
+    if(sets.length>1||warnings.length)return {sets,warnings,recognized:true};
+    return null; // Preserve the existing single-set parser.
+  }
+  // Weight followed by a descending rep sequence: "45 12,10,8".
+  const descending=/\b(\d{1,4}(?:\.\d+)?)\s+(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(\d{1,3}))?\b/.exec(t);
+  if(descending){
+    const weightKg=toKg(descending[1],undefined,defaultUnit);
+    const reps=descending.slice(2).filter(v=>v!=null).map(Number);
+    if(weightKg!==null&&reps.every(r=>r>=1&&r<=500))
+      return {sets:reps.map(r=>({weightKg,reps:r,setType:'working'})),warnings,recognized:true};
+  }
+  // Explicit bodyweight set sequence followed by extra weight.
+  const weightedBodyweight=/\bbodyweight\s+((?:\d{1,3}\s*,?\s*)+)\s*then\s*\+(\d+(?:\.\d+)?)\s*(?:kg|lb)?\s*for\s*(\d{1,3})\b/i.exec(t);
+  if(type==='bodyweight'&&weightedBodyweight){
+    const reps=weightedBodyweight[1].match(/\d{1,3}/g)?.map(Number)||[];
+    const w=toKg(weightedBodyweight[2],undefined,defaultUnit);
+    if(w!==null&&reps.length&&reps.every(r=>r>0&&r<=500))
+      return {sets:[...reps.map(r=>({weightKg:0,reps:r,setType:'working'})),{weightKg:w,reps:Number(weightedBodyweight[3]),setType:'working'}],warnings,recognized:true};
+  }
+  return warnings.length?{sets:[],warnings,recognized:false}:null;
+}
+function validateReview(parsed){
+  if(!Array.isArray(parsed?.items)||!parsed.items.length)return {ok:false,why:'No activities detected'};
+  for(const item of parsed.items){
+    if(item.kind!=='resistance')continue;
+    if(!item.exerciseId)return {ok:false,why:'Choose the correct exercise'};
+    if(!Array.isArray(item.sets)||!item.sets.length)return {ok:false,why:'Enter at least one set for '+item.name};
+    for(const s of item.sets){
+      if(item.loadType==='timed'){
+        if(!Number.isFinite(Number(s.durationSeconds))||Number(s.durationSeconds)<=0)return {ok:false,why:'Enter the hold duration for each set'};
+      }else{
+        if(!Number.isInteger(Number(s.reps))||Number(s.reps)<=0)return {ok:false,why:'Enter the completed reps for each set'};
+        if(item.loadType!=='bodyweight'&&(s.weightKg==null||s.weightKg===''||!Number.isFinite(Number(s.weightKg))||Number(s.weightKg)<0))
+          return {ok:false,why:'Enter the correct weight for each set'};
+      }
+    }
+    if(item.p1Warnings?.length&&!item.p1Acknowledged)return {ok:false,why:'Review and acknowledge the flagged source details'};
+  }
+  return {ok:true,why:''};
+}
+if(typeof globalThis!=='undefined'&&globalThis.__LASTSET_TEST_ONLY__){
+  globalThis.LastSetSmartLogP1Test={parseProgressivePhrase,reviewWarnings,validateReview};
+  return;
+}
+if(typeof window==='undefined'||typeof parseSmartWorkout!=='function')return;
+const previousParser=parseSmartWorkout,previousReview=aiParsedHtml;
+parseSmartWorkout=function(text){
+  const result=previousParser(text);
+  if(!result||!Array.isArray(result.items))return result;
+  const source=safe(text),unit=typeof data!=='undefined'?(data?.profile?.weightUnit||'kg'):'kg';
+  try{
+    const mentions=typeof findExerciseMentions==='function'?(findExerciseMentions(source)||[]).slice().sort((a,b)=>a.start-b.start):[];
+    const used=new Set();
+    for(let i=0;i<mentions.length;i++){
+      const m=mentions[i],segment=source.slice(m.start,i+1<mentions.length?mentions[i+1].start:source.length);
+      const index=result.items.findIndex((item,k)=>!used.has(k)&&item.kind==='resistance'&&item.exerciseId===m.exercise?.id);
+      if(index<0)continue;
+      used.add(index);
+      const item=result.items[index];
+      const parsed=parseProgressivePhrase(segment,item.loadType,unit);
+      if(!parsed)continue;
+      if(parsed.sets.length)item.sets=parsed.sets;
+      item.p1Review=true;
+      item.p1Source=segment.trim();
+      item.p1Warnings=parsed.warnings;
+      item.p1Acknowledged=false;
+      item.notes=[item.notes,'Original Smart Log: '+item.p1Source].filter(Boolean).join(' · ');
+    }
+  }catch(err){console.warn('Smart Log P1 review could not normalize the phrase',err);}
+  return result;
+};
+const escape=s=>typeof escapeHtml==='function'?escapeHtml(s):safe(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const fmt=v=>Number.isInteger(Number(v))?String(Number(v)):String(Math.round(Number(v)*10)/10);
+aiParsedHtml=function(parsed){
+  if(!parsed?.items?.some(item=>item.kind==='resistance'&&item.p1Review))return previousReview(parsed);
+  const result=validateReview(parsed);
+  const cards=parsed.items.map((item,ii)=>{
+    if(item.kind!=='resistance')return aiActivityHtml(item,ii);
+    const marked=item.p1Warnings||[],type=item.loadType||'external';
+    const heading='<div class="ai-activity-head"><div><strong>'+escape(item.name)+'</strong><small>'+escape(item.p1Source||'Review all recorded sets')+'</small></div></div>';
+    const rows=(item.sets||[]).map((s,j)=>{
+      const w=s.weightKg==null?'':s.weightKg,r=s.reps==null?'':s.reps;
+      const fields=type==='timed'?'<label>Seconds<input data-p1-seconds="'+ii+':'+j+'" inputmode="numeric" type="number" min="1" value="'+escape(s.durationSeconds??'')+'"></label>'
+        :'<label>'+ (type==='assisted'?'Assist kg':'Weight kg')+'<input data-p1-weight="'+ii+':'+j+'" inputmode="decimal" type="number" step="any" min="0" value="'+escape(w)+'"></label><label>Reps<input data-p1-reps="'+ii+':'+j+'" inputmode="numeric" type="number" min="1" step="1" value="'+escape(r)+'"></label>';
+      return '<div class="ls-p1-set"><span>Set '+(j+1)+'</span>'+fields+'<label>Type<select data-p1-type="'+ii+':'+j+'"><option value="working" '+(s.setType!=='warmup'?'selected':'')+'>Working</option><option value="warmup" '+(s.setType==='warmup'?'selected':'')+'>Warm-up</option></select></label><button type="button" data-p1-remove="'+ii+':'+j+'" aria-label="Remove set '+(j+1)+'">×</button></div>';
+    }).join('');
+    const warn=marked.length?'<div class="ai-clarify"><strong>Review before saving</strong><div>'+marked.map(w=>escape(w)).join(' · ')+'</div><label class="ls-p1-ack"><input type="checkbox" data-p1-ack="'+ii+'" '+(item.p1Acknowledged?'checked':'')+'> I reviewed these details; keep the original wording in notes</label></div>':'';
+    return '<section class="ai-activity ls-p1-card" data-p1-exercise="'+ii+'">'+heading+rows+'<button class="secondary ls-p1-add" type="button" data-p1-add="'+ii+'">＋ Add missing set</button>'+warn+'</section>';
+  }).join('');
+  return '<div class="ai-result ls-p1-review"><h3>Review every set before saving</h3><p class="muted">Nothing is saved until you confirm. Correct any number or add omitted sets.</p>'+cards+
+    (!result.ok?'<div class="ai-clarify" role="alert">'+escape(result.why)+'</div>':'')+
+    '<button class="primary" data-action="confirm-ai-workout" '+(!result.ok?'disabled':'')+'>Save reviewed workout</button>'+
+    '<button class="secondary" type="button" data-p1-edit-input>Change original description</button></div>';
+};
+function rerender(){if(typeof render==='function')render();}
+function parsedLocation(raw){
+  const parts=safe(raw).split(':').map(Number);
+  if(parts.length!==2||parts.some(v=>!Number.isInteger(v)||v<0))return null;
+  const [i,j]=parts;const item=state?.aiParsed?.items?.[i];
+  return item&&Array.isArray(item.sets)&&item.sets[j]?{i,j,item,set:item.sets[j]}:null;
+}
+document.addEventListener('change',e=>{
+  const t=e.target;
+  for(const [attr,key] of [['data-p1-weight','weightKg'],['data-p1-reps','reps'],['data-p1-seconds','durationSeconds'],['data-p1-type','setType']]){
+    if(!t?.hasAttribute?.(attr))continue;
+    const entry=parsedLocation(t.getAttribute(attr));if(!entry)return;
+    if(key==='setType')entry.set.setType=t.value;
+    else entry.set[key]=t.value.trim()===''?null:number(t.value);
+    rerender();return;
+  }
+  if(t?.hasAttribute?.('data-p1-ack')){
+    const i=Number(t.getAttribute('data-p1-ack'));
+    if(state?.aiParsed?.items?.[i])state.aiParsed.items[i].p1Acknowledged=t.checked;
+    rerender();
+  }
+},true);
+document.addEventListener('click',e=>{
+  const t=e.target.closest?.('[data-p1-add],[data-p1-remove],[data-p1-edit-input],[data-action="confirm-ai-workout"]');
+  if(!t)return;
+  if(t.matches('[data-action="confirm-ai-workout"]')&&state?.aiParsed?.items?.some(it=>it.p1Review)){
+    const v=validateReview(state.aiParsed);
+    if(!v.ok){e.preventDefault();e.stopImmediatePropagation();showToast(v.why);return;}
+  }
+  if(t.hasAttribute('data-p1-edit-input')){
+    e.preventDefault();e.stopImmediatePropagation();
+    state.aiParsed=null;state.aiError='';rerender();return;
+  }
+  if(t.hasAttribute('data-p1-add')){
+    e.preventDefault();e.stopImmediatePropagation();
+    const i=Number(t.getAttribute('data-p1-add'));
+    const item=state?.aiParsed?.items?.[i];
+    if(item?.sets&&item.sets.length<30){
+      item.sets.push({weightKg:null,reps:null,setType:'working'});item.p1Acknowledged=false;rerender();
+    }return;
+  }
+  if(t.hasAttribute('data-p1-remove')){
+    e.preventDefault();e.stopImmediatePropagation();
+    const entry=parsedLocation(t.getAttribute('data-p1-remove'));
+    if(entry){entry.item.sets.splice(entry.j,1);entry.item.p1Acknowledged=false;rerender();}
+  }
+},true);
+const css=document.createElement('style');
+css.id='lastset-smartlog-p1-style';
+css.textContent='.ls-p1-review .ai-activity{margin:12px 0}.ls-p1-review .ls-p1-set{display:grid;grid-template-columns:32px minmax(0,1fr) minmax(0,1fr) minmax(0,88px) 30px;align-items:end;gap:5px;margin:9px 0}.ls-p1-set>span{font-size:11px;color:var(--muted);align-self:center}.ls-p1-set label{font-size:10px;display:block;color:var(--muted);min-width:0}.ls-p1-set input,.ls-p1-set select{display:block;width:100%;min-width:0;margin-top:4px;border-radius:8px;padding:8px 5px;font-size:13px}.ls-p1-set button{border:0;background:#35223b;color:#fff;border-radius:8px;padding:8px 3px}.ls-p1-add{margin-top:8px}.ls-p1-ack{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px}.ls-p1-ack input{width:auto}.ls-p1-review [data-p1-edit-input]{margin-top:8px}.ls-p1-review [data-action="confirm-ai-workout"]:disabled{opacity:.5;cursor:not-allowed}@media(max-width:370px){.ls-p1-set{grid-template-columns:27px minmax(0,1fr) minmax(0,1fr) 70px 24px!important}}';
+document.head.appendChild(css);
+document.documentElement.dataset.lastsetSmartLogP1=VERSION;
+})();
