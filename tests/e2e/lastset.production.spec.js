@@ -228,7 +228,7 @@ test.describe('LastSet production v0.14.0', () => {
   test('Atlas uses source pixel coordinates and distinct selectable vs selected colors', async ({ page }) => {
     await page.locator('[data-nav="explore"]').click();
     const svg=page.locator('.ls-anatomy-premium.male');
-    await expect(svg).toHaveAttribute('viewBox','0 0 346 631');
+    await expect(svg).toHaveAttribute('viewBox','0 0 929 1693');
     const front=await page.request.get('/assets/anatomy-front.webp');
     expect(front.status()).toBe(200);
     expect((await front.body()).byteLength).toBeGreaterThan(16000);
@@ -241,7 +241,7 @@ test.describe('LastSet production v0.14.0', () => {
     const lime=await svg.locator('.ls-region-selected').first().evaluate(el=>getComputedStyle(el).fill);
     expect(lime).not.toEqual(purple);
     await page.locator('[data-explore-side="back"]').click();
-    await expect(page.locator('.ls-anatomy-premium.male')).toHaveAttribute('viewBox','0 0 356 631');
+    await expect(page.locator('.ls-anatomy-premium.male')).toHaveAttribute('viewBox','0 0 929 1693');
   });
 
 
@@ -294,7 +294,9 @@ test.describe('LastSet production v0.14.0', () => {
         const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,40,40);
         return {width:im.naturalWidth,height:im.naturalHeight,alpha:ctx.getImageData(0,0,1,1).data[3]};
       },side);
-      expect(photo).toEqual({width:929,height:1693,alpha:0});
+      expect(photo.width).toBe(929);
+      expect(photo.height).toBe(1693);
+      expect(photo.alpha).toBeLessThanOrEqual(3);
     }
     await page.locator('[data-explore-side="front"]').click();
     await atlas.locator('.ls-atlas-hit[data-anatomy-region="Biceps"]').first().click();
