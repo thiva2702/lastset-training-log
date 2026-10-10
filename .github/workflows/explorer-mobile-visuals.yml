@@ -14,6 +14,7 @@ on:
       - 'lastset-atlas-regions.js'
       - 'assets/anatomy-*.webp'
       - 'lastset-atlas-regions.js'
+      - 'tests/e2e/lastset.production.spec.js'
       - 'index.html'
       - 'scripts/restore-anatomy-detail.mjs'
       - 'build-cloudflare.sh'
