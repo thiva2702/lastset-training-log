@@ -20,5 +20,5 @@ assert(build.includes('scripts/stamp-release.mjs'),'Bundle must tag release iden
 assert(stamp.includes("LASTSET_RELEASE_ID")&&stamp.includes('GITHUB_SHA'),'Build version should follow commit');
 assert(fs.existsSync('lastset-diagnostics.js'));
 assert(fs.existsSync('lastset-diagnostics.css'));
-assert(!sw.includes("if(cached){\n    event.waitUntil("),'Old stale-while-revalidate JS logic still present');
+assert(sw.includes('if(/\\.(?:js|css|json)$/i.test(path))return networkFirstAsset(request);'),'JS and CSS must use network-first path');
 console.log('LastSet versioning smoke tests passed');
