@@ -2,7 +2,17 @@ name: LastSet P0 mobile safety QA
 
 on:
   push:
-    branches: [p0/data-trust-audit-20261011]
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'lastset-integrity.js'
+      - 'lastset-onboarding.js'
+      - 'lastset-offline.js'
+      - 'service-worker.js'
+      - 'tests/e2e/p0.trust.spec.js'
+      - '.github/workflows/p0-mobile-qa.yml'
+      - 'package.json'
+  workflow_dispatch:
   pull_request:
     branches: [main]
     paths:
@@ -47,8 +57,16 @@ jobs:
           done
           cat /tmp/lastset-p0-server.log
           exit 1
+      - name: Verify P0 suite selection
+        run: |
+          npm run test:e2e:p0 -- --list | tee /tmp/lastset-p0-tests.txt
+          if grep -q 'lastset.production.spec.js' /tmp/lastset-p0-tests.txt; then
+            echo "Production tests must not run against P0 isolated origin"
+            exit 1
+          fi
+
       - name: Test mobile Chromium and WebKit against isolated site
-        run: npx playwright test tests/e2e/p0.trust.spec.js --project=mobile-chromium --project=mobile-webkit
+        run: npm run test:e2e:p0 -- --project=mobile-chromium --project=mobile-webkit
       - name: Publish failure traces
         if: always()
         uses: actions/upload-artifact@v4
