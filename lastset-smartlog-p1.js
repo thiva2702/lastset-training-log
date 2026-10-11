@@ -139,6 +139,7 @@ function findUnaccountedExerciseSegments(source,mentions,defaultUnit='kg'){
 }
 
 function validateReview(parsed){
+  if(parsed?.p1AuditError)return {ok:false,why:'Exercise detection could not be verified. Edit the description and try again.'};
   if(!Array.isArray(parsed?.items)||!parsed.items.length)return {ok:false,why:'No activities detected'};
   for(const item of parsed.items){
     if(item.kind!=='resistance')continue;
@@ -218,7 +219,11 @@ parseSmartWorkout=function(text){
     // Never move cardio records into resistance or drop original items.
     result.items.sort((a,b)=>(a.p1SourceStart??Number.MAX_SAFE_INTEGER)-(b.p1SourceStart??Number.MAX_SAFE_INTEGER));
     result.p1DetectedExerciseCount=result.items.filter(item=>item.kind==='resistance').length;
-  }catch(err){console.warn('Smart Log P1 review could not normalize the phrase',err);}
+  }catch(err){
+    console.warn('Smart Log P1 exercise inventory failed safely',err);
+    result.p1AuditError=true;
+    result.items.push({kind:'resistance',exerciseId:null,name:'Exercise verification needed',sets:[],p1Review:true,p1Warnings:['Cannot verify exercise coverage. Edit the original description before saving.'],p1Acknowledged:false,p1Source:source});
+  }
   return result;
 };
 const escape=s=>typeof escapeHtml==='function'?escapeHtml(s):safe(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
@@ -229,7 +234,9 @@ aiParsedHtml=function(parsed){
   const cards=parsed.items.map((item,ii)=>{
     if(item.kind!=='resistance')return aiActivityHtml(item,ii);
     const marked=item.p1Warnings||[],type=item.loadType||'external';
-    const heading='<div class="ai-activity-head"><div><strong>'+escape(item.name)+'</strong><small>'+escape(item.p1Source||'Review all recorded sets')+'</small></div></div>';
+    const choices=!item.exerciseId?(typeof EXERCISES!=='undefined'?EXERCISES.filter(ex=>item.ambiguity==='squat'?/squat/i.test(ex.name):true).slice().sort((a,b)=>a.name.localeCompare(b.name)):[]):[];
+    const chooser=!item.exerciseId?'<label style="display:block;margin:10px 0;font-size:12px;font-weight:700">Exercise identification required<select data-p1-exercise="'+ii+'" style="display:block;width:100%;margin-top:6px;padding:10px" aria-label="Choose exercise for '+escape(item.p1Source||item.name)+'"><option value="">Choose the correct exercise</option>'+choices.map(ex=>'<option value="'+escape(ex.id)+'">'+escape(ex.name)+'</option>').join('')+'</select></label>':'';
+    const heading='<div class="ai-activity-head"><div><strong>'+escape(item.name)+'</strong><small>'+escape(item.p1Source||'Review all recorded sets')+'</small></div></div>'+chooser;
     const rows=(item.sets||[]).map((s,j)=>{
       const w=s.weightKg==null?'':s.weightKg,r=s.reps==null?'':s.reps;
       const fields=type==='timed'?'<label>Seconds<input data-p1-seconds="'+ii+':'+j+'" inputmode="numeric" type="number" min="1" value="'+escape(s.durationSeconds??'')+'"></label>'
@@ -239,7 +246,10 @@ aiParsedHtml=function(parsed){
     const warn=marked.length?'<div class="ai-clarify"><strong>Review before saving</strong><div>'+marked.map(w=>escape(w)).join(' · ')+'</div><label class="ls-p1-ack"><input type="checkbox" data-p1-ack="'+ii+'" '+(item.p1Acknowledged?'checked':'')+'> I reviewed these details; keep the original wording in notes</label></div>':'';
     return '<section class="ai-activity ls-p1-card" data-p1-exercise="'+ii+'">'+heading+rows+'<button class="secondary ls-p1-add" type="button" data-p1-add="'+ii+'">＋ Add missing set</button>'+warn+'</section>';
   }).join('');
-  return '<div class="ai-result ls-p1-review"><h3>Review every set before saving</h3><p class="muted">Nothing is saved until you confirm. Correct any number or add omitted sets.</p>'+cards+
+  const exerciseCount=parsed.items.filter(item=>item.kind==='resistance').length;
+  const unrecognised=parsed.items.filter(item=>item.kind==='resistance'&&!item.exerciseId).length;
+  const status='<div class="ai-clarify" role="status"><strong>'+exerciseCount+' resistance exercise'+(exerciseCount===1?'':'s')+' detected</strong> · '+(unrecognised?unrecognised+' need exercise identification before saving':'All detected exercises are identified')+'</div>';
+  return '<div class="ai-result ls-p1-review"><h3>Review every set before saving</h3><p class="muted">Nothing is saved until you confirm. Correct any number or add omitted sets.</p>'+status+cards+
     (!result.ok?'<div class="ai-clarify" role="alert">'+escape(result.why)+'</div>':'')+
     '<button class="primary" data-action="confirm-ai-workout" '+(!result.ok?'disabled':'')+'>Save reviewed workout</button>'+
     '<button class="secondary" type="button" data-p1-edit-input>Change original description</button></div>';
@@ -253,6 +263,22 @@ function parsedLocation(raw){
 }
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t?.hasAttribute?.('data-p1-exercise')){
+    const idx=Number(t.getAttribute('data-p1-exercise'));
+    const item=state?.aiParsed?.items?.[idx];
+    const exercise=typeof EXERCISES!=='undefined'?EXERCISES.find(ex=>ex.id===t.value):null;
+    if(item&&item.kind==='resistance'&&exercise){
+      item.exerciseId=exercise.id;item.name=exercise.name;
+      item.equipment=exercise.equipment;
+      item.primaryMuscles=exercise.muscles||[];
+      item.loadType=exercise.loadType||'external';
+      if(item.loadType==='bodyweight')item.sets=(item.sets||[]).map(set=>({...set,weightKg:0}));
+      item.p1Acknowledged=false;
+      delete item.ambiguity;
+      rerender();
+    }
+    return;
+  }
   for(const [attr,key] of [['data-p1-weight','weightKg'],['data-p1-reps','reps'],['data-p1-seconds','durationSeconds'],['data-p1-type','setType']]){
     if(!t?.hasAttribute?.(attr))continue;
     const entry=parsedLocation(t.getAttribute(attr));if(!entry)return;
