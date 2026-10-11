@@ -128,7 +128,12 @@ parseSmartWorkout=function(text){
     const mentions=typeof findExerciseMentions==='function'?(findExerciseMentions(source)||[]).slice().sort((a,b)=>a.start-b.start):[];
     const used=new Set();
     for(let i=0;i<mentions.length;i++){
-      const m=mentions[i],segment=source.slice(m.start,i+1<mentions.length?mentions[i+1].start:source.length);
+      const m=mentions[i];
+      // Keep a leading warm-up instruction with the first named exercise.
+      // Starting at "bench" alone would incorrectly mark warm-up sets as working.
+      const lead=i===0?source.slice(0,m.start):'';
+      const start=i===0&&/^\s*warm(?:\s|-)?up\s*$/i.test(lead)?0:m.start;
+      const segment=source.slice(start,i+1<mentions.length?mentions[i+1].start:source.length);
       const index=result.items.findIndex((item,k)=>!used.has(k)&&item.kind==='resistance'&&item.exerciseId===m.exercise?.id);
       if(index<0)continue;
       used.add(index);
