@@ -63,7 +63,7 @@ const omitted=P.findUnaccountedExerciseSegments(report,mentions,'kg');
 assert.equal(omitted.length,1,'One unresolved squat must be presented even alongside recognised exercises');
 assert.equal(omitted[0].ambiguity,'squat');
 assert.deepStrictEqual(omitted[0].sets.map(x=>[x.weightKg,x.reps]),[[100,5],[110,3],[120,1]]);
-const missing={items:[{kind:'resistance',name:'Squat — choose variation',exerciseId:null,sets:pending[0].sets,p1Review:true}]};
+const missing={items:[{kind:'resistance',name:'Squat — choose variation',exerciseId:null,sets:omitted[0].sets,p1Review:true}]};
 assert.equal(P.validateReview(missing).ok,false,'unidentified exercises must block save');
 const unidentified=P.findUnaccountedExerciseSegments('Unlisted lift 50x10. Bench press 80x8',[
   {start:'Unlisted lift 50x10. '.length,end:'Unlisted lift 50x10. '.length+11}
