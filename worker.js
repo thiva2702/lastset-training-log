@@ -41,7 +41,8 @@ const SCRIPT_TAGS = [
   ["/lastset-atlas-regions.js","0282"],
   ["/lastset-anatomy.js","0282"],
   ["/lastset-explore.js","0290"],
-  ["/lastset-mobility.js","0300"]
+  ["/lastset-mobility.js","0300"],
+  ["/lastset-smartlog-p1.js","0150"]
 ];
 
 async function getReleaseId(env){
